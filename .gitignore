@@ -1,41 +1,65 @@
-# Prerequisites
-*.d
+# Build directories
+build/
+cmake-build-*/
+out/
 
-# Compiled Object files
-*.slo
-*.lo
+# IDE files
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+
+# Compiled files
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+*.exe
+*.dll
 *.so
 *.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
 *.lib
 
-# Executables
-*.exe
-*.out
-*.app
+# Qt generated files
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.qm
 
-# debug information files
-*.dwo
+# Cache and temporary files
+*.autosave
+*.log
+*.bak
+*~
+.DS_Store
+Thumbs.db
+
+# vcpkg
+vcpkg_installed/
+
+# Database files (generated at runtime)
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+*.pdb
+*.ilk
+*.exp
+
+# Test output
+Testing/
+*.gcda
+*.gcno
+*.gcov
+
+# Package files
+*.zip
+*.tar.gz
+*.deb
+*.rpm
+*.dmg
+
+# User-generated content (keep examples though)
+/projects/
+!/resources/examples/
