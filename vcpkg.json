@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "orogena",
+  "version": "1.0.0",
+  "description": "Multi-Scale Tectonic Simulator for Fantasy World Building",
+  "dependencies": [
+    "qt6-base",
+    "qt6-3d",
+    "glm",
+    "spdlog",
+    "nlohmann-json",
+    "sqlite3",
+    "boost-geometry",
+    "stb",
+    "fastnoise2",
+    "gtest"
+  ],
+  "builtin-baseline": "latest"
+}
