@@ -26,14 +26,14 @@ target_link_libraries(orogena_global
         glm::glm
 )
 
-# Regional generation library (Scale 2)
-add_library(orogena_regional
-    regional/RegionManager.cpp
-    regional/StreamPowerErosion.cpp
-    regional/BorderStitcher.cpp
+# Region generation library (Scale 2)
+add_library(orogena_region
+    region/region_manager.cpp
+    region/region_stream_erosion.cpp
+    region/region_border_stitcher.cpp
 )
 
-target_link_libraries(orogena_regional
+target_link_libraries(orogena_region
     PUBLIC
         orogena_core
         orogena_global
@@ -47,7 +47,7 @@ add_library(orogena_local
 
 target_link_libraries(orogena_local
     PUBLIC
-        orogena_regional
+        orogena_region
 )
 
 # Rendering library

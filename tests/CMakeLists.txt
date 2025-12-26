@@ -12,7 +12,7 @@ target_link_libraries(test_unit
     PRIVATE
         GTest::gtest_main
         orogena_global
-        orogena_regional
+        orogena_region
 )
 
 gtest_discover_tests(test_unit)
@@ -26,7 +26,7 @@ target_link_libraries(test_integration
     PRIVATE
         GTest::gtest_main
         orogena_global
-        orogena_regional
+        orogena_region
         orogena_local
 )
 
