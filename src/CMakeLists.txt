@@ -14,10 +14,10 @@ target_link_libraries(orogena_core
 
 # Global simulation library (Scale 1)
 add_library(orogena_global
-    global/TectonicSimulation.cpp
-    global/PlateManager.cpp
-    global/Plate.cpp
-    global/GlobalHeightMap.cpp
+    global/global_tectonic_sim.cpp
+    global/global_plate_manager.cpp
+    global/global_plate.cpp
+    global/global_heightmap.cpp
 )
 
 target_link_libraries(orogena_global
