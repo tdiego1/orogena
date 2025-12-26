@@ -1,0 +1,219 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                },
+                "CMAKE_MAKE_PROGRAM": {
+                    "type": "FILEPATH",
+                    "value": "/usr/bin/ninja"
+                },
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_COLOR_DIAGNOSTICS": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Debug build with full symbols and no optimization",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "OROGENA_BUILD_TESTS": "ON",
+                "OROGENA_ENABLE_PROFILING": "OFF"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Release build with LTO and aggressive optimization",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "OROGENA_BUILD_TESTS": "OFF",
+                "OROGENA_ENABLE_PROFILING": "OFF",
+                "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
+            }
+        },
+        {
+            "name": "relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "description": "Release build with debug symbols for profiling",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "OROGENA_BUILD_TESTS": "ON",
+                "OROGENA_ENABLE_PROFILING": "ON"
+            }
+        },
+        {
+            "name": "dev",
+            "displayName": "Development",
+            "description": "Development build with tests and faster compilation",
+            "inherits": "debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "OROGENA_BUILD_TESTS": "ON"
+            }
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Build",
+            "description": "Continuous integration build with all checks enabled",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "OROGENA_BUILD_TESTS": "ON",
+                "CMAKE_CXX_FLAGS": "-Werror"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug Build",
+            "configurePreset": "debug",
+            "jobs": 0,
+            "verbose": false
+        },
+        {
+            "name": "release",
+            "displayName": "Release Build",
+            "configurePreset": "release",
+            "jobs": 0,
+            "verbose": false
+        },
+        {
+            "name": "relwithdebinfo",
+            "displayName": "RelWithDebInfo Build",
+            "configurePreset": "relwithdebinfo",
+            "jobs": 0,
+            "verbose": false
+        },
+        {
+            "name": "dev",
+            "displayName": "Development Build",
+            "configurePreset": "dev",
+            "jobs": 0,
+            "verbose": false
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Build",
+            "configurePreset": "ci",
+            "jobs": 0,
+            "verbose": false
+        },
+        {
+            "name": "debug-verbose",
+            "displayName": "Debug Build (Verbose)",
+            "configurePreset": "debug",
+            "jobs": 0,
+            "verbose": true
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug Tests",
+            "configurePreset": "debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release Tests",
+            "configurePreset": "release",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        },
+        {
+            "name": "dev",
+            "displayName": "Development Tests",
+            "configurePreset": "dev",
+            "output": {
+                "outputOnFailure": true,
+                "verbosity": "verbose"
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug Workflow",
+            "description": "Configure, build, and test in debug mode",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "debug"
+                },
+                {
+                    "type": "test",
+                    "name": "debug"
+                }
+            ]
+        },
+        {
+            "name": "release",
+            "displayName": "Release Workflow",
+            "description": "Configure and build release (no tests)",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "release"
+                }
+            ]
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Workflow",
+            "description": "Full CI pipeline with all checks",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "ci"
+                },
+                {
+                    "type": "build",
+                    "name": "ci"
+                }
+            ]
+        }
+    ]
+}

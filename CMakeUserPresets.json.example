@@ -1,0 +1,40 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "user-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "/home/YOUR_USERNAME/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        }
+      }
+    },
+    {
+      "name": "debug",
+      "inherits": ["debug", "user-base"]
+    },
+    {
+      "name": "release",
+      "inherits": ["release", "user-base"]
+    },
+    {
+      "name": "dev",
+      "inherits": ["dev", "user-base"]
+    },
+    {
+      "name": "relwithdebinfo",
+      "inherits": ["relwithdebinfo", "user-base"]
+    },
+    {
+      "name": "ci",
+      "inherits": ["ci", "user-base"]
+    }
+  ]
+}
