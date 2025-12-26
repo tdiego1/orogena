@@ -1,0 +1,67 @@
+name: Feature Implementation
+description: Template for new feature development
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Development Phase
+      options:
+        - Phase 1 - Foundation
+        - Phase 2 - Global Grid
+        - Phase 3 - Voronoi Plates
+        - Phase 4 - Plate Physics
+        - Phase 5 - Regional Erosion
+        - Phase 6 - Local Detail
+        - Phase 7 - UI/UX
+        - Phase 8 - Optimization
+        - Phase 9 - Release
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Core
+        - Global
+        - Region
+        - Local
+        - Rendering
+        - UI
+        - Database
+        - Utils
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What is the goal of this feature?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Implementation Tasks
+      description: Checklist of tasks to complete
+      value: |
+        - [ ] Task 1
+        - [ ] Task 2
+        - [ ] Write tests
+        - [ ] Update documentation
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      value: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] All tests pass
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to SDP, design docs, related issues
