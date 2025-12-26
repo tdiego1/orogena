@@ -41,8 +41,8 @@ target_link_libraries(orogena_regional
 
 # Local detail library (Scale 3)
 add_library(orogena_local
-    local/DetailSynthesizer.cpp
-    local/GeologyAwareNoise.cpp
+    local/local_detail_synthesizer.cpp
+    local/local_geo_aware_noise.cpp
 )
 
 target_link_libraries(orogena_local
