@@ -2,7 +2,7 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 BreakBeforeBraces: Allman
-ColumnLimit: 100
+ColumnLimit: 150
 PointerAlignment: Left
 ReferenceAlignment: Left
 AllowShortFunctionsOnASingleLine: Empty
