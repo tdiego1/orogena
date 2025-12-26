@@ -11,7 +11,7 @@
 
 #include <QApplication>
 
-#include "ui/MainWindow.h"
+#include "gui/gui_main_window.h"
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
 
@@ -39,8 +39,8 @@ int32_t main(int32_t argc, char_t* argv[])
     Orogena::Utils::Logger::Initialize();
 
     // Create and show main window
-    orogena::MainWindow mainWindow;
-    mainWindow.show();
+    Orogena::GUI::MainWindow main_window;
+    main_window.show();
 
     return app.exec();
 }

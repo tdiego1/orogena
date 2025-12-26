@@ -66,12 +66,12 @@ target_link_libraries(orogena_rendering
 )
 
 # UI library
-add_library(orogena_ui
-    ui/MainWindow.cpp
-    ui/GlobalViewport.cpp
+add_library(orogena_gui
+    gui/gui_main_window.cpp
+    gui/GlobalViewport.cpp
 )
 
-target_link_libraries(orogena_ui
+target_link_libraries(orogena_gui
     PUBLIC
         Qt6::Widgets
         orogena_rendering
@@ -106,7 +106,7 @@ add_executable(orogena
 
 target_link_libraries(orogena
     PRIVATE
-        orogena_ui
+        orogena_gui
         orogena_database
         orogena_utils
 )
