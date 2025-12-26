@@ -1,8 +1,8 @@
 # Core library (shared by all components)
 add_library(orogena_core
-    core/Application.cpp
-    core/Project.cpp
-    core/Settings.cpp
+    core/core_application.cpp
+    core/core_project.cpp
+    core/core_settings.cpp
 )
 
 target_link_libraries(orogena_core
@@ -65,10 +65,10 @@ target_link_libraries(orogena_rendering
         orogena_local
 )
 
-# UI library
+# GUI library
 add_library(orogena_gui
     gui/gui_main_window.cpp
-    gui/GlobalViewport.cpp
+    gui/gui_global_viewport.cpp
 )
 
 target_link_libraries(orogena_gui
