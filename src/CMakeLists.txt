@@ -50,14 +50,14 @@ target_link_libraries(orogena_local
         orogena_region
 )
 
-# Rendering library
-add_library(orogena_rendering
-    rendering/MultiScaleRenderer.cpp
-    rendering/HeightMapRenderer.cpp
-    rendering/Camera.cpp
+# render library
+add_library(orogena_render
+    render/render_multiscale.cpp
+    render/render_heightmap.cpp
+    render/render_camera.cpp
 )
 
-target_link_libraries(orogena_rendering
+target_link_libraries(orogena_render
     PUBLIC
         Qt6::OpenGL
         Qt6::OpenGLWidgets
@@ -74,7 +74,7 @@ add_library(orogena_gui
 target_link_libraries(orogena_gui
     PUBLIC
         Qt6::Widgets
-        orogena_rendering
+        orogena_render
 )
 
 # Database library
