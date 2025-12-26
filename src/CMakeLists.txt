@@ -79,7 +79,7 @@ target_link_libraries(orogena_gui
 
 # Database library
 add_library(orogena_database
-    database/DatabaseManager.cpp
+    database/database_manager.cpp
 )
 
 target_link_libraries(orogena_database
