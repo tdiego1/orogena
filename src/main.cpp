@@ -1,0 +1,50 @@
+/**************************************************************************************************/
+/**
+ * @file main.cpp
+ * @brief Implementation of Main
+ *
+ * @author Diego Torres
+ * @date 2025
+ * @copyright Copyright (C) 2025 Diego Torres. All rights reserved.
+ */
+/**************************************************************************************************/
+
+#include <QApplication>
+
+#include "ui/MainWindow.h"
+#include "utils/utils_logger.h"
+#include "utils/utils_types.h"
+
+//=================================================================================================
+// Static Member Initialization
+//=================================================================================================
+
+//=================================================================================================
+// Constructors/Destructor
+//=================================================================================================
+
+//=================================================================================================
+// Public Functions
+//=================================================================================================
+
+int32_t main(int32_t argc, char_t* argv[])
+{
+    // Initialize application
+    QApplication app(argc, argv);
+    app.setApplicationName("Orogena");
+    app.setApplicationVersion("1.0.0");
+    app.setOrganizationName("Orogena");
+
+    // Initialize logger
+    Orogena::Utils::Logger::Initialize();
+
+    // Create and show main window
+    orogena::MainWindow mainWindow;
+    mainWindow.show();
+
+    return app.exec();
+}
+
+//=================================================================================================
+// Private Functions
+//=================================================================================================
