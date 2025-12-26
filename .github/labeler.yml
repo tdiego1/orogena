@@ -1,28 +1,4 @@
 # .github/labeler.yml
-core:
-  - src/core/**/*
-
-global:
-  - src/global/**/*
-
-region:
-  - src/region/**/*
-
-local:
-  - src/local/**/*
-
-render:
-  - src/render/**/*
-
-gui:
-  - src/gui/**/*
-
-database:
-  - src/database/**/*
-
-utils:
-  - src/utils/**/*
-
 test:
   - tests/**/*
 
