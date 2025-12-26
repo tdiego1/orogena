@@ -60,6 +60,7 @@ find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(libassert CONFIG REQUIRED)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)

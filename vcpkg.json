@@ -8,7 +8,8 @@
         "spdlog",
         "nlohmann-json",
         "sqlite3",
-        "gtest"
+        "gtest",
+        "libassert"
     ],
     "builtin-baseline": "64e1fbee7d9f40eab5d112aaff648c4dcffe9e47"
 }
