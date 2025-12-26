@@ -3,7 +3,7 @@ build/
 cmake-build-*/
 out/
 
-# IDE files
+# IDE files (keep .vscode/settings.json)
 .vscode/
 .idea/
 *.user
@@ -33,6 +33,9 @@ ui_*.h
 *~
 .DS_Store
 Thumbs.db
+.cache/
+compile_commands.json
+CMakeUserPresets.json
 
 # vcpkg
 vcpkg_installed/
@@ -63,3 +66,7 @@ Testing/
 # User-generated content (keep examples though)
 /projects/
 !/resources/examples/
+
+# Claude Code
+.claude/
+CLAUDE.md
