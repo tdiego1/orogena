@@ -25,57 +25,73 @@ Orogena is a professional-grade terrain generation tool that simulates millions 
 
 ### Prerequisites
 
-- C++20 compatible compiler (GCC 10+, Clang 10+, MSVC 2019+)
-- CMake 3.20+
-- vcpkg (for dependency management)
-- Qt 6.8+
+- **Compiler**: Clang 21+ (recommended), GCC 10+, or MSVC 2019+
+- **CMake**: 3.25+ (for CMake Presets support)
+- **vcpkg**: For dependency management
+- **Qt**: 6.8+
+- **Ninja**: Build system (optional but recommended)
 
-### Build Instructions
+### Quick Start (Using CMake Presets)
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/orogena.git
 cd orogena
 
-# Configure with vcpkg
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=[path-to-vcpkg]/scripts/buildsystems/vcpkg.cmake
+# Setup vcpkg (first time only)
+./scripts/setup_vcpkg.sh
+source ~/.bashrc  # Reload shell
 
-# Build
-cmake --build build --config Release
+# One-command build (configure + build + test)
+cmake --workflow --preset debug
 
 # Run
-./build/src/orogena
+./build/debug/src/orogena
 ```
 
-### Linux (CachyOS/Arch)
+**First time setup?** See [SETUP.md](SETUP.md) for detailed setup instructions.
+
+**Build documentation:** See [BUILD_GUIDE.md](BUILD_GUIDE.md) for comprehensive build options.
+
+### Platform-Specific Instructions
+
+**Linux (Arch/CachyOS)**:
+```bash
+sudo pacman -S cmake clang ninja qt6-base mesa
+cmake --workflow --preset release
+```
+
+**Windows** (using Visual Studio 2022):
+```powershell
+cmake --preset release
+cmake --build --preset release
+```
+
+**macOS**:
+```bash
+brew install cmake llvm ninja qt@6
+cmake --workflow --preset release
+```
+
+### Development vs Production Builds
 
 ```bash
-# Install system dependencies
-sudo pacman -S cmake gcc qt6-base qt6-3d opengl-driver
+# Development build (fast compile, debug symbols, tests)
+cmake --workflow --preset dev
 
-# Build with vcpkg
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
-cmake --build build -j$(nproc)
+# Production build (optimized, LTO enabled)
+cmake --workflow --preset release
 ```
 
-### Windows
+### Available Build Presets
 
-```bash
-# Using Visual Studio 2022
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build build --config Release
-```
+| Preset | Use Case | Tests | LTO | Speed |
+|--------|----------|-------|-----|-------|
+| `debug` / `dev` | Development | ✓ | ✗ | Fast compile |
+| `release` | Production | ✗ | ✓ | Slow compile, fast runtime |
+| `relwithdebinfo` | Profiling | ✓ | ✗ | Balanced |
 
-### macOS
-
-```bash
-# Install dependencies via Homebrew
-brew install cmake qt@6
-
-# Build
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
-cmake --build build
-```
+See [PRESETS_SUMMARY.md](PRESETS_SUMMARY.md) for quick reference.
 
 ---
 
@@ -102,9 +118,16 @@ orogena/
 
 ## Documentation
 
-- [Software Development Plan](docs/001_sdp_orogena.md)
-- [Coding Standard](docs/002_coding_standard.md)
-- [Design Standard](docs/003_design_standard.md)
+### Getting Started
+- **[SETUP.md](SETUP.md)** - First-time setup guide (start here!)
+- **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - Comprehensive CMake Presets guide
+- **[PRESETS_SUMMARY.md](PRESETS_SUMMARY.md)** - Quick preset reference
+
+### Development
+- [Software Development Plan](docs/001_sdp_orogena.md) - Project roadmap
+- [Coding Standard](docs/002_coding_standard.md) - Code style guide
+- [Design Standard](docs/003_design_standard.md) - Architecture patterns
+- [CLAUDE.md](CLAUDE.md) - AI-assisted development guide
 
 ---
 
