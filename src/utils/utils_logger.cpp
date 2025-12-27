@@ -38,7 +38,8 @@ void Logger::Initialize()
     console_sink->set_level(spdlog::level::debug);
 
     // Create file sink with rotation (10MB, 3 files)
-    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("orogena.log", 1024 * 1024 * 10, 3);
+    auto file_sink =
+        std::make_shared<spdlog::sinks::rotating_file_sink_mt>("orogena.log", 1024 * 1024 * 10, 3);
     file_sink->set_level(spdlog::level::trace);
 
     // Create logger with both sinks
