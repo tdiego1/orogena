@@ -14,9 +14,7 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-namespace Orogena
-{
-namespace Utils
+namespace Orogena::Utils
 {
 
 //=================================================================================================
@@ -33,7 +31,7 @@ std::shared_ptr<spdlog::logger> Logger::s_Logger;
 // Public Functions
 //=================================================================================================
 
-void Logger::Initialize(void)
+void Logger::Initialize()
 {
     // Create console sink
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -54,7 +52,7 @@ void Logger::Initialize(void)
     spdlog::info("Orogena logger initialized");
 }
 
-std::shared_ptr<spdlog::logger> Logger::Get(void)
+std::shared_ptr<spdlog::logger> Logger::Get()
 {
     return s_Logger;
 }
@@ -63,5 +61,4 @@ std::shared_ptr<spdlog::logger> Logger::Get(void)
 // Private Functions
 //=================================================================================================
 
-} // namespace Utils
-} // namespace Orogena
+} // namespace Orogena::Utils
