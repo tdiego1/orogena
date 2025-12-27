@@ -31,6 +31,7 @@ int32_t main(int32_t argc, char_t* argv[])
 {
     // Initialize application
     QApplication app(argc, argv);
+
     QApplication::setApplicationName("Orogena");
     QApplication::setApplicationVersion("1.0.0");
     QApplication::setOrganizationName("Orogena");
