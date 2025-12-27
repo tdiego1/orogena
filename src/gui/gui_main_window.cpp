@@ -18,9 +18,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace Orogena
-{
-namespace GUI
+namespace Orogena::GUI
 {
 
 //=================================================================================================
@@ -46,7 +44,7 @@ MainWindow::~MainWindow()
 // Public Functions
 //=================================================================================================
 
-void MainWindow::SetupUI(void)
+void MainWindow::SetupUI()
 {
     setWindowTitle("Orogena - Multi-Scale Tectonic Simulator");
     resize(1280, 720);
@@ -56,12 +54,13 @@ void MainWindow::SetupUI(void)
     SetupStatusBar();
 
     // TODO: Add central widget (viewport)
-    auto* placeholder = new QLabel("Orogena v1.0\n\nProject structure initialized!\n\nSee docs/ for development plan.", this);
+    auto* placeholder = new QLabel(
+        "Orogena v1.0\n\nProject structure initialized!\n\nSee docs/ for development plan.", this);
     placeholder->setAlignment(Qt::AlignCenter);
     setCentralWidget(placeholder);
 }
 
-void MainWindow::SetupMenuBar(void)
+void MainWindow::SetupMenuBar()
 {
     // File menu
     auto* file_menu = menuBar()->addMenu(tr("&File"));
@@ -91,7 +90,7 @@ void MainWindow::SetupMenuBar(void)
     help_menu->addAction(tr("&About Orogena"));
 }
 
-void MainWindow::SetupToolBar(void)
+void MainWindow::SetupToolBar()
 {
     auto* toolbar = addToolBar(tr("Main Toolbar"));
     toolbar->addAction(tr("New"));
@@ -103,7 +102,7 @@ void MainWindow::SetupToolBar(void)
     toolbar->addAction(tr("Stop"));
 }
 
-void MainWindow::SetupStatusBar(void)
+void MainWindow::SetupStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 }
@@ -112,5 +111,4 @@ void MainWindow::SetupStatusBar(void)
 // Private Functions
 //=================================================================================================
 
-} // namespace GUI
-} // namespace Orogena
+} // namespace Orogena::GUI
