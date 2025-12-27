@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-message("VCPKG_ROOT from environment: $ENV{VCPKG_ROOT}")
-
 project(Orogena VERSION 1.0.0 LANGUAGES CXX)
 
 # Compiler selection - Use Clang (can be overridden by CMakePresets.json)
