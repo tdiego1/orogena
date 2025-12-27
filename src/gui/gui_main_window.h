@@ -21,9 +21,7 @@
 
 #include <QMainWindow>
 
-namespace Orogena
-{
-namespace GUI
+namespace Orogena::GUI
 {
 
 /**************************************************************************************************/
@@ -61,23 +59,22 @@ class MainWindow : public QMainWindow
     /**
      * @brief Setup the UI.
      */
-    void SetupUI(void);
+    void SetupUI();
 
     /**
      * @brief Setup the menu bar.
      */
-    void SetupMenuBar(void);
+    void SetupMenuBar();
 
     /**
      * @brief Setup the tool bar.
      */
-    void SetupToolBar(void);
+    void SetupToolBar();
 
     /**
      * @brief Setup the status bar.
      */
-    void SetupStatusBar(void);
+    void SetupStatusBar();
 };
 
-} // namespace GUI
-} // namespace Orogena
+} // namespace Orogena::GUI

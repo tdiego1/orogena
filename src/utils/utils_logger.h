@@ -23,9 +23,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace Orogena
-{
-namespace Utils
+namespace Orogena::Utils
 {
 
 /**************************************************************************************************/
@@ -45,12 +43,12 @@ class Logger
     /**
      * @brief Initializes the logger.
      */
-    static void Initialize(void);
+    static void Initialize();
 
     /**
      * @brief Gets the logger instance.
      */
-    static std::shared_ptr<spdlog::logger> Get(void);
+    static std::shared_ptr<spdlog::logger> Get();
 
   private:
     //=============================================================================================
@@ -60,5 +58,4 @@ class Logger
     static std::shared_ptr<spdlog::logger> s_Logger; ///< Shared logger instance
 };
 
-} // namespace Utils
-} // namespace Orogena
+} // namespace Orogena::Utils

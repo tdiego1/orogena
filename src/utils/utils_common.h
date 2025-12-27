@@ -1,12 +1,10 @@
 /**************************************************************************************************/
 /**
- * @file utils_assert.h
- * @brief Wrapper for libassert
+ * @file utils_common.h
+ * @brief Common includes used throughout Orogena
  *
  * @details
- * Import libassert macros into global namespace for convenience using lowecase variants
- * (enable with -DLIBASSERT_LOWERCASE if needed).
- * Otherwise use: DEBUG_ASSERT, ASSERT, ASSUME, PANIC, UNREACHABLE.
+ * Centralized header for commonly used standard and third-party library includes.
  *
  * @author Diego Torres
  * @date 2025
@@ -20,13 +18,3 @@
 /**************************************************************************************************/
 
 #pragma once
-
-#include <libassert/assert.hpp>
-
-namespace Orogena::Utils
-{
-
-// Custom stringification for Orogena types
-// Add as needed during development.
-
-} // namespace Orogena::Utils
