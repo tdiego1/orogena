@@ -47,6 +47,7 @@ class Logger
 
     /**
      * @brief Gets the logger instance.
+     * @return Shared pointer to the logger instance.
      */
     static std::shared_ptr<spdlog::logger> Get();
 
