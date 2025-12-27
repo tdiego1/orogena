@@ -36,7 +36,9 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.MemberPrefix
     value: m_
-  - key: readability-identifier-naming.StaticVariablePrefix
+  - key: readability-identifier-naming.ClassMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassMemberPrefix
     value: s_
   - key: readability-identifier-naming.ConstantCase
     value: CamelCase
