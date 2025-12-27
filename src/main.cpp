@@ -31,9 +31,9 @@ int32_t main(int32_t argc, char_t* argv[])
 {
     // Initialize application
     QApplication app(argc, argv);
-    app.setApplicationName("Orogena");
-    app.setApplicationVersion("1.0.0");
-    app.setOrganizationName("Orogena");
+    QApplication::setApplicationName("Orogena");
+    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setOrganizationName("Orogena");
 
     // Initialize logger
     Orogena::Utils::Logger::Initialize();
@@ -42,7 +42,7 @@ int32_t main(int32_t argc, char_t* argv[])
     Orogena::GUI::MainWindow main_window;
     main_window.show();
 
-    return app.exec();
+    return QApplication::exec();
 }
 
 //=================================================================================================
