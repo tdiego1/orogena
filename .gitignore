@@ -73,3 +73,4 @@ CLAUDE.md
 
 # GitHub Copilot Chat
 .github/instructions/*
+.github/copilot-instructions.md
