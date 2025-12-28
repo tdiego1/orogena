@@ -70,3 +70,6 @@ Testing/
 # Claude Code
 .claude/
 CLAUDE.md
+
+# GitHub Copilot Chat
+.github/instructions/*
