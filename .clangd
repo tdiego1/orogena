@@ -1,0 +1,24 @@
+---
+# Clangd configuration for Orogena
+
+CompileFlags:
+  CompilationDatabase: build/dev
+
+Diagnostics:
+  ClangTidy:
+    CheckOptions:
+      HeaderFilterRegex: '^(src|tests)/.*'
+  UnusedIncludes: None
+
+---
+
+# Suppress all diagnostics in external headers
+If:
+  PathExclude:
+    - src/.*
+    - tests/.*
+
+Diagnostics:
+  Suppress: '*'
+  ClangTidy:
+    Add: []

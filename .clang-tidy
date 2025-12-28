@@ -1,6 +1,8 @@
 ---
 # Clang-Tidy configuration for Orogena
-# Run with: clang-tidy src/**/*.cpp -- -std=c++20
+# Run with: clang-tidy -p build/dev src/**/*.cpp
+# Or use run-clang-tidy for parallel analysis: run-clang-tidy -p build/dev -header-filter='^(src|tests)/.*'
+
 
 Checks: >
   bugprone-*,
@@ -17,7 +19,7 @@ Checks: >
 
 WarningsAsErrors: ''
 
-HeaderFilterRegex: 'src/.*\.(h|hpp)'
+HeaderFilterRegex: '^(src|tests)/.*\.(h|hpp)$'
 
 CheckOptions:
   - key: readability-identifier-naming.NamespaceCase
