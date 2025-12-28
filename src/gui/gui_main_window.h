@@ -21,6 +21,9 @@
 
 #include <QMainWindow>
 
+// Forward declarations
+class QDockWidget;
+
 namespace Orogena::GUI
 {
 
@@ -75,6 +78,18 @@ class MainWindow : public QMainWindow
      * @brief Setup the status bar.
      */
     void SetupStatusBar();
+
+    /**
+     * @brief Setup the dockable panels.
+     */
+    void SetupDockPanels();
+
+    //=============================================================================================
+    // Private Functions
+    //=============================================================================================
+
+    QDockWidget* m_ParametersDock; ///< Left sidebar for simulation parameters.
+    QDockWidget* m_PropertiesDock; ///< Right sidebar for properties/info.
 };
 
 } // namespace Orogena::GUI
