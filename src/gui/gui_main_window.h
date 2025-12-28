@@ -50,6 +50,16 @@ class MainWindow : public QMainWindow
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+  private slots:
+    //=============================================================================================
+    // Private Slots
+    //=============================================================================================
+
+    /**
+     * @brief Show the About dialog.
+     */
+    void ShowAboutDialog();
+
   private:
     //=============================================================================================
     // Private Types
@@ -85,7 +95,7 @@ class MainWindow : public QMainWindow
     void SetupDockPanels();
 
     //=============================================================================================
-    // Private Functions
+    // Private Member Variables
     //=============================================================================================
 
     QDockWidget* m_ParametersDock; ///< Left sidebar for simulation parameters.

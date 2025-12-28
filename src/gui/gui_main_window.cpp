@@ -14,6 +14,7 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QStatusBar>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -114,7 +115,7 @@ void MainWindow::SetupMenuBar()
     // Help menu
     auto* help_menu = menuBar()->addMenu(tr("&Help"));
     help_menu->addAction(tr("&Documentation"));
-    help_menu->addAction(tr("&About Orogena"));
+    help_menu->addAction(tr("&About Orogena"), this, &MainWindow::ShowAboutDialog);
 }
 
 void MainWindow::SetupToolBar()
@@ -171,6 +172,28 @@ void MainWindow::SetupDockPanels()
     addDockWidget(Qt::RightDockWidgetArea, m_PropertiesDock);
 
     Log::Debug("Dockable panels initialized: Parameters (left), Properties (right)");
+}
+
+void MainWindow::ShowAboutDialog()
+{
+    QString about_text = tr(
+        "<h2>Orogena</h2>"
+        "<p><b>Multi-Scale Terrain Generation through Tectonic Simulation</b></p>"
+        "<p>Version 1.0.0 (Phase 1 - Foundation)</p>"
+        "<p>Copyright © 2025 Diego Torres. All rights reserved.</p>"
+        "<p>Licensed under the GNU General Public License v3.0</p>"
+        "<hr>"
+        "<p>Orogena is a cross-platform desktop application for generating realistic terrain "
+        "through geologically accurate plate tectonic simulation.</p>"
+        "<p><b>Technology Stack:</b><br>"
+        "• C++20<br>"
+        "• Qt 6.8+<br>"
+        "• OpenGL 4.5+<br>"
+        "• SQLite</p>"
+        "<p>For more information, visit the project documentation.</p>");
+
+    QMessageBox::about(this, tr("About Orogena"), about_text);
+    Log::Debug("About dialog displayed");
 }
 
 //=================================================================================================
