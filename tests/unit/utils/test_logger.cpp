@@ -9,16 +9,16 @@
  */
 /**************************************************************************************************/
 
+#include <spdlog/spdlog.h>
+
 #include "utils/utils_logger.h"
 
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <regex>
-#include <spdlog/spdlog.h>
 
 using namespace Orogena::Utils;
-namespace fs = std::filesystem;
 
 /**************************************************************************************************/
 /**
@@ -73,21 +73,23 @@ class LoggerTest : public ::testing::Test
     {
         try
         {
-            for (const auto& entry : fs::directory_iterator("."))
+            for (const auto& entry : std::filesystem::directory_iterator("."))
             {
                 if (entry.is_regular_file())
                 {
                     std::string filename = entry.path().filename().string();
                     if (filename.starts_with("orogena_") && filename.ends_with(".log"))
                     {
-                        fs::remove(entry.path());
+                        std::filesystem::remove(entry.path());
                     }
                 }
             }
         }
-        catch (const fs::filesystem_error&)
+        // NOLINTNEXTLINE(bugprone-empty-catch)
+        catch (const std::filesystem::filesystem_error&)
         {
-            // Ignore cleanup errors
+            // Intentionally ignore cleanup errors - test cleanup failures should not cause test
+            // failures
         }
     }
 
@@ -95,19 +97,19 @@ class LoggerTest : public ::testing::Test
      * @brief Finds the most recent log file
      * @return Path to the most recent log file, or empty path if none found
      */
-    static fs::path FindLatestLogFile()
+    static std::filesystem::path FindLatestLogFile()
     {
-        fs::path latest_file;
-        fs::file_time_type latest_time{};
+        std::filesystem::path latest_file;
+        std::filesystem::file_time_type latest_time{};
 
-        for (const auto& entry : fs::directory_iterator("."))
+        for (const auto& entry : std::filesystem::directory_iterator("."))
         {
             if (entry.is_regular_file())
             {
                 std::string filename = entry.path().filename().string();
                 if (filename.starts_with("orogena_") && filename.ends_with(".log"))
                 {
-                    auto file_time = fs::last_write_time(entry.path());
+                    auto file_time = std::filesystem::last_write_time(entry.path());
                     if (latest_file.empty() || file_time > latest_time)
                     {
                         latest_file = entry.path();
@@ -125,7 +127,7 @@ class LoggerTest : public ::testing::Test
      * @param filepath Path to file to read
      * @return File contents as string
      */
-    static std::string ReadFile(const fs::path& filepath)
+    static std::string ReadFile(const std::filesystem::path& filepath)
     {
         std::ifstream file(filepath, std::ios::in);
         if (!file.is_open())
@@ -190,15 +192,15 @@ TEST_F(LoggerTest, InitializeCreatesLogFile)
     // Logger already initialized in SetUp()
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     EXPECT_FALSE(log_file.empty()) << "No log file was created";
-    EXPECT_TRUE(fs::exists(log_file)) << "Log file does not exist";
+    EXPECT_TRUE(std::filesystem::exists(log_file)) << "Log file does not exist";
 }
 
 TEST_F(LoggerTest, LogFileHasCorrectTimestampFormat)
 {
     // Arrange & Act
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
 
     // Assert
     std::string filename = log_file.filename().string();
@@ -222,7 +224,7 @@ TEST_F(LoggerTest, TraceMessageWrittenToFile)
     FlushAndCloseLogger();
 
     // Assert - Check file contains trace message
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test trace message") != std::string::npos)
         << "Trace message not found in log file";
@@ -235,7 +237,7 @@ TEST_F(LoggerTest, DebugMessageWrittenToFile)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test debug message") != std::string::npos)
         << "Debug message not found in log file";
@@ -245,10 +247,10 @@ TEST_F(LoggerTest, InfoMessageWrittenToFile)
 {
     // Arrange & Act
     Logger::Info("Test info message");
-    FlushAndCloseLogger();  // Close file to make writes visible
+    FlushAndCloseLogger(); // Close file to make writes visible
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test info message") != std::string::npos)
         << "Info message not found in log file";
@@ -261,7 +263,7 @@ TEST_F(LoggerTest, WarnMessageWrittenToFile)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test warning message") != std::string::npos)
         << "Warning message not found in log file";
@@ -274,7 +276,7 @@ TEST_F(LoggerTest, ErrorMessageWrittenToFile)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test error message") != std::string::npos)
         << "Error message not found in log file";
@@ -287,7 +289,7 @@ TEST_F(LoggerTest, CriticalMessageWrittenToFile)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test critical message") != std::string::npos)
         << "Critical message not found in log file";
@@ -307,7 +309,7 @@ TEST_F(LoggerTest, FormattedMessageWithSingleArgument)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test value: 42") != std::string::npos)
         << "Formatted message not found in log file";
@@ -325,7 +327,7 @@ TEST_F(LoggerTest, FormattedMessageWithMultipleArguments)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Operation: add with values x=10, y=20") != std::string::npos)
         << "Formatted message not found in log file";
@@ -341,7 +343,7 @@ TEST_F(LoggerTest, FormattedMessageWithFloatingPoint)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Pi value: 3.14") != std::string::npos)
         << "Formatted floating point message not found in log file";
@@ -364,7 +366,7 @@ TEST_F(LoggerTest, SetLevelFiltersLowerPriorityMessages)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
 
     EXPECT_TRUE(log_contents.find("This debug message should not appear") == std::string::npos)
@@ -380,7 +382,7 @@ TEST_F(LoggerTest, SetLevelFiltersLowerPriorityMessages)
 TEST_F(LoggerTest, SetConsoleLevelIndependentFromFileLevel)
 {
     // Arrange
-    Logger::SetLevel(LogLevel::TRACE);  // Logger must allow TRACE for any sink to receive it
+    Logger::SetLevel(LogLevel::TRACE); // Logger must allow TRACE for any sink to receive it
     Logger::SetConsoleLevel(LogLevel::ERROR);
     Logger::SetFileLevel(LogLevel::TRACE);
 
@@ -392,7 +394,7 @@ TEST_F(LoggerTest, SetConsoleLevelIndependentFromFileLevel)
 
     // Assert
     // All messages should be in file (TRACE level)
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
 
     EXPECT_TRUE(log_contents.find("Trace message") != std::string::npos)
@@ -416,7 +418,7 @@ TEST_F(LoggerTest, ConvenienceAliasWorks)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Testing convenience alias") != std::string::npos)
         << "Message logged via convenience alias not found";
@@ -432,8 +434,8 @@ TEST_F(LoggerTest, EmptyMessageLogged)
     Logger::Info("");
 
     // Assert - Should not crash, file should exist
-    fs::path log_file = FindLatestLogFile();
-    EXPECT_TRUE(fs::exists(log_file));
+    std::filesystem::path log_file = FindLatestLogFile();
+    EXPECT_TRUE(std::filesystem::exists(log_file));
 }
 
 TEST_F(LoggerTest, VeryLongMessageLogged)
@@ -446,7 +448,7 @@ TEST_F(LoggerTest, VeryLongMessageLogged)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find(long_message) != std::string::npos)
         << "Long message not found in log file";
@@ -461,8 +463,9 @@ TEST_F(LoggerTest, SpecialCharactersInMessage)
     Logger::Info("{}", special_chars);
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
-    EXPECT_TRUE(fs::exists(log_file)) << "Log file should exist after logging special characters";
+    std::filesystem::path log_file = FindLatestLogFile();
+    EXPECT_TRUE(std::filesystem::exists(log_file))
+        << "Log file should exist after logging special characters";
 }
 
 /**************************************************************************************************/
@@ -480,12 +483,14 @@ TEST_F(LoggerTest, ConcurrentLoggingDoesNotCrash)
     // Act
     for (int t = 0; t < c_NumThreads; ++t)
     {
-        threads.emplace_back([t]() {
-            for (int i = 0; i < c_MessagesPerThread; ++i)
+        threads.emplace_back(
+            [t]()
             {
-                Logger::Info("Thread {} message {}", t, i);
-            }
-        });
+                for (int i = 0; i < c_MessagesPerThread; ++i)
+                {
+                    Logger::Info("Thread {} message {}", t, i);
+                }
+            });
     }
 
     for (auto& thread : threads)
@@ -495,7 +500,7 @@ TEST_F(LoggerTest, ConcurrentLoggingDoesNotCrash)
     FlushAndCloseLogger();
 
     // Assert
-    fs::path log_file = FindLatestLogFile();
+    std::filesystem::path log_file = FindLatestLogFile();
     std::string log_contents = ReadFile(log_file);
 
     // Verify at least some messages from each thread are present
