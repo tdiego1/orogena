@@ -15,7 +15,8 @@ Checks: >
   -readability-magic-numbers,
   -cppcoreguidelines-avoid-magic-numbers,
   -modernize-use-trailing-return-type,
-  -readability-identifier-length
+  -readability-identifier-length,
+  -cppcoreguidelines-owning-memory
 
 WarningsAsErrors: ''
 
