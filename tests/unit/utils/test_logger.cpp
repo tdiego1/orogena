@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <numbers>
 #include <regex>
 
 using namespace Orogena::Utils;
@@ -336,7 +337,7 @@ TEST_F(LoggerTest, FormattedMessageWithMultipleArguments)
 TEST_F(LoggerTest, FormattedMessageWithFloatingPoint)
 {
     // Arrange
-    double pi = 3.14159;
+    double pi = std::numbers::pi;
 
     // Act
     Logger::Debug("Pi value: {:.2f}", pi);
