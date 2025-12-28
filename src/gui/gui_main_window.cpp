@@ -16,7 +16,7 @@
 #include <QStatusBar>
 #include <QToolBar>
 
-#include <spdlog/spdlog.h>
+#include "utils/utils_logger.h"
 
 namespace Orogena::GUI
 {
@@ -32,12 +32,12 @@ namespace Orogena::GUI
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     SetupUI();
-    spdlog::info("MainWindow created");
+    Log::Info("MainWindow created");
 }
 
 MainWindow::~MainWindow()
 {
-    spdlog::info("MainWindow destroyed");
+    Log::Info("MainWindow destroyed");
 }
 
 //=================================================================================================
