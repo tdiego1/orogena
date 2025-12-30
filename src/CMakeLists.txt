@@ -68,7 +68,9 @@ target_link_libraries(orogena_render
 # GUI library
 add_library(orogena_gui
     gui/gui_main_window.cpp
+    gui/gui_main_window.h
     gui/gui_global_viewport.cpp
+    gui/gui_global_viewport.h
 )
 
 target_link_libraries(orogena_gui
@@ -104,15 +106,21 @@ add_executable(orogena
     main.cpp
 )
 
+# Qt resources - added to executable to ensure they're linked
+target_sources(orogena PRIVATE
+    ${CMAKE_SOURCE_DIR}/resources/resources.qrc
+)
+
+# Enable Qt's automatic resource compiler
+set_target_properties(orogena PROPERTIES
+    AUTORCC ON
+    WIN32_EXECUTABLE ON
+    MACOSX_BUNDLE ON
+)
+
 target_link_libraries(orogena
     PRIVATE
         orogena_gui
         orogena_database
         orogena_utils
-)
-
-# Set executable properties
-set_target_properties(orogena PROPERTIES
-    WIN32_EXECUTABLE ON
-    MACOSX_BUNDLE ON
 )
