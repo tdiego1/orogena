@@ -19,7 +19,10 @@
 
 #pragma once
 
+#include <QLabel>
 #include <QMainWindow>
+
+#include "render/render_viewport.h"
 
 // Forward declarations
 class QDockWidget;
@@ -94,12 +97,21 @@ class MainWindow : public QMainWindow
      */
     void SetupDockPanels();
 
+    /**
+     * @brief Setup the central viewport.
+     */
+    void SetupViewport();
+
     //=============================================================================================
     // Private Member Variables
     //=============================================================================================
 
     QDockWidget* m_ParametersDock; ///< Left sidebar for simulation parameters.
     QDockWidget* m_PropertiesDock; ///< Right sidebar for properties/info.
+
+    QLabel* m_StatusLabel; ///< Status bar label for FPS display.
+
+    Render::Viewport* m_Viewport{nullptr}; ///< Central OpenGL rendering viewport.
 };
 
 } // namespace Orogena::GUI

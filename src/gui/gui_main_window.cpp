@@ -24,6 +24,7 @@
 #include <qlabel.h>
 #include <qnamespace.h>
 
+#include "render/render_viewport.h"
 #include "utils/utils_logger.h"
 
 namespace Orogena::GUI
@@ -50,7 +51,7 @@ MainWindow::~MainWindow()
 }
 
 //=================================================================================================
-// Public Functions
+// Private Functions
 //=================================================================================================
 
 void MainWindow::SetupUI()
@@ -84,12 +85,7 @@ void MainWindow::SetupUI()
     SetupToolBar();
     SetupDockPanels();
     SetupStatusBar();
-
-    // TODO: Replace with QOpenGLWidget viewport
-    auto* placeholder = new QLabel(
-        "Orogena v1.0\n\nProject structure initialized!\n\nSee docs/ for development plan.", this);
-    placeholder->setAlignment(Qt::AlignCenter);
-    setCentralWidget(placeholder);
+    SetupViewport();
 }
 
 void MainWindow::SetupMenuBar()
@@ -158,9 +154,9 @@ void MainWindow::SetupStatusBar()
     statusBar()->showMessage(tr("Ready"));
 
     // Permenant widget for FPS (right side)
-    auto* fps_label = new QLabel(tr("FPS: 60"));
-    fps_label->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    statusBar()->addPermanentWidget(fps_label);
+    m_StatusLabel = new QLabel(tr("FPS: 60"));
+    m_StatusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    statusBar()->addPermanentWidget(m_StatusLabel);
 }
 
 void MainWindow::SetupDockPanels()
@@ -196,6 +192,37 @@ void MainWindow::SetupDockPanels()
     Log::Debug("Dockable panels initialized: Parameters (left), Properties (right)");
 }
 
+void MainWindow::SetupViewport()
+{
+    // Create and set viewport as central widget
+    m_Viewport = new Render::Viewport(this);
+    setCentralWidget(m_Viewport);
+
+    // Connect FPS update to status bar
+    connect(m_Viewport, &Render::Viewport::FPSUpdated, this,
+            [this](int32_t fps) { m_StatusLabel->setText(QString("FPS: %1").arg(fps)); });
+
+    // Connect OpenGL initialization
+    connect(m_Viewport, &Render::Viewport::OpenGLInitialized, this,
+            [](const QString& vendor, const QString& renderer, const QString& version)
+            {
+                Log::Info("MainWindow: GPU initialized - {} / {}", vendor.toStdString(),
+                          renderer.toStdString());
+            });
+
+    // Connect OpenGL erros
+    connect(m_Viewport, &Render::Viewport::OpenGLError, this,
+            [this](const QString& error)
+            {
+                QMessageBox::critical(this, "OpenGL Error",
+                                      QString("OpenGL error ocurred:\n%1").arg(error));
+            });
+}
+
+//=================================================================================================
+// Private Slots
+//=================================================================================================
+
 void MainWindow::ShowAboutDialog()
 {
     QString about_text =
@@ -217,9 +244,5 @@ void MainWindow::ShowAboutDialog()
     QMessageBox::about(this, tr("About Orogena"), about_text);
     Log::Debug("About dialog displayed");
 }
-
-//=================================================================================================
-// Private Functions
-//=================================================================================================
 
 } // namespace Orogena::GUI
