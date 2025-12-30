@@ -58,6 +58,28 @@ void MainWindow::SetupUI()
     setWindowTitle("Orogena - Multi-Scale Tectonic Simulator");
     resize(1280, 720);
 
+    // Set window icon with multiple sizes for different contexts
+    QIcon app_icon;
+    app_icon.addFile(":/icons/icons/app_icon_16.png");
+    app_icon.addFile(":/icons/icons/app_icon_32.png");
+    app_icon.addFile(":/icons/icons/app_icon_48.png");
+    app_icon.addFile(":/icons/icons/app_icon_64.png");
+    app_icon.addFile(":/icons/icons/app_icon_128.png");
+    app_icon.addFile(":/icons/icons/app_icon_256.png");
+    app_icon.addFile(":/icons/icons/app_icon_512.png");
+    setWindowIcon(app_icon);
+
+    // Debug: Check if icon is null
+    if (app_icon.isNull())
+    {
+        Log::Error("Failed to load application icon - check resources.qrc");
+    }
+    else
+    {
+        Log::Debug("Application icon loaded successfully with {} sizes",
+                   app_icon.availableSizes().size());
+    }
+
     SetupMenuBar();
     SetupToolBar();
     SetupDockPanels();
@@ -176,21 +198,21 @@ void MainWindow::SetupDockPanels()
 
 void MainWindow::ShowAboutDialog()
 {
-    QString about_text = tr(
-        "<h2>Orogena</h2>"
-        "<p><b>Multi-Scale Terrain Generation through Tectonic Simulation</b></p>"
-        "<p>Version 1.0.0 (Phase 1 - Foundation)</p>"
-        "<p>Copyright © 2025 Diego Torres. All rights reserved.</p>"
-        "<p>Licensed under the GNU General Public License v3.0</p>"
-        "<hr>"
-        "<p>Orogena is a cross-platform desktop application for generating realistic terrain "
-        "through geologically accurate plate tectonic simulation.</p>"
-        "<p><b>Technology Stack:</b><br>"
-        "• C++20<br>"
-        "• Qt 6.8+<br>"
-        "• OpenGL 4.5+<br>"
-        "• SQLite</p>"
-        "<p>For more information, visit the project documentation.</p>");
+    QString about_text =
+        tr("<h2>Orogena</h2>"
+           "<p><b>Multi-Scale Terrain Generation through Tectonic Simulation</b></p>"
+           "<p>Version 1.0.0 (Phase 1 - Foundation)</p>"
+           "<p>Copyright © 2025 Diego Torres. All rights reserved.</p>"
+           "<p>Licensed under the GNU General Public License v3.0</p>"
+           "<hr>"
+           "<p>Orogena is a cross-platform desktop application for generating realistic terrain "
+           "through geologically accurate plate tectonic simulation.</p>"
+           "<p><b>Technology Stack:</b><br>"
+           "• C++20<br>"
+           "• Qt 6.8+<br>"
+           "• OpenGL 4.5+<br>"
+           "• SQLite</p>"
+           "<p>For more information, visit the project documentation.</p>");
 
     QMessageBox::about(this, tr("About Orogena"), about_text);
     Log::Debug("About dialog displayed");
