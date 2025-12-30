@@ -1,8 +1,24 @@
-# Local development hooks - NOT checked into version control
+# Local development hooks for IDE integration
 # This file runs after CMake configuration completes
 #
-# To enable: Add to your .gitignore and source from CMakeLists.txt (optional)
-# Or use CMakePresets.json (recommended)
+# USAGE:
+# This hook is designed to be used via CMakeUserPresets.json (git-ignored)
+# Copy the example below to your CMakeUserPresets.json:
+#
+# {
+#     "version": 6,
+#     "configurePresets": [
+#         {
+#             "name": "user-dev",
+#             "inherits": "dev",
+#             "cacheVariables": {
+#                 "CMAKE_PROJECT_INCLUDE_BEFORE": "${sourceDir}/cmake/local-hooks.cmake"
+#             }
+#         }
+#     ]
+# }
+#
+# Then configure with: cmake --preset user-dev
 
 # Create symlink for clangd/VSCode
 # Ensures compile_commands.json is discoverable at build/compile_commands.json
