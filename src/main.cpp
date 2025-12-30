@@ -10,6 +10,8 @@
 /**************************************************************************************************/
 
 #include <QApplication>
+#include <qtdeprecationdefinitions.h>
+#include <qtenvironmentvariables.h>
 
 #include "gui/gui_main_window.h"
 #include "utils/utils_logger.h"
@@ -29,6 +31,15 @@
 
 int32_t main(int32_t argc, char_t* argv[])
 {
+#ifdef Q_OS_LINUX
+    // On Linux, prefer X11/GLX over Wayland/EGL for better OpenGL support
+    // Only set if not already defined by user.
+    if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
+    {
+        qputenv("QT_QPA_PLATFORM", "xcb"); // Force XCB on Linux
+    }
+#endif
+
     // Initialize application
     QApplication app(argc, argv);
 

@@ -40,6 +40,9 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.MemberPrefix
     value: m_
+  - key: readability-identifier-naming.PublicMemberPrfix
+    value: (empty)
+    value: lower_case
   - key: readability-identifier-naming.ClassMemberCase
     value: CamelCase
   - key: readability-identifier-naming.ClassMemberPrefix
