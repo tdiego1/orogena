@@ -55,6 +55,7 @@ add_library(orogena_render
     render/render_multiscale.cpp
     render/render_heightmap.cpp
     render/render_camera.cpp
+    render/render_viewport.cpp
 )
 
 target_link_libraries(orogena_render
