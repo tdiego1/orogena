@@ -41,3 +41,17 @@ using uint64_t = std::uint64_t;
 // Floating-point types
 using float32_t = float;
 using float64_t = double;
+
+namespace Orogena::Utils
+{
+/**
+ * @brief RGB color structure
+ */
+struct ColorRGBF
+{
+    float32_t r; ///< Red
+    float32_t g; ///< Green
+    float32_t b; ///< Blue
+};
+
+} // namespace Orogena::Utils
