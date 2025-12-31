@@ -12,10 +12,12 @@
 - **Parameters**: camelCase (e.g., `plateCount`)
 - **Local variables**: lower_snake_case (e.g., `active_plates`)
 - **Members**: `m_PascalCase` (e.g., `m_Plates`)
+- **Struct Members**: `pascalCase` (e.g., `plateType`)
 - **Statics**: `s_PascalCase` (e.g., `s_Instance`)
 - **Globals**: `g_PascalCase` (e.g., `g_Handle`)
 - **Constants**: `c_PascalCase` (e.g., `c_MaxPlates`)
 - **Enum values**: UPPER_SNAKE_CASE (e.g., `PlateType::OCEANIC`)
+- **Strict Types**: Use `int32_t`/`float32_t` etc. from `utils/utils_types.h` (not `int`/`float`)
 
 ---
 
@@ -178,6 +180,7 @@ ClassName::ClassName()
 | Parameter/Argument | camelCase | `plateVelocity`, `regionIndex` |
 | Variable (local) | lower_snake_case | `plate_velocity`, `region_index` |
 | Member variable | m_ + PascalCase | `m_Plates`, `m_HeightMap` |
+| Struct variable | pascalCase | `plateType`, `boundaryStrength` |
 | Static variable | s_ + PascalCase | `s_Instance`, `s_GlobalState` |
 | Global variable | g_ + PascalCase | `g_ApplicationHandle` |
 | Constant (any scope) | c_ + PascalCase | `c_MaxPlates`, `c_DefaultSeed` |
@@ -185,6 +188,70 @@ ClassName::ClassName()
 | Enum value | UPPER_SNAKE_CASE | `PlateType::OCEANIC`, `BoundaryType::CONVERGENT` |
 | Template param | PascalCase | `template<typename T>` |
 | Macro | UPPER_SNAKE_CASE | `OROGENA_VERSION` |
+
+### 3.3 Strict Type Definitions
+
+Orogena uses explicit-width type aliases defined in `utils/utils_types.h` to ensure consistent type sizes across platforms and improve code clarity. **Always use these strict types instead of primitive types.**
+
+```cpp
+#include "utils/utils_types.h"
+```
+
+| Primitive Type | Strict Type | Purpose |
+|---------------|-------------|---------|
+| `char` | `char_t` | Character data |
+| `int8_t` / `std::int8_t` | `int8_t` | 8-bit signed integer |
+| `int16_t` / `std::int16_t` | `int16_t` | 16-bit signed integer |
+| `int` / `int32_t` | `int32_t` | 32-bit signed integer |
+| `long long` / `int64_t` | `int64_t` | 64-bit signed integer |
+| `uint8_t` / `std::uint8_t` | `uint8_t` | 8-bit unsigned integer |
+| `uint16_t` / `std::uint16_t` | `uint16_t` | 16-bit unsigned integer |
+| `unsigned int` / `uint32_t` | `uint32_t` | 32-bit unsigned integer |
+| `unsigned long long` / `uint64_t` | `uint64_t` | 64-bit unsigned integer |
+| `float` | `float32_t` | 32-bit floating point |
+| `double` | `float64_t` | 64-bit floating point |
+
+**Examples**:
+```cpp
+// Bad - ambiguous primitive types
+int plate_count = 10;
+float height = 1500.0f;
+char buffer[256];
+
+// Good - explicit strict types
+int32_t plate_count = 10;
+float32_t height = 1500.0f;
+char_t buffer[256];
+
+// Function signatures should use strict types
+float64_t CalculateUplift(int32_t plateIndex, float64_t deltaTime);
+void ProcessHeightMap(const std::vector<float32_t>& heights);
+
+// Member variables with strict types
+class HeightMap
+{
+private:
+    int32_t m_Width;
+    int32_t m_Height;
+    std::vector<float32_t> m_Data;
+};
+```
+
+**When to use which integer size**:
+- `int32_t`: Default choice for counts, indices, and general integers
+- `int64_t`: Large values (file sizes, timestamps, IDs that may exceed 2 billion)
+- `int8_t`/`int16_t`: Memory-constrained data structures, binary protocols
+- Unsigned variants: Bit manipulation, sizes, truly non-negative values
+
+**When to use which floating-point size**:
+- `float32_t`: Graphics data, GPU buffers, memory-sensitive arrays (heightmaps)
+- `float64_t`: Simulation calculations, accumulation, precision-sensitive math
+
+**Exceptions**:
+- Loop indices with `auto` (e.g., range-based for loops) are acceptable
+- Third-party API boundaries may require their native types
+- `size_t` for STL container sizes and indices remains acceptable
+- `bool` does not have a strict type alias (use `bool` directly)
 
 **Prefix Priority Rules**:
 - If a variable is both static and global, use `s_` prefix
