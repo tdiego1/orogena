@@ -82,12 +82,14 @@ target_link_libraries(orogena_gui
 # Database library
 add_library(orogena_database
     database/database_manager.cpp
+    database/database_transaction.cpp
 )
 
 target_link_libraries(orogena_database
     PUBLIC
         Qt6::Sql
         orogena_core
+        orogena_utils
 )
 
 # Utilities library

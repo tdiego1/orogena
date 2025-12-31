@@ -29,8 +29,6 @@
 
 #include <memory>
 
-#include <queue>
-
 #include "database/database_interface.h"
 
 #include <condition_variable>
@@ -39,6 +37,7 @@
 // Forward declare Qt types to avoid leaking Qt headers
 class QSqlDatabase;
 class QSqlQuery;
+class QSqlError;
 
 namespace Orogena::Database
 {
@@ -227,6 +226,11 @@ class DatabaseManager : public IDatabase
     void StoreLastError(const std::string& connectionName = "");
 
     /**
+     * @brief Store error from QSqlQuery
+     */
+    void StoreQueryError(QSqlQuery& query);
+
+    /**
      * @brief Execute schema migration SQL
      * @param sql Migration SQL statement
      * @return true if successful, false otherwise
@@ -245,6 +249,9 @@ class DatabaseManager : public IDatabase
     mutable std::mutex m_ErrorMutex;                ///< Mutex for error access;
     std::optional<DatabaseError> m_LastError;       ///< Last error information.
     bool m_Connected;                               ///< Connection status.
+
+    std::string m_TransactionConnection;   ///< Connection used for current transaction.
+    mutable std::mutex m_TransactionMutex; ///< Mutex for transaction connection.
 
     static std::unique_ptr<DatabaseManager> s_Instance; ///< Singleton instance.
     static std::mutex s_InstanceMutex;                  ///< Mutex for singleton instance creation.

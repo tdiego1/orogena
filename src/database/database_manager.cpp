@@ -50,59 +50,6 @@ PooledConnectionGuard::~PooledConnectionGuard()
 }
 
 //=================================================================================================
-// DatabaseTransaction Implementation
-//=================================================================================================
-
-DatabaseTransaction::DatabaseTransaction(IDatabase& db)
-    : m_Database(db), m_Committed(false), m_RolledBack(false)
-{
-    if (!m_Database.BeginTransaction())
-    {
-        throw std::runtime_error("Failed to begin database transaction");
-    }
-}
-
-DatabaseTransaction::~DatabaseTransaction()
-{
-    if (!m_Committed && !m_RolledBack)
-    {
-        m_Database.Rollback();
-        Log::Warn("Transaction auto-rolled back (not explicitly committed)");
-    }
-}
-
-bool DatabaseTransaction::Commit()
-{
-    if (m_Committed)
-    {
-        Log::Warn("Transaction already committed");
-        return true;
-    }
-
-    if (m_RolledBack)
-    {
-        Log::Error("Cannot commit transaction after rollback");
-        return false;
-    }
-
-    m_Committed = m_Database.Commit();
-    return m_Committed;
-}
-
-bool DatabaseTransaction::Rollback()
-{
-    if (m_RolledBack)
-    {
-        Log::Warn("Transaction already rolled back");
-        return true;
-    }
-
-    m_RolledBack = m_Database.Rollback();
-    m_Committed = false;
-    return m_RolledBack;
-}
-
-//=================================================================================================
 // DatabaseManager - Singleton
 //=================================================================================================
 
@@ -150,26 +97,31 @@ DatabaseManager::~DatabaseManager()
 
 bool DatabaseManager::Connect(const std::string& path)
 {
-    std::lock_guard<std::mutex> lock(m_PoolMutex);
-
-    if (m_Connected)
     {
-        Log::Warn("Already connected to database, disconnecting first");
-        Disconnect();
-    }
+        std::lock_guard<std::mutex> lock(m_PoolMutex);
 
-    m_DatabasePath = path;
+        if (m_Connected)
+        {
+            Log::Warn("Already connected to database, disconnecting first");
+            // Can't call Disconnect() here - it also needs the lock
+            // Set flag to disconnect after releasing lock
+        }
 
-    if (!InitializePool())
-    {
-        Log::Error("Failed to initialize connection pool");
-        return false;
-    }
+        m_DatabasePath = path;
 
-    m_Connected = true;
+        if (!InitializePool())
+        {
+            Log::Error("Failed to initialize connection pool");
+            return false;
+        }
+
+        m_Connected = true;
+    } // Release lock here
+
     Log::Info("Connected to database: {}", path);
 
-    // Initialize schema using first connection
+    // Initialize schema without holding the pool lock
+    // InitializeSchema() will acquire connections as needed
     if (!InitializeSchema())
     {
         Log::Error("Failed to initialize database schema");
@@ -182,16 +134,24 @@ bool DatabaseManager::Connect(const std::string& path)
 
 void DatabaseManager::Disconnect()
 {
-    std::lock_guard<std::mutex> lock(m_PoolMutex);
-
-    if (!m_Connected)
     {
-        return;
+        std::lock_guard<std::mutex> lock(m_PoolMutex);
+
+        if (!m_Connected)
+        {
+            return;
+        }
+    } // Release lock before calling DestroyPool()
+
+    // DestroyPool doesn't need the lock - it's safe to call after disconnecting
+    DestroyPool();
+
+    {
+        std::lock_guard<std::mutex> lock(m_PoolMutex);
+        m_Connected = false;
+        m_DatabasePath.clear();
     }
 
-    DestroyPool();
-    m_Connected = false;
-    m_DatabasePath.clear();
     Log::Info("Disconnected from database");
 }
 
@@ -219,96 +179,85 @@ bool DatabaseManager::BeginTransaction()
         return false;
     }
 
-    // Transactions use the first connection (main thread)
-    auto connectionName = AcquireConnection();
-    if (connectionName.empty())
+    std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
+
+    if (!m_TransactionConnection.empty())
+    {
+        Log::Error("Transaction already active");
+        return false;
+    }
+
+    // Acquire connection and KEEP it for the transaction lifetime
+    m_TransactionConnection = AcquireConnection();
+    if (m_TransactionConnection.empty())
     {
         Log::Error("Failed to acquire connection for transaction");
         return false;
     }
 
-    QSqlDatabase db = GetDatabase(connectionName);
+    QSqlDatabase db = GetDatabase(m_TransactionConnection);
     if (!db.transaction())
     {
-        StoreLastError(connectionName);
-        ReleaseConnection(connectionName);
+        StoreLastError(m_TransactionConnection);
+        ReleaseConnection(m_TransactionConnection);
+        m_TransactionConnection.clear();
         Log::Error("Failed to begin transaction: {}", m_LastError->message);
         return false;
     }
 
-    Log::Debug("Transaction began on connection {}", connectionName);
+    Log::Debug("Transaction began on connection {}", m_TransactionConnection);
     return true;
 }
 
 bool DatabaseManager::Commit()
 {
-    // Find connection with active transaction
-    std::string activeConnection;
-    {
-        std::lock_guard<std::mutex> lock(m_PoolMutex);
-        for (const auto& conn : m_ConnectionPool)
-        {
-            if (conn.inUse)
-            {
-                activeConnection = conn.connectionName;
-                break;
-            }
-        }
-    }
+    std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
 
-    if (activeConnection.empty())
+    if (m_TransactionConnection.empty())
     {
         Log::Error("No active transaction to commit");
         return false;
     }
 
-    QSqlDatabase db = GetDatabase(activeConnection);
+    QSqlDatabase db = GetDatabase(m_TransactionConnection);
     if (!db.commit())
     {
-        StoreLastError(activeConnection);
-        ReleaseConnection(activeConnection);
+        StoreLastError(m_TransactionConnection);
         Log::Error("Failed to commit transaction: {}", m_LastError->message);
+        // Don't release connection yet - might need to rollback
         return false;
     }
 
-    ReleaseConnection(activeConnection);
-    Log::Debug("Transaction committed on connection {}", activeConnection);
+    // Release the connection back to the pool
+    ReleaseConnection(m_TransactionConnection);
+    m_TransactionConnection.clear();
+
+    Log::Debug("Transaction committed");
     return true;
 }
 
 bool DatabaseManager::Rollback()
 {
-    // Find connection with active transaction
-    std::string activeConnection;
-    {
-        std::lock_guard<std::mutex> lock(m_PoolMutex);
-        for (const auto& conn : m_ConnectionPool)
-        {
-            if (conn.inUse)
-            {
-                activeConnection = conn.connectionName;
-                break;
-            }
-        }
-    }
+    std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
 
-    if (activeConnection.empty())
+    if (m_TransactionConnection.empty())
     {
         Log::Error("No active transaction to rollback");
         return false;
     }
 
-    QSqlDatabase db = GetDatabase(activeConnection);
+    QSqlDatabase db = GetDatabase(m_TransactionConnection);
     if (!db.rollback())
     {
-        StoreLastError(activeConnection);
-        ReleaseConnection(activeConnection);
+        StoreLastError(m_TransactionConnection);
         Log::Error("Failed to rollback transaction: {}", m_LastError->message);
-        return false;
+        // Still release the connection
     }
 
-    ReleaseConnection(activeConnection);
-    Log::Debug("Transaction rolled back on connection {}", activeConnection);
+    ReleaseConnection(m_TransactionConnection);
+    m_TransactionConnection.clear();
+
+    Log::Debug("Transaction rolled back");
     return true;
 }
 
@@ -324,26 +273,59 @@ bool DatabaseManager::Execute(const std::string& sql)
         return false;
     }
 
-    PooledConnectionGuard guard(*this, AcquireConnection());
-    if (guard.GetConnectionName().empty())
+    // Check if we have an active transaction
+    std::string connectionName;
+    bool useTransaction = false;
     {
-        Log::Error("Failed to acquire connection");
-        return false;
+        std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
+        if (!m_TransactionConnection.empty())
+        {
+            connectionName = m_TransactionConnection;
+            useTransaction = true;
+        }
     }
 
-    QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-    QSqlQuery query(db);
-
-    if (!query.exec(QString::fromStdString(sql)))
+    if (useTransaction)
     {
-        StoreLastError(guard.GetConnectionName());
-        Log::Error("Failed to execute SQL: {}", m_LastError->message);
-        Log::Debug("SQL: {}", sql);
-        return false;
-    }
+        // Use transaction connection directly (no guard needed, transaction owns it)
+        QSqlDatabase db = GetDatabase(connectionName);
+        QSqlQuery query(db);
 
-    Log::Trace("Executed SQL: {}", sql);
-    return true;
+        if (!query.exec(QString::fromStdString(sql)))
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute SQL: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return false;
+        }
+
+        Log::Trace("Executed SQL: {}", sql);
+        return true;
+    }
+    else
+    {
+        // Normal execution with pooled connection
+        PooledConnectionGuard guard(*this, AcquireConnection());
+        if (guard.GetConnectionName().empty())
+        {
+            Log::Error("Failed to acquire connection");
+            return false;
+        }
+
+        QSqlDatabase db = GetDatabase(guard.GetConnectionName());
+        QSqlQuery query(db);
+
+        if (!query.exec(QString::fromStdString(sql)))
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute SQL: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return false;
+        }
+
+        Log::Trace("Executed SQL: {}", sql);
+        return true;
+    }
 }
 
 std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
@@ -354,27 +336,61 @@ std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
         return std::nullopt;
     }
 
-    PooledConnectionGuard guard(*this, AcquireConnection());
-    if (guard.GetConnectionName().empty())
+    // Check if we have an active transaction
+    std::string connectionName;
+    bool useTransaction = false;
     {
-        Log::Error("Failed to acquire connection");
-        return std::nullopt;
+        std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
+        if (!m_TransactionConnection.empty())
+        {
+            connectionName = m_TransactionConnection;
+            useTransaction = true;
+        }
     }
 
-    QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-    QSqlQuery query(db);
-
-    if (!query.exec(QString::fromStdString(sql)))
+    if (useTransaction)
     {
-        StoreLastError(guard.GetConnectionName());
-        Log::Error("Failed to execute query: {}", m_LastError->message);
-        Log::Debug("SQL: {}", sql);
-        return std::nullopt;
-    }
+        // Use transaction connection directly
+        QSqlDatabase db = GetDatabase(connectionName);
+        QSqlQuery query(db);
 
-    auto result = ConvertQueryResult(query);
-    Log::Trace("Query returned {} rows", result.GetRowCount());
-    return result;
+        if (!query.exec(QString::fromStdString(sql)))
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute query: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return std::nullopt;
+        }
+
+        auto result = ConvertQueryResult(query);
+        Log::Trace("Query returned {} rows", result.GetRowCount());
+        return result;
+    }
+    else
+    {
+        // Normal query with pooled connection
+        PooledConnectionGuard guard(*this, AcquireConnection());
+        if (guard.GetConnectionName().empty())
+        {
+            Log::Error("Failed to acquire connection");
+            return std::nullopt;
+        }
+
+        QSqlDatabase db = GetDatabase(guard.GetConnectionName());
+        QSqlQuery query(db);
+
+        if (!query.exec(QString::fromStdString(sql)))
+        {
+            StoreLastError(guard.GetConnectionName());
+            Log::Error("Failed to execute query: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return std::nullopt;
+        }
+
+        auto result = ConvertQueryResult(query);
+        Log::Trace("Query returned {} rows", result.GetRowCount());
+        return result;
+    }
 }
 
 bool DatabaseManager::ExecutePrepared(const std::string& sql,
@@ -386,32 +402,69 @@ bool DatabaseManager::ExecutePrepared(const std::string& sql,
         return false;
     }
 
-    PooledConnectionGuard guard(*this, AcquireConnection());
-    if (guard.GetConnectionName().empty())
+    // Check if we have an active transaction
+    std::string connectionName;
+    bool useTransaction = false;
     {
-        Log::Error("Failed to acquire connection");
-        return false;
+        std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
+        if (!m_TransactionConnection.empty())
+        {
+            connectionName = m_TransactionConnection;
+            useTransaction = true;
+        }
     }
 
-    QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-    QSqlQuery query(db);
-    query.prepare(QString::fromStdString(sql));
-
-    for (const auto& param : params)
+    if (useTransaction)
     {
-        query.addBindValue(QString::fromStdString(param));
-    }
+        QSqlDatabase db = GetDatabase(connectionName);
+        QSqlQuery query(db);
+        query.prepare(QString::fromStdString(sql));
 
-    if (!query.exec())
+        for (const auto& param : params)
+        {
+            query.addBindValue(QString::fromStdString(param));
+        }
+
+        if (!query.exec())
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute prepared statement: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return false;
+        }
+
+        Log::Trace("Executed prepared statement");
+        return true;
+    }
+    else
     {
-        StoreLastError(guard.GetConnectionName());
-        Log::Error("Failed to execute prepared statement: {}", m_LastError->message);
-        Log::Debug("SQL: {}", sql);
-        return false;
-    }
+        PooledConnectionGuard guard(*this, AcquireConnection());
+        if (guard.GetConnectionName().empty())
+        {
+            Log::Error("Failed to acquire connection");
+            return false;
+        }
 
-    Log::Trace("Executed prepared statement");
-    return true;
+        QSqlDatabase db = GetDatabase(guard.GetConnectionName());
+        QSqlQuery query(db);
+        query.prepare(QString::fromStdString(sql));
+
+        for (const auto& param : params)
+        {
+            query.addBindValue(QString::fromStdString(param));
+        }
+
+        if (!query.exec())
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute prepared statement: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return false;
+        }
+
+        Log::Trace("Executed prepared statement");
+        return true;
+    }
 }
 
 std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql,
@@ -423,38 +476,72 @@ std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql
         return std::nullopt;
     }
 
-    PooledConnectionGuard guard(*this, AcquireConnection());
-    if (guard.GetConnectionName().empty())
+    // Check if we have an active transaction
+    std::string connectionName;
+    bool useTransaction = false;
     {
-        Log::Error("Failed to acquire connection");
-        return std::nullopt;
+        std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
+        if (!m_TransactionConnection.empty())
+        {
+            connectionName = m_TransactionConnection;
+            useTransaction = true;
+        }
     }
 
-    QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-    QSqlQuery query(db);
-    query.prepare(QString::fromStdString(sql));
-
-    for (const auto& param : params)
+    if (useTransaction)
     {
-        query.addBindValue(QString::fromStdString(param));
-    }
+        QSqlDatabase db = GetDatabase(connectionName);
+        QSqlQuery query(db);
+        query.prepare(QString::fromStdString(sql));
 
-    if (!query.exec())
+        for (const auto& param : params)
+        {
+            query.addBindValue(QString::fromStdString(param));
+        }
+
+        if (!query.exec())
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute prepared query: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return std::nullopt;
+        }
+
+        auto result = ConvertQueryResult(query);
+        Log::Trace("Prepared query returned {} rows", result.GetRowCount());
+        return result;
+    }
+    else
     {
-        StoreLastError(guard.GetConnectionName());
-        Log::Error("Failed to execute prepared query: {}", m_LastError->message);
-        Log::Debug("SQL: {}", sql);
-        return std::nullopt;
-    }
+        PooledConnectionGuard guard(*this, AcquireConnection());
+        if (guard.GetConnectionName().empty())
+        {
+            Log::Error("Failed to acquire connection");
+            return std::nullopt;
+        }
 
-    auto result = ConvertQueryResult(query);
-    Log::Trace("Prepared query returned {} rows", result.GetRowCount());
-    return result;
+        QSqlDatabase db = GetDatabase(guard.GetConnectionName());
+        QSqlQuery query(db);
+        query.prepare(QString::fromStdString(sql));
+
+        for (const auto& param : params)
+        {
+            query.addBindValue(QString::fromStdString(param));
+        }
+
+        if (!query.exec())
+        {
+            StoreQueryError(query);
+            Log::Error("Failed to execute prepared query: {}", m_LastError->message);
+            Log::Debug("SQL: {}", sql);
+            return std::nullopt;
+        }
+
+        auto result = ConvertQueryResult(query);
+        Log::Trace("Prepared query returned {} rows", result.GetRowCount());
+        return result;
+    }
 }
-
-//=================================================================================================
-// Schema Management
-//=================================================================================================
 
 //=================================================================================================
 // Schema Management
@@ -650,6 +737,11 @@ bool DatabaseManager::InitializePool()
             return false;
         }
 
+        // Enable WAL mode for better concurrent access
+        QSqlQuery pragmaQuery(db);
+        pragmaQuery.exec("PRAGMA journal_mode=WAL");
+        pragmaQuery.exec("PRAGMA busy_timeout=5000");
+
         m_ConnectionPool.push_back({connectionName, false});
         Log::Debug("Created pooled connection {}", connectionName);
     }
@@ -780,6 +872,19 @@ void DatabaseManager::StoreLastError(const std::string& connectionName)
 
     QSqlError error = db.lastError();
 
+    // Only store if there's actually an error
+    if (error.isValid() && error.type() != QSqlError::NoError)
+    {
+        m_LastError = DatabaseError{.message = error.text().toStdString(),
+                                    .sqlState = error.nativeErrorCode().toStdString(),
+                                    .nativeErrorCode = static_cast<int32_t>(error.type())};
+    }
+}
+
+void DatabaseManager::StoreQueryError(QSqlQuery& query)
+{
+    std::lock_guard<std::mutex> lock(m_ErrorMutex);
+    QSqlError error = query.lastError();
     m_LastError = DatabaseError{.message = error.text().toStdString(),
                                 .sqlState = error.nativeErrorCode().toStdString(),
                                 .nativeErrorCode = static_cast<int32_t>(error.type())};
