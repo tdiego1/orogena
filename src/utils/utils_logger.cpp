@@ -71,6 +71,23 @@ void Logger::Initialize()
     Info("Orogena logger initialized");
 }
 
+void Logger::Shutdown()
+{
+    if (s_Logger)
+    {
+        s_Logger->info("Orogena logger shutting down");
+        s_Logger->flush();
+        s_Logger.reset();
+    }
+    s_FileSink.reset();
+    s_ConsoleSink.reset();
+}
+
+bool Logger::IsInitialized()
+{
+    return s_Logger != nullptr;
+}
+
 void Logger::SetLevel(LogLevel level)
 {
     s_Logger->set_level(ToSpdlogLevel(level));
