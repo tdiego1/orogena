@@ -71,6 +71,8 @@ add_library(orogena_gui
     gui/gui_main_window.h
     gui/gui_global_viewport.cpp
     gui/gui_global_viewport.h
+    gui/gui_qt_settings.cpp
+    gui/gui_qt_settings.h
 )
 
 target_link_libraries(orogena_gui

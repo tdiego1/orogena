@@ -6,6 +6,7 @@ include(GoogleTest)
 add_executable(test_unit
     unit/database/test_database_manager.cpp
     unit/utils/test_logger.cpp
+    unit/gui/test_qt_settings.cpp
 )
 
 target_link_libraries(test_unit
@@ -14,6 +15,8 @@ target_link_libraries(test_unit
         GTest::gtest_main
         orogena_database
         orogena_utils
+        orogena_gui
+        Qt6::Core
 )
 
 gtest_discover_tests(test_unit)
