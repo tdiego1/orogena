@@ -10,6 +10,9 @@
 /**************************************************************************************************/
 
 #include "gui_qt_settings.h"
+
+#include <QDir>
+#include <QStandardPaths>
 #include <QStringList>
 
 namespace Orogena::GUI
@@ -19,10 +22,7 @@ namespace Orogena::GUI
 // Constructors
 //=============================================================================================
 
-QtSettings::QtSettings()
-    : m_Settings{"Orogena", "Orogena"}
-{
-}
+QtSettings::QtSettings() : m_Settings{"Orogena", "Orogena"} {}
 
 QtSettings::QtSettings(const std::string& organization, const std::string& application)
     : m_Settings{QString::fromStdString(organization), QString::fromStdString(application)}
@@ -65,7 +65,7 @@ std::optional<int32_t> QtSettings::GetInt(const std::string& key) const
         return std::nullopt;
     }
 
-    bool ok = false;
+    bool    ok = false;
     int32_t result = value.toInt(&ok);
     if (!ok)
     {
@@ -91,7 +91,7 @@ std::optional<int64_t> QtSettings::GetInt64(const std::string& key) const
         return std::nullopt;
     }
 
-    bool ok = false;
+    bool    ok = false;
     int64_t result = value.toLongLong(&ok);
     if (!ok)
     {
@@ -117,7 +117,7 @@ std::optional<float64_t> QtSettings::GetFloat(const std::string& key) const
         return std::nullopt;
     }
 
-    bool ok = false;
+    bool      ok = false;
     float64_t result = value.toDouble(&ok);
     if (!ok)
     {
@@ -168,7 +168,7 @@ std::optional<std::vector<std::string>> QtSettings::GetStringList(const std::str
         return std::nullopt;
     }
 
-    QStringList qList = value.toStringList();
+    QStringList              qList = value.toStringList();
     std::vector<std::string> result;
     result.reserve(static_cast<size_t>(qList.size()));
     for (const auto& str : qList)
@@ -214,6 +214,26 @@ void QtSettings::BeginGroup(const std::string& prefix)
 void QtSettings::EndGroup()
 {
     m_Settings.endGroup();
+}
+
+//=============================================================================================
+// Standard Paths
+//=============================================================================================
+
+std::string QtSettings::GetDefaultProjectsDirectory() const
+{
+    // Use ~/Documents/Orogena as the default projects directory
+    QString documents_path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString projects_path = documents_path + "/Orogena";
+
+    // Create directory if it doesn't exist
+    QDir dir(projects_path);
+    if (!dir.exists())
+    {
+        dir.mkpath(".");
+    }
+
+    return projects_path.toStdString();
 }
 
 } // namespace Orogena::GUI

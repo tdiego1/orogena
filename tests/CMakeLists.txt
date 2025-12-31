@@ -4,6 +4,7 @@ include(GoogleTest)
 
 # Unit tests
 add_executable(test_unit
+    unit/core/test_project.cpp
     unit/database/test_database_manager.cpp
     unit/utils/test_logger.cpp
     unit/gui/test_qt_settings.cpp
@@ -13,6 +14,7 @@ target_link_libraries(test_unit
     PRIVATE
         GTest::gtest
         GTest::gtest_main
+        orogena_core
         orogena_database
         orogena_utils
         orogena_gui

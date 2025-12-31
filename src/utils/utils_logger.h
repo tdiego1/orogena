@@ -62,6 +62,19 @@ class Logger
     static void Initialize();
 
     /**
+     * @brief Shuts down the logger safely.
+     * @details Should be called before static destruction to prevent crashes
+     * when other components try to log during their destruction.
+     */
+    static void Shutdown();
+
+    /**
+     * @brief Checks if the logger is initialized and safe to use.
+     * @return true if logging calls are safe, false otherwise.
+     */
+    static bool IsInitialized();
+
+    /**
      * @brief Sets the global log level.
      * @param level Minimum log level to output.
      */
@@ -171,7 +184,7 @@ class Logger
     // Private Members
     //=============================================================================================
 
-    static std::shared_ptr<spdlog::logger> s_Logger;           ///< Shared logger instance
+    static std::shared_ptr<spdlog::logger>      s_Logger;      ///< Shared logger instance
     static std::shared_ptr<spdlog::sinks::sink> s_ConsoleSink; ///< Console sink
     static std::shared_ptr<spdlog::sinks::sink> s_FileSink;    ///< File sink
 };

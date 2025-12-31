@@ -48,7 +48,7 @@ namespace Orogena::Database
 struct PooledConnection
 {
     std::string connectionName; ///< Unique connection name.
-    bool inUse{false};          ///< Connection usage status.
+    bool        inUse{false};   ///< Connection usage status.
 };
 
 /**
@@ -70,7 +70,7 @@ class PooledConnectionGuard
 
   private:
     DatabaseManager& m_Manager;
-    std::string m_ConnectionName;
+    std::string      m_ConnectionName;
 };
 
 /**
@@ -106,19 +106,19 @@ class DatabaseManager : public IDatabase
     // IDatabase Implementation
     //=============================================================================================
 
-    bool Connect(const std::string& path) override;
-    void Disconnect() override;
-    bool IsConnected() const override;
+    bool                         Connect(const std::string& path) override;
+    void                         Disconnect() override;
+    bool                         IsConnected() const override;
     std::optional<DatabaseError> GetLastError() const override;
 
     bool BeginTransaction() override;
     bool Commit() override;
     bool Rollback() override;
 
-    bool Execute(const std::string& sql) override;
+    bool                       Execute(const std::string& sql) override;
     std::optional<QueryResult> Query(const std::string& sql) override;
     bool ExecutePrepared(const std::string& sql, const std::vector<std::string>& params) override;
-    std::optional<QueryResult> QueryPrepared(const std::string& sql,
+    std::optional<QueryResult> QueryPrepared(const std::string&              sql,
                                              const std::vector<std::string>& params) override;
 
     //=============================================================================================
@@ -241,17 +241,17 @@ class DatabaseManager : public IDatabase
     // Private Members
     //=============================================================================================
 
-    std::string m_DatabasePath;                     ///< Path to database file.
+    std::string                   m_DatabasePath;   ///< Path to database file.
     std::vector<PooledConnection> m_ConnectionPool; ///< Connection pool.
-    mutable std::mutex m_PoolMutex;                 ///< Mutex for connection pool.
-    std::condition_variable m_PoolCondition;        ///< Condition variable for pool.
-    int32_t m_PoolSize;                             ///< Number of connections in pool.
-    mutable std::mutex m_ErrorMutex;                ///< Mutex for error access;
-    std::optional<DatabaseError> m_LastError;       ///< Last error information.
-    bool m_Connected;                               ///< Connection status.
+    mutable std::mutex            m_PoolMutex;      ///< Mutex for connection pool.
+    std::condition_variable       m_PoolCondition;  ///< Condition variable for pool.
+    int32_t                       m_PoolSize;       ///< Number of connections in pool.
+    mutable std::mutex            m_ErrorMutex;     ///< Mutex for error access;
+    std::optional<DatabaseError>  m_LastError;      ///< Last error information.
+    bool                          m_Connected;      ///< Connection status.
 
-    std::string m_TransactionConnection;   ///< Connection used for current transaction.
-    mutable std::mutex m_TransactionMutex; ///< Mutex for transaction connection.
+    std::string        m_TransactionConnection; ///< Connection used for current transaction.
+    mutable std::mutex m_TransactionMutex;      ///< Mutex for transaction connection.
 
     static std::unique_ptr<DatabaseManager> s_Instance; ///< Singleton instance.
     static std::mutex s_InstanceMutex;                  ///< Mutex for singleton instance creation.

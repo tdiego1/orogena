@@ -20,10 +20,12 @@
 
 #pragma once
 
-#include <optional>
 #include <string>
 #include <vector>
+
 #include "utils/utils_types.h"
+
+#include <optional>
 
 namespace Orogena::Core
 {
@@ -42,7 +44,7 @@ namespace Orogena::Core
  */
 class ISettings
 {
-public:
+  public:
     virtual ~ISettings() = default;
 
     // String settings
@@ -50,19 +52,19 @@ public:
     virtual std::optional<std::string> GetString(const std::string& key) const = 0;
 
     // Integer settings
-    virtual void SetInt(const std::string& key, int32_t value) = 0;
+    virtual void                   SetInt(const std::string& key, int32_t value) = 0;
     virtual std::optional<int32_t> GetInt(const std::string& key) const = 0;
 
     // 64-bit integer settings
-    virtual void SetInt64(const std::string& key, int64_t value) = 0;
+    virtual void                   SetInt64(const std::string& key, int64_t value) = 0;
     virtual std::optional<int64_t> GetInt64(const std::string& key) const = 0;
 
     // Floating-point settings
-    virtual void SetFloat(const std::string& key, float64_t value) = 0;
+    virtual void                     SetFloat(const std::string& key, float64_t value) = 0;
     virtual std::optional<float64_t> GetFloat(const std::string& key) const = 0;
 
     // Boolean settings
-    virtual void SetBool(const std::string& key, bool value) = 0;
+    virtual void                SetBool(const std::string& key, bool value) = 0;
     virtual std::optional<bool> GetBool(const std::string& key) const = 0;
 
     // String list settings (e.g., recent projects)
@@ -78,6 +80,15 @@ public:
     // Group management (for hierarchical settings)
     virtual void BeginGroup(const std::string& prefix) = 0;
     virtual void EndGroup() = 0;
+
+    // Standard paths (cross-platform)
+
+    /**
+     * @brief Get the default directory for user projects
+     * @return Path to default projects directory (e.g., ~/Documents/Orogena)
+     * @details Creates the directory if it doesn't exist
+     */
+    virtual std::string GetDefaultProjectsDirectory() const = 0;
 };
 
 } // namespace Orogena::Core
