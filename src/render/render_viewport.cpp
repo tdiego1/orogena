@@ -11,14 +11,15 @@
 
 #include "render_viewport.h"
 
-#include <format>
-
+#include <QMouseEvent>
 #include <QSurfaceFormat>
+#include <QWheelEvent>
 
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
 
 #include <GL/gl.h>
+#include <format>
 
 namespace Orogena::Render
 {
@@ -31,12 +32,15 @@ namespace Orogena::Render
 // Constructors/Destructor
 //=================================================================================================
 
-Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent)
+Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent), m_Camera(std::make_unique<Camera>())
 {
     // Use the default format set in main() - don't override it here
     // This prevents format mismatches between QApplication and QOpenGLWidget
 
     Log::Debug("Viewport: Using application default OpenGL format");
+
+    // Enable mouse tracking for hover events
+    setMouseTracking(true);
 
 #ifdef Q_OS_LINUX
     const char* qpa_platform = qgetenv("QT_QPA_PLATFORM");
@@ -101,13 +105,12 @@ void Viewport::initializeGL()
 
     // Get actual context format
     QSurfaceFormat actual_format = context()->format();
-    int32_t major_version = actual_format.majorVersion();
-    int32_t minor_version = actual_format.minorVersion();
+    int32_t        major_version = actual_format.majorVersion();
+    int32_t        minor_version = actual_format.minorVersion();
 
     // Get OpenGL info - safely convert GLubyte* to std::string
-    auto glStringToStd = [](const GLubyte* str) -> std::string {
-        return str ? reinterpret_cast<const char*>(str) : "Unknown";
-    };
+    auto glStringToStd = [](const GLubyte* str) -> std::string
+    { return str ? reinterpret_cast<const char*>(str) : "Unknown"; };
 
     std::string vendor_str = glStringToStd(glGetString(GL_VENDOR));
     std::string renderer_str = glStringToStd(glGetString(GL_RENDERER));
@@ -143,6 +146,14 @@ void Viewport::initializeGL()
 
     CheckGLError("OpenGL state setup");
 
+    // Initialize grid renderer
+    m_Grid = std::make_unique<Grid>(static_cast<QOpenGLFunctions_4_5_Core*>(this));
+    if (!m_Grid->Initialize())
+    {
+        Log::Error("Viewport: Failed to initialize grid renderer");
+        m_Grid.reset();
+    }
+
     // Start FPS timer
     m_FrameStartTime = std::chrono::steady_clock::now();
     m_LastFPSUpdateMs = 0;
@@ -160,6 +171,12 @@ void Viewport::paintGL()
     // Check for errors
     CheckGLError("paintGL clear");
 
+    // Render grid if available
+    if (m_Grid && m_Grid->IsInitialized())
+    {
+        m_Grid->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+    }
+
     // Update FPS counter
     UpdateFPS();
 
@@ -171,6 +188,9 @@ void Viewport::resizeGL(int32_t widthPx, int32_t heightPx)
 {
     // Update viewport
     glViewport(0, 0, widthPx, heightPx);
+
+    // Update camera projection matrix
+    m_Camera->SetViewportSize(widthPx, heightPx);
 
     Log::Debug("Viewport: Resized to {}x{}", widthPx, heightPx);
 
@@ -221,8 +241,8 @@ void Viewport::UpdateFPS()
 {
     m_FrameCount++;
 
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_FrameStartTime);
+    auto    now = std::chrono::steady_clock::now();
+    auto    elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_FrameStartTime);
     int64_t current_time_ms = elapsed.count();
     int64_t delta_time = current_time_ms - m_LastFPSUpdateMs;
 
@@ -236,6 +256,61 @@ void Viewport::UpdateFPS()
         m_FrameCount = 0;
         m_LastFPSUpdateMs = current_time_ms;
     }
+}
+
+void Viewport::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        m_LeftMousePressed = true;
+        m_LastMousePos = event->pos();
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_RightMousePressed = true;
+        m_LastMousePos = event->pos();
+    }
+}
+
+void Viewport::mouseMoveEvent(QMouseEvent* event)
+{
+    QPoint current_pos = event->pos();
+    QPoint delta = current_pos - m_LastMousePos;
+
+    if (m_LeftMousePressed)
+    {
+        // Left mouse button: Rotate camera
+        m_Camera->Rotate(static_cast<float32_t>(delta.x()), static_cast<float32_t>(delta.y()));
+    }
+    else if (m_RightMousePressed)
+    {
+        // Right mouse button: Pan camera
+        m_Camera->Pan(-static_cast<float32_t>(delta.x()), static_cast<float32_t>(delta.y()));
+    }
+
+    m_LastMousePos = current_pos;
+}
+
+void Viewport::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        m_LeftMousePressed = false;
+    }
+    else if (event->button() == Qt::RightButton)
+    {
+        m_RightMousePressed = false;
+    }
+}
+
+void Viewport::wheelEvent(QWheelEvent* event)
+{
+    // Zoom camera with mouse wheel
+    float32_t delta =
+        static_cast<float32_t>(event->angleDelta().y()) / 120.0F; // Normalize wheel delta
+    m_Camera->Zoom(-delta); // Negative for intuitive zoom direction
+
+    event->accept();
 }
 
 } // namespace Orogena::Render
