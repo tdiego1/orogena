@@ -21,11 +21,18 @@
 
 #include <QLabel>
 #include <QMainWindow>
+#include <QMenu>
 
+#include <memory>
+
+#include "core/core_project.h"
+#include "database/database_manager.h"
+#include "gui/gui_qt_settings.h"
 #include "render/render_viewport.h"
 
 // Forward declarations
 class QDockWidget;
+class QAction;
 
 namespace Orogena::GUI
 {
@@ -53,6 +60,17 @@ class MainWindow : public QMainWindow
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+  protected:
+    //=============================================================================================
+    // Protected Functions (Qt overrides)
+    //=============================================================================================
+
+    /**
+     * @brief Handle window close event
+     * @param event Close event to handle
+     */
+    void closeEvent(QCloseEvent* event) override;
+
   private slots:
     //=============================================================================================
     // Private Slots
@@ -62,6 +80,32 @@ class MainWindow : public QMainWindow
      * @brief Show the About dialog.
      */
     void ShowAboutDialog();
+
+    /**
+     * @brief Create a new project.
+     */
+    void OnNewProject();
+
+    /**
+     * @brief Open an existing project.
+     */
+    void OnOpenProject();
+
+    /**
+     * @brief Open a recent project.
+     * @param path Path to the project file
+     */
+    void OnOpenRecentProject(const QString& path);
+
+    /**
+     * @brief Save the current project.
+     */
+    void OnSaveProject();
+
+    /**
+     * @brief Save the current project to a new location.
+     */
+    void OnSaveProjectAs();
 
   private:
     //=============================================================================================
@@ -102,6 +146,32 @@ class MainWindow : public QMainWindow
      */
     void SetupViewport();
 
+    /**
+     * @brief Setup the project manager and callbacks.
+     */
+    void SetupProjectManager();
+
+    /**
+     * @brief Update the recent projects submenu.
+     */
+    void UpdateRecentProjectsMenu();
+
+    /**
+     * @brief Update window title based on project state.
+     */
+    void UpdateWindowTitle();
+
+    /**
+     * @brief Update UI state based on whether a project is open.
+     */
+    void UpdateProjectUI();
+
+    /**
+     * @brief Check for unsaved changes and prompt user.
+     * @return true if safe to proceed (saved or user chose to discard)
+     */
+    bool CheckUnsavedChanges();
+
     //=============================================================================================
     // Private Member Variables
     //=============================================================================================
@@ -112,6 +182,15 @@ class MainWindow : public QMainWindow
     QLabel* m_StatusLabel; ///< Status bar label for FPS display.
 
     Render::Viewport* m_Viewport{nullptr}; ///< Central OpenGL rendering viewport.
+
+    // Project management
+    std::unique_ptr<QtSettings> m_Settings;             ///< Application settings.
+    std::unique_ptr<Core::ProjectManager> m_ProjectManager; ///< Project lifecycle manager.
+
+    // File menu actions (need references for enable/disable)
+    QAction* m_ActionSave{nullptr};   ///< Save action.
+    QAction* m_ActionSaveAs{nullptr}; ///< Save As action.
+    QMenu* m_RecentProjectsMenu{nullptr}; ///< Recent projects submenu.
 };
 
 } // namespace Orogena::GUI
