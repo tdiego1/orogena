@@ -7,7 +7,6 @@ add_library(orogena_core
 
 target_link_libraries(orogena_core
     PUBLIC
-        Qt6::Core
         spdlog::spdlog
         nlohmann_json::nlohmann_json
 )
