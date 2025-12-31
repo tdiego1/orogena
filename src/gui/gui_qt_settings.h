@@ -91,6 +91,9 @@ class QtSettings : public Core::ISettings
     void BeginGroup(const std::string& prefix) override;
     void EndGroup() override;
 
+    // Standard paths
+    std::string GetDefaultProjectsDirectory() const override;
+
   private:
     QSettings m_Settings;
 };

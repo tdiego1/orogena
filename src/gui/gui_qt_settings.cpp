@@ -11,6 +11,8 @@
 
 #include "gui_qt_settings.h"
 
+#include <QDir>
+#include <QStandardPaths>
 #include <QStringList>
 
 namespace Orogena::GUI
@@ -212,6 +214,26 @@ void QtSettings::BeginGroup(const std::string& prefix)
 void QtSettings::EndGroup()
 {
     m_Settings.endGroup();
+}
+
+//=============================================================================================
+// Standard Paths
+//=============================================================================================
+
+std::string QtSettings::GetDefaultProjectsDirectory() const
+{
+    // Use ~/Documents/Orogena as the default projects directory
+    QString documents_path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString projects_path = documents_path + "/Orogena";
+
+    // Create directory if it doesn't exist
+    QDir dir(projects_path);
+    if (!dir.exists())
+    {
+        dir.mkpath(".");
+    }
+
+    return projects_path.toStdString();
 }
 
 } // namespace Orogena::GUI
