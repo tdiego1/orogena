@@ -402,17 +402,19 @@ void MainWindow::ShowAboutDialog()
 {
     QString about_text =
         tr("<h2>Orogena</h2>"
-           "<p><b>Multi-Scale Terrain Generation through Tectonic Simulation</b></p>"
-           "<p>Version 1.0.0 (Phase 1 - Foundation)</p>"
+           "<p><b>Complete Worldbuilding Suite</b></p>"
+           "<p>Version 1.0.0 (Phase 0)</p>"
            "<p>Copyright (C) 2025 Diego Torres. All rights reserved.</p>"
            "<p>Licensed under the GNU General Public License v3.0</p>"
            "<hr>"
-           "<p>Orogena is a cross-platform desktop application for generating realistic terrain "
-           "through geologically accurate plate tectonic simulation.</p>"
+           "<p>Orogena is a cross-platform desktop application for complete "
+           "worldbuilding following Artifexian's methodology. It targets fantasy "
+           "authors, game developers, and world-builders who need geologically and "
+           "climatologically plausible worlds from stellar parameters down to local detail.</p>"
            "<p><b>Technology Stack:</b><br>"
            "- C++20<br>"
            "- Qt 6.8+<br>"
-           "- OpenGL 4.5+<br>"
+           "- OpenGL 4.6+<br>"
            "- SQLite</p>"
            "<p>For more information, visit the project documentation.</p>");
 
