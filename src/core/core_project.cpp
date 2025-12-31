@@ -245,13 +245,7 @@ bool ProjectManager::CreateProject(const std::filesystem::path& directoryPath,
 
     try
     {
-        // Create directory if needed
-        if (!std::filesystem::exists(directoryPath))
-        {
-            std::filesystem::create_directories(directoryPath);
-        }
-
-        // Build file paths
+        // Build safe filename from project name
         std::string safe_name = projectName;
         // Replace spaces with underscores for filename
         for (char& c : safe_name)
@@ -262,9 +256,17 @@ bool ProjectManager::CreateProject(const std::filesystem::path& directoryPath,
             }
         }
 
-        std::filesystem::path project_path = directoryPath / (safe_name + c_ProjectFileExtension);
+        // Create project subdirectory: directoryPath/ProjectName/
+        std::filesystem::path project_dir = directoryPath / safe_name;
+        if (!std::filesystem::exists(project_dir))
+        {
+            std::filesystem::create_directories(project_dir);
+        }
+
+        // Build file paths within the project directory
+        std::filesystem::path project_path = project_dir / (safe_name + c_ProjectFileExtension);
         std::string           database_filename = safe_name + c_ProjectDatabaseExtension;
-        std::filesystem::path database_path = directoryPath / database_filename;
+        std::filesystem::path database_path = project_dir / database_filename;
 
         // Check if files already exist
         if (std::filesystem::exists(project_path))
