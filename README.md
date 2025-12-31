@@ -2,7 +2,7 @@
     <picture>
         <source srcset="docs/assets/orogena_logo_dark.png" media="(prefers-color-scheme: dark)">
         <source srcset="docs/assets/orogena_logo.png" media="(prefers-color-scheme: light)">
-        <img src="docs/assets/orogena_logo.png" alt="Orogena Logo" width="250">
+        <img src="docs/assets/orogena_logo.png" alt="Orogena Logo" width="200">
     </picture>
 </p>
 
