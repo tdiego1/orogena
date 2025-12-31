@@ -32,13 +32,13 @@ namespace Orogena::Database
 //=================================================================================================
 
 std::unique_ptr<DatabaseManager> DatabaseManager::s_Instance = nullptr;
-std::mutex DatabaseManager::s_InstanceMutex;
+std::mutex                       DatabaseManager::s_InstanceMutex;
 
 //=================================================================================================
 // PooledConnectionGuard Implementation
 //=================================================================================================
 
-PooledConnectionGuard::PooledConnectionGuard(DatabaseManager& manager,
+PooledConnectionGuard::PooledConnectionGuard(DatabaseManager&   manager,
                                              const std::string& connectionName)
     : m_Manager(manager), m_ConnectionName(connectionName)
 {
@@ -275,7 +275,7 @@ bool DatabaseManager::Execute(const std::string& sql)
 
     // Check if we have an active transaction
     std::string connectionName;
-    bool useTransaction = false;
+    bool        useTransaction = false;
     {
         std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
         if (!m_TransactionConnection.empty())
@@ -289,7 +289,7 @@ bool DatabaseManager::Execute(const std::string& sql)
     {
         // Use transaction connection directly (no guard needed, transaction owns it)
         QSqlDatabase db = GetDatabase(connectionName);
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
 
         if (!query.exec(QString::fromStdString(sql)))
         {
@@ -313,7 +313,7 @@ bool DatabaseManager::Execute(const std::string& sql)
         }
 
         QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
 
         if (!query.exec(QString::fromStdString(sql)))
         {
@@ -338,7 +338,7 @@ std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
 
     // Check if we have an active transaction
     std::string connectionName;
-    bool useTransaction = false;
+    bool        useTransaction = false;
     {
         std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
         if (!m_TransactionConnection.empty())
@@ -352,7 +352,7 @@ std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
     {
         // Use transaction connection directly
         QSqlDatabase db = GetDatabase(connectionName);
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
 
         if (!query.exec(QString::fromStdString(sql)))
         {
@@ -377,7 +377,7 @@ std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
         }
 
         QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
 
         if (!query.exec(QString::fromStdString(sql)))
         {
@@ -393,7 +393,7 @@ std::optional<QueryResult> DatabaseManager::Query(const std::string& sql)
     }
 }
 
-bool DatabaseManager::ExecutePrepared(const std::string& sql,
+bool DatabaseManager::ExecutePrepared(const std::string&              sql,
                                       const std::vector<std::string>& params)
 {
     if (!m_Connected)
@@ -404,7 +404,7 @@ bool DatabaseManager::ExecutePrepared(const std::string& sql,
 
     // Check if we have an active transaction
     std::string connectionName;
-    bool useTransaction = false;
+    bool        useTransaction = false;
     {
         std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
         if (!m_TransactionConnection.empty())
@@ -417,7 +417,7 @@ bool DatabaseManager::ExecutePrepared(const std::string& sql,
     if (useTransaction)
     {
         QSqlDatabase db = GetDatabase(connectionName);
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
         query.prepare(QString::fromStdString(sql));
 
         for (const auto& param : params)
@@ -446,7 +446,7 @@ bool DatabaseManager::ExecutePrepared(const std::string& sql,
         }
 
         QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
         query.prepare(QString::fromStdString(sql));
 
         for (const auto& param : params)
@@ -467,7 +467,7 @@ bool DatabaseManager::ExecutePrepared(const std::string& sql,
     }
 }
 
-std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql,
+std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string&              sql,
                                                           const std::vector<std::string>& params)
 {
     if (!m_Connected)
@@ -478,7 +478,7 @@ std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql
 
     // Check if we have an active transaction
     std::string connectionName;
-    bool useTransaction = false;
+    bool        useTransaction = false;
     {
         std::lock_guard<std::mutex> txnLock(m_TransactionMutex);
         if (!m_TransactionConnection.empty())
@@ -491,7 +491,7 @@ std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql
     if (useTransaction)
     {
         QSqlDatabase db = GetDatabase(connectionName);
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
         query.prepare(QString::fromStdString(sql));
 
         for (const auto& param : params)
@@ -521,7 +521,7 @@ std::optional<QueryResult> DatabaseManager::QueryPrepared(const std::string& sql
         }
 
         QSqlDatabase db = GetDatabase(guard.GetConnectionName());
-        QSqlQuery query(db);
+        QSqlQuery    query(db);
         query.prepare(QString::fromStdString(sql));
 
         for (const auto& param : params)
@@ -557,7 +557,7 @@ bool DatabaseManager::InitializeSchema()
     }
 
     PooledConnectionGuard guard(*this, connectionName);
-    QSqlDatabase db = GetDatabase(connectionName);
+    QSqlDatabase          db = GetDatabase(connectionName);
 
     // Check if schema already exists
     QSqlQuery query(db);
@@ -884,7 +884,7 @@ void DatabaseManager::StoreLastError(const std::string& connectionName)
 void DatabaseManager::StoreQueryError(QSqlQuery& query)
 {
     std::lock_guard<std::mutex> lock(m_ErrorMutex);
-    QSqlError error = query.lastError();
+    QSqlError                   error = query.lastError();
     m_LastError = DatabaseError{.message = error.text().toStdString(),
                                 .sqlState = error.nativeErrorCode().toStdString(),
                                 .nativeErrorCode = static_cast<int32_t>(error.type())};

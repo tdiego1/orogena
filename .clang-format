@@ -13,7 +13,7 @@ NamespaceIndentation: None
 SpaceAfterCStyleCast: false
 SpaceBeforeParens: ControlStatements
 AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveDeclarations: true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackParameters: false

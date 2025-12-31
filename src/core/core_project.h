@@ -49,7 +49,7 @@ class ISettings;
 constexpr const char* c_ProjectFileExtension = ".oro";
 constexpr const char* c_ProjectDatabaseExtension = ".db";
 constexpr const char* c_ProjectFormatVersion = "1.0";
-constexpr int32_t c_MaxRecentProjects = 10;
+constexpr int32_t     c_MaxRecentProjects = 10;
 
 //=================================================================================================
 // Project Info Structure
@@ -133,10 +133,10 @@ enum class ProjectState
  */
 struct ProjectCallbacks
 {
-    std::function<void(const std::string& path)> onProjectOpened;
-    std::function<void()> onProjectClosed;
-    std::function<void()> onProjectModified;
-    std::function<void(const std::string& path)> onProjectSaved;
+    std::function<void(const std::string& path)>  onProjectOpened;
+    std::function<void()>                         onProjectClosed;
+    std::function<void()>                         onProjectModified;
+    std::function<void(const std::string& path)>  onProjectSaved;
     std::function<void(const std::string& error)> onError;
 };
 
@@ -173,7 +173,7 @@ class IProjectManager
      * - <projectName>.db (SQLite database)
      */
     virtual bool CreateProject(const std::filesystem::path& directoryPath,
-                               const std::string& projectName) = 0;
+                               const std::string&           projectName) = 0;
 
     /**
      * @brief Open an existing project
@@ -318,23 +318,23 @@ class ProjectManager : public IProjectManager
     //=============================================================================================
 
     bool CreateProject(const std::filesystem::path& directoryPath,
-                       const std::string& projectName) override;
+                       const std::string&           projectName) override;
     bool OpenProject(const std::filesystem::path& projectFilePath) override;
     bool SaveProject() override;
     bool SaveProjectAs(const std::filesystem::path& newPath) override;
     bool CloseProject(bool force = false) override;
 
-    bool IsProjectOpen() const override;
-    bool HasUnsavedChanges() const override;
-    ProjectState GetState() const override;
-    std::optional<ProjectInfo> GetProjectInfo() const override;
+    bool                                 IsProjectOpen() const override;
+    bool                                 HasUnsavedChanges() const override;
+    ProjectState                         GetState() const override;
+    std::optional<ProjectInfo>           GetProjectInfo() const override;
     std::optional<std::filesystem::path> GetProjectPath() const override;
     std::optional<std::filesystem::path> GetDatabasePath() const override;
 
     void MarkModified() override;
 
     std::vector<std::filesystem::path> GetRecentProjects() const override;
-    void ClearRecentProjects() override;
+    void                               ClearRecentProjects() override;
 
     void SetCallbacks(const ProjectCallbacks& callbacks) override;
 
@@ -372,11 +372,11 @@ class ProjectManager : public IProjectManager
     // Private Members
     //=============================================================================================
 
-    ISettings& m_Settings;           ///< Settings for recent projects
+    ISettings&           m_Settings; ///< Settings for recent projects
     Database::IDatabase* m_Database; ///< Database interface (may be null)
 
-    ProjectState m_State{ProjectState::CLOSED};         ///< Current state
-    std::optional<ProjectInfo> m_ProjectInfo;           ///< Current project metadata
+    ProjectState                         m_State{ProjectState::CLOSED}; ///< Current state
+    std::optional<ProjectInfo>           m_ProjectInfo; ///< Current project metadata
     std::optional<std::filesystem::path> m_ProjectPath; ///< Path to .oro file
 
     ProjectCallbacks m_Callbacks; ///< Event callbacks

@@ -161,11 +161,11 @@ class MockSettings : public ISettings
     }
 
   private:
-    std::unordered_map<std::string, std::string> m_StringValues;
-    std::unordered_map<std::string, int32_t> m_IntValues;
-    std::unordered_map<std::string, int64_t> m_Int64Values;
-    std::unordered_map<std::string, float64_t> m_FloatValues;
-    std::unordered_map<std::string, bool> m_BoolValues;
+    std::unordered_map<std::string, std::string>              m_StringValues;
+    std::unordered_map<std::string, int32_t>                  m_IntValues;
+    std::unordered_map<std::string, int64_t>                  m_Int64Values;
+    std::unordered_map<std::string, float64_t>                m_FloatValues;
+    std::unordered_map<std::string, bool>                     m_BoolValues;
     std::unordered_map<std::string, std::vector<std::string>> m_StringListValues;
 };
 
@@ -255,7 +255,7 @@ TEST_F(ProjectSerializationTest, SerializeProducesValidJson)
 TEST_F(ProjectSerializationTest, DeserializeRecreatesProjectInfo)
 {
     std::string json = SerializeProjectInfo(m_Info);
-    auto result = DeserializeProjectInfo(json);
+    auto        result = DeserializeProjectInfo(json);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(m_Info.version, result->version);
@@ -270,7 +270,7 @@ TEST_F(ProjectSerializationTest, DeserializeRecreatesProjectInfo)
 TEST_F(ProjectSerializationTest, DeserializePreservesSettings)
 {
     std::string json = SerializeProjectInfo(m_Info);
-    auto result = DeserializeProjectInfo(json);
+    auto        result = DeserializeProjectInfo(json);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(m_Info.settings.size(), result->settings.size());
@@ -288,7 +288,7 @@ TEST_F(ProjectSerializationTest, DeserializeReturnsNulloptForMissingRequiredFiel
 {
     // JSON missing required "name" field
     std::string json = R"({"version": "1.0", "database": "test.db"})";
-    auto result = DeserializeProjectInfo(json);
+    auto        result = DeserializeProjectInfo(json);
     EXPECT_FALSE(result.has_value());
 }
 
@@ -296,7 +296,7 @@ TEST_F(ProjectSerializationTest, DeserializeHandlesOptionalFields)
 {
     // Minimal valid JSON with only required fields
     std::string json = R"({"version": "1.0", "name": "Minimal", "database": "min.db"})";
-    auto result = DeserializeProjectInfo(json);
+    auto        result = DeserializeProjectInfo(json);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ("Minimal", result->name);
@@ -328,7 +328,7 @@ class ProjectFileTest : public ::testing::Test
     }
 
     std::filesystem::path m_TempDir;
-    ProjectInfo m_Info;
+    ProjectInfo           m_Info;
 };
 
 TEST_F(ProjectFileTest, SaveAndLoadProjectFile)
@@ -349,7 +349,7 @@ TEST_F(ProjectFileTest, SaveAndLoadProjectFile)
 TEST_F(ProjectFileTest, LoadNonexistentFileReturnsNullopt)
 {
     std::filesystem::path nonexistent = m_TempDir / "nonexistent.oro";
-    auto result = LoadProjectInfoFromFile(nonexistent);
+    auto                  result = LoadProjectInfoFromFile(nonexistent);
     EXPECT_FALSE(result.has_value());
 }
 
@@ -361,7 +361,7 @@ TEST_F(ProjectFileTest, SaveCreatesValidJsonFile)
 
     // Read file content manually
     std::ifstream file(project_path);
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string   content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
     EXPECT_NE(content.find("\"name\""), std::string::npos);
     EXPECT_NE(content.find("\"File Test Project\""), std::string::npos);
@@ -390,8 +390,8 @@ class ProjectManagerTest : public ::testing::Test
         std::filesystem::remove_all(m_TempDir);
     }
 
-    std::filesystem::path m_TempDir;
-    std::unique_ptr<MockSettings> m_Settings;
+    std::filesystem::path           m_TempDir;
+    std::unique_ptr<MockSettings>   m_Settings;
     std::unique_ptr<ProjectManager> m_Manager;
 };
 
@@ -488,7 +488,7 @@ TEST_F(ProjectManagerTest, SaveProjectUpdatesModifiedTime)
 {
     ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "SaveTest"));
 
-    auto initial_info = m_Manager->GetProjectInfo();
+    auto    initial_info = m_Manager->GetProjectInfo();
     int64_t initial_modified = initial_info->modifiedTimestamp;
 
     // Wait a bit and save
@@ -612,7 +612,7 @@ TEST_F(ProjectManagerTest, RecentProjectsMostRecentFirst)
 
 TEST_F(ProjectManagerTest, CallbacksInvokedOnCreate)
 {
-    bool opened_called = false;
+    bool        opened_called = false;
     std::string opened_path;
 
     ProjectCallbacks callbacks;
@@ -659,7 +659,7 @@ TEST_F(ProjectManagerTest, CallbacksInvokedOnModified)
 
 TEST_F(ProjectManagerTest, CallbacksInvokedOnSave)
 {
-    bool saved_called = false;
+    bool        saved_called = false;
     std::string saved_path;
 
     ProjectCallbacks callbacks;
@@ -679,7 +679,7 @@ TEST_F(ProjectManagerTest, CallbacksInvokedOnSave)
 
 TEST_F(ProjectManagerTest, ErrorCallbackInvokedOnFailure)
 {
-    bool error_called = false;
+    bool        error_called = false;
     std::string error_message;
 
     ProjectCallbacks callbacks;

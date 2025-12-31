@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QSettings>
+
 #include "core/core_settings_interface.h"
 
 namespace Orogena::GUI
@@ -43,7 +44,7 @@ namespace Orogena::GUI
  */
 class QtSettings : public Core::ISettings
 {
-public:
+  public:
     /**
      * @brief Constructs settings with default organization and application name
      */
@@ -57,23 +58,23 @@ public:
     ~QtSettings() override = default;
 
     // String settings
-    void SetString(const std::string& key, const std::string& value) override;
+    void                       SetString(const std::string& key, const std::string& value) override;
     std::optional<std::string> GetString(const std::string& key) const override;
 
     // Integer settings
-    void SetInt(const std::string& key, int32_t value) override;
+    void                   SetInt(const std::string& key, int32_t value) override;
     std::optional<int32_t> GetInt(const std::string& key) const override;
 
     // 64-bit integer settings
-    void SetInt64(const std::string& key, int64_t value) override;
+    void                   SetInt64(const std::string& key, int64_t value) override;
     std::optional<int64_t> GetInt64(const std::string& key) const override;
 
     // Floating-point settings
-    void SetFloat(const std::string& key, float64_t value) override;
+    void                     SetFloat(const std::string& key, float64_t value) override;
     std::optional<float64_t> GetFloat(const std::string& key) const override;
 
     // Boolean settings
-    void SetBool(const std::string& key, bool value) override;
+    void                SetBool(const std::string& key, bool value) override;
     std::optional<bool> GetBool(const std::string& key) const override;
 
     // String list settings
@@ -90,7 +91,7 @@ public:
     void BeginGroup(const std::string& prefix) override;
     void EndGroup() override;
 
-private:
+  private:
     QSettings m_Settings;
 };
 

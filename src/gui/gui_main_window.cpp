@@ -257,9 +257,9 @@ void MainWindow::SetupViewport()
     connect(m_Viewport, &Render::Viewport::OpenGLError, this,
             [this](const std::string& error)
             {
-                QMessageBox::critical(this, "OpenGL Error",
-                                      QString("OpenGL error occurred:\n%1")
-                                          .arg(QString::fromStdString(error)));
+                QMessageBox::critical(
+                    this, "OpenGL Error",
+                    QString("OpenGL error occurred:\n%1").arg(QString::fromStdString(error)));
             });
 }
 
@@ -267,8 +267,8 @@ void MainWindow::SetupProjectManager()
 {
     // Create settings and project manager with database support
     m_Settings = std::make_unique<QtSettings>();
-    m_ProjectManager = std::make_unique<Core::ProjectManager>(
-        *m_Settings, &Database::DatabaseManager::Instance());
+    m_ProjectManager =
+        std::make_unique<Core::ProjectManager>(*m_Settings, &Database::DatabaseManager::Instance());
 
     // Setup callbacks
     Core::ProjectCallbacks callbacks;
@@ -288,10 +288,7 @@ void MainWindow::SetupProjectManager()
         statusBar()->showMessage(tr("Project closed"), 3000);
     };
 
-    callbacks.onProjectModified = [this]()
-    {
-        UpdateWindowTitle();
-    };
+    callbacks.onProjectModified = [this]() { UpdateWindowTitle(); };
 
     callbacks.onProjectSaved = [this](const std::string& path)
     {
@@ -300,9 +297,7 @@ void MainWindow::SetupProjectManager()
     };
 
     callbacks.onError = [this](const std::string& error)
-    {
-        QMessageBox::warning(this, tr("Project Error"), QString::fromStdString(error));
-    };
+    { QMessageBox::warning(this, tr("Project Error"), QString::fromStdString(error)); };
 
     m_ProjectManager->SetCallbacks(callbacks);
 }
@@ -378,7 +373,7 @@ bool MainWindow::CheckUnsavedChanges()
         return true;
     }
 
-    auto info = m_ProjectManager->GetProjectInfo();
+    auto    info = m_ProjectManager->GetProjectInfo();
     QString project_name = info ? QString::fromStdString(info->name) : tr("Untitled");
 
     QMessageBox::StandardButton result = QMessageBox::question(
@@ -389,13 +384,13 @@ bool MainWindow::CheckUnsavedChanges()
 
     switch (result)
     {
-    case QMessageBox::Save:
-        return m_ProjectManager->SaveProject();
-    case QMessageBox::Discard:
-        return m_ProjectManager->CloseProject(true);
-    case QMessageBox::Cancel:
-    default:
-        return false;
+        case QMessageBox::Save:
+            return m_ProjectManager->SaveProject();
+        case QMessageBox::Discard:
+            return m_ProjectManager->CloseProject(true);
+        case QMessageBox::Cancel:
+        default:
+            return false;
     }
 }
 
@@ -440,7 +435,7 @@ void MainWindow::OnNewProject()
     }
 
     // Get project name
-    bool ok;
+    bool    ok;
     QString name = QInputDialog::getText(this, tr("New Project"), tr("Project name:"),
                                          QLineEdit::Normal, tr("My World"), &ok);
 
@@ -484,9 +479,8 @@ void MainWindow::OnOpenProject()
     }
 
     // Get file path
-    QString file_path = QFileDialog::getOpenFileName(
-        this, tr("Open Project"), QDir::homePath(),
-        tr("Orogena Projects (*.oro);;All Files (*)"));
+    QString file_path = QFileDialog::getOpenFileName(this, tr("Open Project"), QDir::homePath(),
+                                                     tr("Orogena Projects (*.oro);;All Files (*)"));
 
     if (file_path.isEmpty())
     {
@@ -555,7 +549,7 @@ void MainWindow::OnSaveProjectAs()
         return;
     }
 
-    auto info = m_ProjectManager->GetProjectInfo();
+    auto    info = m_ProjectManager->GetProjectInfo();
     QString default_name = info ? QString::fromStdString(info->name) + ".oro" : "project.oro";
 
     QString file_path = QFileDialog::getSaveFileName(this, tr("Save Project As"), default_name,

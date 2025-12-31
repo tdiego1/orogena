@@ -40,9 +40,9 @@ namespace Orogena::Database
  */
 struct QueryResult
 {
-    std::vector<std::vector<std::string>> rows; ///< Rows of result data.
-    std::vector<std::string> columnNames;       ///< Names of columns in result.
-    int32_t rowsAffected{0};                    ///< Number of rows affected (for non-SELECT).
+    std::vector<std::vector<std::string>> rows;        ///< Rows of result data.
+    std::vector<std::string>              columnNames; ///< Names of columns in result.
+    int32_t rowsAffected{0}; ///< Number of rows affected (for non-SELECT).
 
     /**
      * @brief Check if the result is empty
@@ -81,9 +81,9 @@ struct QueryResult
  */
 struct DatabaseError
 {
-    std::string message;        ///< Error message.
-    std::string sqlState;       ///< SQL state code.
-    int32_t nativeErrorCode{0}; ///< Native database error code.
+    std::string message;            ///< Error message.
+    std::string sqlState;           ///< SQL state code.
+    int32_t     nativeErrorCode{0}; ///< Native database error code.
 };
 
 //=================================================================================================
@@ -188,7 +188,7 @@ class IDatabase
      * @param params Parameter values (converted to strings)
      * @return true if successful
      */
-    virtual bool ExecutePrepared(const std::string& sql,
+    virtual bool ExecutePrepared(const std::string&              sql,
                                  const std::vector<std::string>& params) = 0;
 
     /**
@@ -197,7 +197,7 @@ class IDatabase
      * @param params Parameter values (converted to strings)
      * @return Query results or nullopt on error
      */
-    virtual std::optional<QueryResult> QueryPrepared(const std::string& sql,
+    virtual std::optional<QueryResult> QueryPrepared(const std::string&              sql,
                                                      const std::vector<std::string>& params) = 0;
 };
 
@@ -268,9 +268,9 @@ class DatabaseTransaction
     // Private Members
     //=============================================================================================
 
-    IDatabase& m_Database; ///< Database interface reference.
-    bool m_Committed;      ///< Whether transaction was committed.
-    bool m_RolledBack;     ///< Whether transaction was rolled back.
+    IDatabase& m_Database;   ///< Database interface reference.
+    bool       m_Committed;  ///< Whether transaction was committed.
+    bool       m_RolledBack; ///< Whether transaction was rolled back.
 };
 
 } // namespace Orogena::Database

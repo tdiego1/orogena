@@ -184,7 +184,7 @@ class Logger
     // Private Members
     //=============================================================================================
 
-    static std::shared_ptr<spdlog::logger> s_Logger;           ///< Shared logger instance
+    static std::shared_ptr<spdlog::logger>      s_Logger;      ///< Shared logger instance
     static std::shared_ptr<spdlog::sinks::sink> s_ConsoleSink; ///< Console sink
     static std::shared_ptr<spdlog::sinks::sink> s_FileSink;    ///< File sink
 };

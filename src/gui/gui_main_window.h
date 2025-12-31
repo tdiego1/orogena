@@ -19,11 +19,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
-
-#include <memory>
 
 #include "core/core_project.h"
 #include "database/database_manager.h"
@@ -184,13 +184,13 @@ class MainWindow : public QMainWindow
     Render::Viewport* m_Viewport{nullptr}; ///< Central OpenGL rendering viewport.
 
     // Project management
-    std::unique_ptr<QtSettings> m_Settings;             ///< Application settings.
+    std::unique_ptr<QtSettings>           m_Settings;       ///< Application settings.
     std::unique_ptr<Core::ProjectManager> m_ProjectManager; ///< Project lifecycle manager.
 
     // File menu actions (need references for enable/disable)
-    QAction* m_ActionSave{nullptr};   ///< Save action.
-    QAction* m_ActionSaveAs{nullptr}; ///< Save As action.
-    QMenu* m_RecentProjectsMenu{nullptr}; ///< Recent projects submenu.
+    QAction* m_ActionSave{nullptr};         ///< Save action.
+    QAction* m_ActionSaveAs{nullptr};       ///< Save As action.
+    QMenu*   m_RecentProjectsMenu{nullptr}; ///< Recent projects submenu.
 };
 
 } // namespace Orogena::GUI

@@ -229,7 +229,7 @@ ProjectManager::ProjectManager(ISettings& settings, Database::IDatabase* databas
 }
 
 bool ProjectManager::CreateProject(const std::filesystem::path& directoryPath,
-                                   const std::string& projectName)
+                                   const std::string&           projectName)
 {
     if (IsProjectOpen())
     {
@@ -263,7 +263,7 @@ bool ProjectManager::CreateProject(const std::filesystem::path& directoryPath,
         }
 
         std::filesystem::path project_path = directoryPath / (safe_name + c_ProjectFileExtension);
-        std::string database_filename = safe_name + c_ProjectDatabaseExtension;
+        std::string           database_filename = safe_name + c_ProjectDatabaseExtension;
         std::filesystem::path database_path = directoryPath / database_filename;
 
         // Check if files already exist
@@ -452,7 +452,7 @@ bool ProjectManager::SaveProjectAs(const std::filesystem::path& newPath)
         std::filesystem::path old_dir = m_ProjectPath->parent_path();
 
         // Derive new database filename from new project filename
-        std::string new_db_filename = newPath.stem().string() + ".db";
+        std::string           new_db_filename = newPath.stem().string() + ".db";
         std::filesystem::path old_db_path = old_dir / m_ProjectInfo->databaseFilename;
         std::filesystem::path new_db_path = new_dir / new_db_filename;
 

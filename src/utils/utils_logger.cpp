@@ -24,7 +24,7 @@ namespace Orogena::Utils
 // Static Member Initialization
 //=================================================================================================
 
-std::shared_ptr<spdlog::logger> Logger::s_Logger;
+std::shared_ptr<spdlog::logger>      Logger::s_Logger;
 std::shared_ptr<spdlog::sinks::sink> Logger::s_ConsoleSink;
 std::shared_ptr<spdlog::sinks::sink> Logger::s_FileSink;
 
@@ -43,8 +43,8 @@ void Logger::Initialize()
     s_ConsoleSink->set_level(spdlog::level::debug);
 
     // Generate timestamped log filename
-    auto now = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
+    auto    now = std::chrono::system_clock::now();
+    auto    time = std::chrono::system_clock::to_time_t(now);
     std::tm local_time{};
 
 #ifdef _WIN32
