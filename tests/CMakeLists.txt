@@ -4,14 +4,15 @@ include(GoogleTest)
 
 # Unit tests
 add_executable(test_unit
+    unit/database/test_database_manager.cpp
     unit/utils/test_logger.cpp
 )
 
 target_link_libraries(test_unit
     PRIVATE
+        GTest::gtest
         GTest::gtest_main
-        orogena_global
-        orogena_region
+        orogena_database
         orogena_utils
 )
 
