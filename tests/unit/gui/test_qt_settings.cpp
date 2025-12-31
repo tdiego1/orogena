@@ -9,12 +9,13 @@
  */
 /**************************************************************************************************/
 
-#include "gui/gui_qt_settings.h"
-
-#include <gtest/gtest.h>
-
 #include <QCoreApplication>
 #include <QSettings>
+
+#include "gui/gui_qt_settings.h"
+
+#include <filesystem>
+#include <gtest/gtest.h>
 
 using namespace Orogena::GUI;
 using namespace Orogena::Core;
@@ -104,7 +105,7 @@ TEST_F(QtSettingsTest, SetAndGetInt)
 {
     // Arrange
     const std::string key = "test/int";
-    const int32_t value = 42;
+    const int32_t     value = 42;
 
     // Act
     m_Settings->SetInt(key, value);
@@ -128,7 +129,7 @@ TEST_F(QtSettingsTest, SetNegativeInt)
 {
     // Arrange
     const std::string key = "test/negative";
-    const int32_t value = -12345;
+    const int32_t     value = -12345;
 
     // Act
     m_Settings->SetInt(key, value);
@@ -147,7 +148,7 @@ TEST_F(QtSettingsTest, SetAndGetInt64)
 {
     // Arrange
     const std::string key = "test/int64";
-    const int64_t value = 9223372036854775807LL; // Max int64_t
+    const int64_t     value = 9223372036854775807LL; // Max int64_t
 
     // Act
     m_Settings->SetInt64(key, value);
@@ -175,7 +176,7 @@ TEST_F(QtSettingsTest, SetAndGetFloat)
 {
     // Arrange
     const std::string key = "test/float";
-    const float64_t value = 3.14159265358979;
+    const float64_t   value = 3.14159265358979;
 
     // Act
     m_Settings->SetFloat(key, value);
@@ -199,7 +200,7 @@ TEST_F(QtSettingsTest, SetNegativeFloat)
 {
     // Arrange
     const std::string key = "test/negative_float";
-    const float64_t value = -2.71828;
+    const float64_t   value = -2.71828;
 
     // Act
     m_Settings->SetFloat(key, value);
@@ -258,12 +259,9 @@ TEST_F(QtSettingsTest, GetNonexistentBoolReturnsNullopt)
 TEST_F(QtSettingsTest, SetAndGetStringList)
 {
     // Arrange
-    const std::string key = "test/stringlist";
-    const std::vector<std::string> value = {
-        "/path/to/project1.oro",
-        "/path/to/project2.oro",
-        "/path/to/project3.oro"
-    };
+    const std::string              key = "test/stringlist";
+    const std::vector<std::string> value = {"/path/to/project1.oro", "/path/to/project2.oro",
+                                            "/path/to/project3.oro"};
 
     // Act
     m_Settings->SetStringList(key, value);
@@ -277,7 +275,7 @@ TEST_F(QtSettingsTest, SetAndGetStringList)
 TEST_F(QtSettingsTest, SetEmptyStringList)
 {
     // Arrange
-    const std::string key = "test/empty_list";
+    const std::string              key = "test/empty_list";
     const std::vector<std::string> value = {};
 
     // Act
@@ -495,4 +493,28 @@ TEST_F(QtSettingsTest, ValueWithUnicodeCharacters)
     // Assert
     ASSERT_TRUE(retrieved.has_value());
     EXPECT_EQ(value, retrieved.value());
+}
+
+/**************************************************************************************************/
+// Standard Paths Tests
+/**************************************************************************************************/
+
+TEST_F(QtSettingsTest, GetDefaultProjectsDirectoryReturnsValidPath)
+{
+    // Act
+    std::string path = m_Settings->GetDefaultProjectsDirectory();
+
+    // Assert
+    EXPECT_FALSE(path.empty());
+    EXPECT_TRUE(std::filesystem::exists(path));
+    EXPECT_TRUE(std::filesystem::is_directory(path));
+}
+
+TEST_F(QtSettingsTest, GetDefaultProjectsDirectoryContainsOrogena)
+{
+    // Act
+    std::string path = m_Settings->GetDefaultProjectsDirectory();
+
+    // Assert
+    EXPECT_NE(path.find("Orogena"), std::string::npos);
 }
