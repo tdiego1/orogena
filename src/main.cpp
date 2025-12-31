@@ -14,6 +14,7 @@
 #include <qtdeprecationdefinitions.h>
 #include <qtenvironmentvariables.h>
 
+#include "database/database_manager.h"
 #include "gui/gui_main_window.h"
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
@@ -59,7 +60,17 @@ int32_t main(int32_t argc, char_t* argv[])
     Orogena::GUI::MainWindow main_window;
     main_window.show();
 
-    return QApplication::exec();
+    int32_t result = QApplication::exec();
+
+    // Clean up singletons before QApplication is destroyed
+    // DatabaseManager uses QSqlDatabase which requires QCoreApplication to exist
+    Orogena::Database::DatabaseManager::DestroyInstance();
+
+    // Note: Logger::Shutdown() is NOT called here because main_window's destructor
+    // runs after this point (during stack unwinding) and may still log.
+    // The logger will clean up safely during static destruction.
+
+    return result;
 }
 
 //=================================================================================================
