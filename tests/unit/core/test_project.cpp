@@ -696,3 +696,68 @@ TEST_F(ProjectManagerTest, ErrorCallbackInvokedOnFailure)
     EXPECT_TRUE(error_called);
     EXPECT_FALSE(error_message.empty());
 }
+
+//=================================================================================================
+// SaveProjectAs Tests
+//=================================================================================================
+
+TEST_F(ProjectManagerTest, SaveAsUpdatesProjectNameAndDatabaseFilename)
+{
+    // Create initial project
+    ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "OriginalProject"));
+
+    // Verify original state
+    auto original_info = m_Manager->GetProjectInfo();
+    ASSERT_TRUE(original_info.has_value());
+    EXPECT_EQ("OriginalProject", original_info->name);
+    EXPECT_EQ("OriginalProject.db", original_info->databaseFilename);
+
+    // Create .db file to simulate database existence (since we don't have real DB in tests)
+    std::filesystem::path original_db = m_TempDir / "OriginalProject.db";
+    std::ofstream{original_db} << "dummy";
+    ASSERT_TRUE(std::filesystem::exists(original_db));
+
+    // Save as new name
+    std::filesystem::path new_path = m_TempDir / "RenamedProject.oro";
+    ASSERT_TRUE(m_Manager->SaveProjectAs(new_path));
+
+    // Verify updated state
+    auto new_info = m_Manager->GetProjectInfo();
+    ASSERT_TRUE(new_info.has_value());
+    EXPECT_EQ("RenamedProject", new_info->name);
+    EXPECT_EQ("RenamedProject.db", new_info->databaseFilename);
+
+    // Verify new .oro file exists
+    EXPECT_TRUE(std::filesystem::exists(new_path));
+
+    // Verify new .db file was created (copied from original)
+    std::filesystem::path new_db = m_TempDir / "RenamedProject.db";
+    EXPECT_TRUE(std::filesystem::exists(new_db));
+}
+
+TEST_F(ProjectManagerTest, SaveAsToDifferentDirectory)
+{
+    // Create initial project
+    ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "OriginalDir"));
+
+    // Create .db file
+    std::filesystem::path original_db = m_TempDir / "OriginalDir.db";
+    std::ofstream{original_db} << "dummy";
+
+    // Create new directory
+    std::filesystem::path new_dir = m_TempDir / "subdir";
+    std::filesystem::create_directories(new_dir);
+
+    // Save as to new directory with new name
+    std::filesystem::path new_path = new_dir / "NewDirProject.oro";
+    ASSERT_TRUE(m_Manager->SaveProjectAs(new_path));
+
+    // Verify files in new directory
+    EXPECT_TRUE(std::filesystem::exists(new_path));
+    EXPECT_TRUE(std::filesystem::exists(new_dir / "NewDirProject.db"));
+
+    // Verify project info updated
+    auto info = m_Manager->GetProjectInfo();
+    EXPECT_EQ("NewDirProject", info->name);
+    EXPECT_EQ("NewDirProject.db", info->databaseFilename);
+}
