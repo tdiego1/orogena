@@ -33,26 +33,28 @@ namespace Orogena::Render
 
 Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent)
 {
-    // Request OpenGL 4.5 Core Profile
-    QSurfaceFormat format;
-    format.setVersion(4, 6);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setDepthBufferSize(24);
-    format.setStencilBufferSize(8);
-    format.setSamples(4); // 4x MSAA
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setSwapInterval(1); // VSync enabled
-    QSurfaceFormat::setDefaultFormat(format);
+    // Use the default format set in main() - don't override it here
+    // This prevents format mismatches between QApplication and QOpenGLWidget
 
-    setFormat(format);
-
-    Log::Debug("Viewport: Requested OpenGL 4.6 Core Profile");
+    Log::Debug("Viewport: Using application default OpenGL format");
 
 #ifdef Q_OS_LINUX
-    Log::Debug("Platform: Linux (using X11/GLX by default)");
+    const char* qpa_platform = qgetenv("QT_QPA_PLATFORM");
+    if (qpa_platform && QString(qpa_platform).contains("wayland"))
+    {
+        Log::Debug("Platform: Linux (Wayland/EGL)");
+    }
+    else if (qpa_platform && QString(qpa_platform).contains("xcb"))
+    {
+        Log::Debug("Platform: Linux (X11/GLX)");
+    }
+    else
+    {
+        Log::Debug("Platform: Linux (auto-detected)");
+    }
 #elif defined(Q_OS_WIN)
     Log::Debug("Platform: Windows");
-#elif define(Q_OS_MACOS)
+#elif defined(Q_OS_MACOS)
     Log::Debug("Platform: macOS");
 #endif
 }
