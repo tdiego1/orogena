@@ -80,6 +80,15 @@ class ISettings
     // Group management (for hierarchical settings)
     virtual void BeginGroup(const std::string& prefix) = 0;
     virtual void EndGroup() = 0;
+
+    // Standard paths (cross-platform)
+
+    /**
+     * @brief Get the default directory for user projects
+     * @return Path to default projects directory (e.g., ~/Documents/Orogena)
+     * @details Creates the directory if it doesn't exist
+     */
+    virtual std::string GetDefaultProjectsDirectory() const = 0;
 };
 
 } // namespace Orogena::Core
