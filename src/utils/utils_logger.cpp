@@ -11,11 +11,11 @@
 
 #include "utils/utils_logger.h"
 
-#include <chrono>
-#include <format>
-
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+#include <chrono>
+#include <format>
 
 namespace Orogena::Utils
 {
@@ -54,12 +54,13 @@ void Logger::Initialize()
 #endif
 
     std::string log_filename =
-        std::format("orogena_{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}.log", local_time.tm_year + 1900,
-                    local_time.tm_mon + 1, local_time.tm_mday, local_time.tm_hour, local_time.tm_min,
-                    local_time.tm_sec);
+        std::format("orogena_{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}.log",
+                    local_time.tm_year + 1900, local_time.tm_mon + 1, local_time.tm_mday,
+                    local_time.tm_hour, local_time.tm_min, local_time.tm_sec);
 
     // Create file sink with rotation (10MB, 3 files)
-    s_FileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_filename, 1024 * 1024 * 10, 3);
+    s_FileSink =
+        std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_filename, 1024 * 1024 * 10, 3);
     s_FileSink->set_level(spdlog::level::trace);
 
     // Create logger with both sinks
@@ -93,20 +94,22 @@ spdlog::level::level_enum Logger::ToSpdlogLevel(LogLevel level)
 {
     switch (level)
     {
-    case LogLevel::TRACE:
-        return spdlog::level::trace;
-    case LogLevel::DEBUG:
-        return spdlog::level::debug;
-    case LogLevel::INFO:
-        return spdlog::level::info;
-    case LogLevel::WARN:
-        return spdlog::level::warn;
-    case LogLevel::ERROR:
-        return spdlog::level::err;
-    case LogLevel::CRITICAL:
-        return spdlog::level::critical;
-    default:
-        return spdlog::level::info;
+        case LogLevel::TRACE:
+            return spdlog::level::trace;
+        case LogLevel::DEBUG:
+            return spdlog::level::debug;
+        case LogLevel::INFO:
+            return spdlog::level::info;
+        case LogLevel::WARN:
+            return spdlog::level::warn;
+        case LogLevel::ERROR:
+            return spdlog::level::err;
+        case LogLevel::CRITICAL:
+            return spdlog::level::critical;
+        case LogLevel::OFF:
+            return spdlog::level::off;
+        default:
+            return spdlog::level::info;
     }
 }
 
