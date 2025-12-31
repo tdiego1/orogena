@@ -1,23 +1,39 @@
-# Orogena
+<p align="center">
+    <picture>
+        <source srcset="docs/assets/orogena_logo_dark.png" media="(prefers-color-scheme: dark)">
+        <source srcset="docs/assets/orogena_logo.png" media="(prefers-color-scheme: light)">
+        <img src="docs/assets/orogena_logo.png" alt="Orogena Logo" width="250">
+    </picture>
+</p>
 
-**Multi-Scale Tectonic Simulator for Fantasy World Building**
-
-Version 1.0 | December 2025
-
----
+<p align="center">Complete Worldbuilding Suite - Version 2.0</p>
 
 ## Overview
 
-Orogena is a professional-grade terrain generation tool that simulates millions of years of plate tectonics at planetary scale, enabling seamless extraction of regional and local maps with progressive detail enhancement.
+Orogena is a professional-grade worldbuilding application following [Artifexian's methodology](https://www.youtube.com/c/Artifexian), enabling the creation of geologically and climatologically plausible worlds from stellar parameters down to local detail.
 
 ### Key Features
 
+- **Complete 19-system worldbuilding**: Stars → Planets → Tectonics → Climate → Resources
 - **Multi-scale generation**: Planet → Continent → Region → Local detail
-- **GPU-accelerated** global tectonic simulation
-- **Realistic erosion** with drainage networks
+- **GPU-accelerated** simulation for tectonics, climate, and ocean currents
+- **Realistic erosion** with drainage networks and river systems
+- **Köppen climate zones** with biome mapping
+- **Resource placement**: Fuel, ores, and salt deposits in geologically appropriate locations
 - **Seamless tile boundaries** using intelligent border stitching
 - **Database-backed caching** for instant revisits
 - **Cross-platform** support (Linux, Windows, macOS)
+
+### The 19 Worldbuilding Systems
+
+| Category | Systems |
+|----------|---------|
+| **Foundation** | Star & planetary system, planet parameters, moons & tides |
+| **Geophysics** | Plate tectonics, land topography, bathymetry |
+| **Circulation** | Ocean currents, winds & pressure, upwelling & reefs |
+| **Climate** | Precipitation, temperature, Köppen zones, biomes |
+| **Hydrology** | Rivers, lakes, drainage networks, weather patterns |
+| **Resources** | Rocks & minerals, fuel deposits, copper/bronze/iron ores, salt |
 
 ---
 
@@ -101,14 +117,24 @@ See [PRESETS_SUMMARY.md](PRESETS_SUMMARY.md) for quick reference.
 orogena/
 ├── docs/               # Documentation
 ├── src/                # Source code
-│   ├── core/          # Application core
-│   ├── global/        # Scale 1: Global simulation
-│   ├── regional/      # Scale 2: Regional generation
-│   ├── local/         # Scale 3: Local detail
-│   ├── rendering/     # OpenGL rendering
-│   ├── ui/            # Qt user interface
-│   ├── database/      # SQLite database layer
-│   └── utils/         # Utilities
+│   ├── core/          # Application foundation
+│   ├── stellar/       # Stars, orbits, habitable zones
+│   ├── planetary/     # Planet params, moons, tides
+│   ├── global/        # Plate tectonics simulation
+│   ├── topography/    # Land & bathymetry generation
+│   ├── ocean/         # Ocean currents, upwelling
+│   ├── atmosphere/    # Winds, pressure systems
+│   ├── climate/       # Temperature, precipitation, Köppen
+│   ├── hydrology/     # Rivers, lakes, drainage
+│   ├── weather/       # Weather patterns
+│   ├── geology/       # Rocks, minerals, cratons
+│   ├── resources/     # Fuel, ores, salt deposits
+│   ├── region/        # Regional tile system
+│   ├── local/         # Local detail synthesis
+│   ├── render/        # OpenGL visualization
+│   ├── gui/           # Qt user interface
+│   ├── database/      # SQLite persistence
+│   └── utils/         # Logging and utilities
 ├── tests/             # Unit and integration tests
 ├── resources/         # Icons, UI files, presets
 └── scripts/           # Build and packaging scripts
@@ -124,7 +150,7 @@ orogena/
 - **[PRESETS_SUMMARY.md](PRESETS_SUMMARY.md)** - Quick preset reference
 
 ### Development
-- [Software Development Plan](docs/001_sdp_orogena.md) - Project roadmap
+- [Software Development Plan v2.0](docs/001_sdp_orogena_v2.md) - Complete 12-phase roadmap
 - [Coding Standard](docs/002_coding_standard.md) - Code style guide
 - [Design Standard](docs/003_design_standard.md) - Architecture patterns
 - [CLAUDE.md](CLAUDE.md) - AI-assisted development guide
@@ -133,9 +159,24 @@ orogena/
 
 ## Development Status
 
-**Current Phase**: Foundation & Infrastructure (Phase 1)
+**Current Phase**: Phase 0 - Foundation Completion
 
-See the [Software Development Plan](docs/001_sdp_orogena.md) for detailed roadmap.
+### Roadmap
+
+| Phase | Milestone | Status |
+|-------|-----------|--------|
+| **0** | Foundation (database, settings, viewport) | In Progress |
+| **1** | Stellar Foundation | Planned |
+| **2** | Planetary Parameters | Planned |
+| **3** | Enhanced Plate Tectonics | Planned |
+| **4** | Topography Generation | **MVP v1.0** |
+| **5-11** | Ocean → Climate → Resources | Planned |
+| **12** | Integration & Polish | **Full Suite v2.0** |
+
+**MVP (v1.0)**: Complete terrain generation from stellar parameters
+**Full Suite (v2.0)**: All 19 Artifexian worldbuilding systems
+
+See the [Software Development Plan v2.0](docs/001_sdp_orogena_v2.md) for detailed timeline.
 
 ---
 
@@ -161,5 +202,6 @@ Contributions are welcome! Please read the coding and design standards before su
 
 ## Acknowledgments
 
-- Inspired by real-world plate tectonics and terrain generation research
+- Worldbuilding methodology inspired by [Artifexian](https://www.youtube.com/c/Artifexian)
 - Built with Qt 6, OpenGL, and modern C++20
+- Geological accuracy informed by plate tectonics and climate science research
