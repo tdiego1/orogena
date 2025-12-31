@@ -10,6 +10,7 @@
 /**************************************************************************************************/
 
 #include <QApplication>
+#include <QSurfaceFormat>
 #include <qtdeprecationdefinitions.h>
 #include <qtenvironmentvariables.h>
 
@@ -31,14 +32,18 @@
 
 int32_t main(int32_t argc, char_t* argv[])
 {
-#ifdef Q_OS_LINUX
-    // On Linux, prefer X11/GLX over Wayland/EGL for better OpenGL support
-    // Only set if not already defined by user.
-    if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
-    {
-        qputenv("QT_QPA_PLATFORM", "xcb"); // Force XCB on Linux
-    }
-#endif
+    // Set default OpenGL format BEFORE creating QApplication
+    // This is critical for both X11/GLX and Wayland/EGL
+    QSurfaceFormat default_format;
+    default_format.setVersion(4, 6); // OpenGL 4.5 Core
+    default_format.setProfile(QSurfaceFormat::CoreProfile);
+    default_format.setDepthBufferSize(24);
+    default_format.setStencilBufferSize(8);
+    default_format.setSamples(4); // 4x MSAA
+    default_format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    default_format.setSwapInterval(1); // VSync
+    default_format.setRenderableType(QSurfaceFormat::OpenGL);
+    QSurfaceFormat::setDefaultFormat(default_format);
 
     // Initialize application
     QApplication app(argc, argv);
