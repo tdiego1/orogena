@@ -444,18 +444,11 @@ void MainWindow::OnNewProject()
         return;
     }
 
-    // Get save directory
-    QString directory = QFileDialog::getExistingDirectory(
-        this, tr("Select Project Location"), QDir::homePath(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    // Use default projects directory (~/Documents/Orogena)
+    std::string default_dir = m_Settings->GetDefaultProjectsDirectory();
 
-    if (directory.isEmpty())
-    {
-        return;
-    }
-
-    // Create project
-    if (!m_ProjectManager->CreateProject(directory.toStdString(), name.toStdString()))
+    // Create project in the default directory (will create ProjectName subdirectory)
+    if (!m_ProjectManager->CreateProject(default_dir, name.toStdString()))
     {
         // Error callback will have shown the message
         return;
@@ -478,9 +471,11 @@ void MainWindow::OnOpenProject()
         m_ProjectManager->CloseProject(true);
     }
 
-    // Get file path
-    QString file_path = QFileDialog::getOpenFileName(this, tr("Open Project"), QDir::homePath(),
-                                                     tr("Orogena Projects (*.oro);;All Files (*)"));
+    // Get file path (start in default projects directory)
+    std::string default_dir = m_Settings->GetDefaultProjectsDirectory();
+    QString     file_path =
+        QFileDialog::getOpenFileName(this, tr("Open Project"), QString::fromStdString(default_dir),
+                                     tr("Orogena Projects (*.oro);;All Files (*)"));
 
     if (file_path.isEmpty())
     {
@@ -549,10 +544,14 @@ void MainWindow::OnSaveProjectAs()
         return;
     }
 
-    auto    info = m_ProjectManager->GetProjectInfo();
-    QString default_name = info ? QString::fromStdString(info->name) + ".oro" : "project.oro";
+    auto info = m_ProjectManager->GetProjectInfo();
 
-    QString file_path = QFileDialog::getSaveFileName(this, tr("Save Project As"), default_name,
+    // Build default path in the projects directory
+    std::string default_dir = m_Settings->GetDefaultProjectsDirectory();
+    QString     default_name = info ? QString::fromStdString(info->name) + ".oro" : "project.oro";
+    QString     default_path = QString::fromStdString(default_dir) + "/" + default_name;
+
+    QString file_path = QFileDialog::getSaveFileName(this, tr("Save Project As"), default_path,
                                                      tr("Orogena Projects (*.oro);;All Files (*)"));
 
     if (file_path.isEmpty())
