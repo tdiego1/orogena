@@ -119,6 +119,165 @@ Orogena follows a **layered, multi-scale architecture** organized around three s
 - **No layer skipping**: UI cannot directly access Database
 - **Callbacks for upward communication**: Use signals/slots, observers, or callbacks
 
+### 2.3 Qt/Framework Boundary Separation
+
+To maintain modularity and testability, Qt types are confined to the presentation layer. Core logic uses standard C++20 types exclusively.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  GUI Layer (Qt Widgets)                                         │
+│  - Owns QString, QWidget, QSettings                             │
+│  - Converts std::string → QString at display time               │
+│  - Converts QString → std::string when passing to lower layers  │
+├─────────────────────────────────────────────────────────────────┤
+│  Render Layer (QOpenGLWidget)                                   │
+│  - Inherits Qt classes (unavoidable for OpenGL context)         │
+│  - Signals/slots use std::string, int32_t, custom structs       │
+├─────────────────────────────────────────────────────────────────┤
+│  Simulation/Domain Layers (Pure C++20)                          │
+│  - std::string, std::vector, std::optional, glm types           │
+│  - Zero Qt headers                                              │
+├─────────────────────────────────────────────────────────────────┤
+│  Database Layer (Abstracted)                                    │
+│  - Interface uses std::string, std::vector<uint8_t>             │
+│  - Qt SQL hidden in implementation                              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Type Mapping at Boundaries
+
+| Layer | String | Container | Optional | Time |
+|-------|--------|-----------|----------|------|
+| GUI | `QString` | `QList` | `QVariant` | `QDateTime` |
+| Boundary | Convert ↕ | Convert ↕ | Convert ↕ | Convert ↕ |
+| Core | `std::string` | `std::vector` | `std::optional` | `std::chrono` |
+| Database | `std::string` | `std::vector` | `std::optional` | `int64_t` (unix) |
+
+#### Pattern: Abstract Interface for Qt-Dependent Services
+
+Define pure C++ interfaces in core layers; implement with Qt in the GUI layer.
+
+```cpp
+// core/core_settings_interface.h - Pure C++ interface
+class ISettings
+{
+public:
+    virtual ~ISettings() = default;
+    virtual void SetString(const std::string& key, const std::string& value) = 0;
+    virtual std::optional<std::string> GetString(const std::string& key) const = 0;
+    virtual void SetInt(const std::string& key, int32_t value) = 0;
+    virtual std::optional<int32_t> GetInt(const std::string& key) const = 0;
+};
+
+// gui/gui_qt_settings.h - Qt implementation (only in GUI layer)
+class QtSettings : public Core::ISettings
+{
+public:
+    void SetString(const std::string& key, const std::string& value) override
+    {
+        m_Settings.setValue(QString::fromStdString(key),
+                           QString::fromStdString(value));
+    }
+
+    std::optional<std::string> GetString(const std::string& key) const override
+    {
+        QVariant val = m_Settings.value(QString::fromStdString(key));
+        if (!val.isValid()) return std::nullopt;
+        return val.toString().toStdString();
+    }
+
+private:
+    QSettings m_Settings{"Orogena", "Orogena"};
+};
+```
+
+#### Pattern: Signals Use Standard Types
+
+When Qt classes must emit signals (e.g., `QOpenGLWidget`), use `std::string` instead of `QString`:
+
+```cpp
+// In render/render_viewport.h
+signals:
+    void FPSUpdated(int32_t fps);
+    void OpenGLInitialized(const std::string& vendor, const std::string& renderer,
+                           const std::string& version);
+    void OpenGLError(const std::string& error);
+
+// In gui/gui_main_window.cpp - GUI layer converts at the boundary
+connect(m_Viewport, &Render::Viewport::OpenGLError, this,
+        [this](const std::string& error)
+        {
+            QMessageBox::critical(this, "OpenGL Error",
+                                  QString::fromStdString(error));
+        });
+```
+
+#### Pattern: Callback Interfaces for Non-Qt Components
+
+For simulation components that need to report progress without Qt dependency:
+
+```cpp
+// global/global_simulation_callbacks.h - Pure C++
+struct SimulationCallbacks
+{
+    std::function<void(int32_t step, int32_t totalSteps)> onProgress;
+    std::function<void(const std::string& message)> onStatusUpdate;
+    std::function<void(const std::string& error)> onError;
+    std::function<void()> onComplete;
+};
+
+// gui/gui_simulation_controller.cpp - Bridge to Qt signals
+void SimulationController::StartSimulation()
+{
+    Global::SimulationCallbacks callbacks;
+
+    callbacks.onProgress = [this](int32_t step, int32_t total) {
+        emit ProgressUpdated(step, total);  // Qt signal
+    };
+
+    callbacks.onError = [this](const std::string& error) {
+        emit ErrorOccurred(QString::fromStdString(error));
+    };
+
+    m_Simulation.SetCallbacks(callbacks);
+    m_Simulation.Run();
+}
+```
+
+#### CMake Enforcement
+
+Ensure core libraries don't link Qt:
+
+```cmake
+# Core libraries - NO Qt dependencies
+target_link_libraries(orogena_core
+    PUBLIC
+        spdlog::spdlog
+        nlohmann_json::nlohmann_json
+)
+
+# Simulation layers - NO Qt dependencies
+target_link_libraries(orogena_global
+    PUBLIC
+        orogena_core
+        glm::glm
+)
+
+# GUI layer - Qt dependencies live here
+target_link_libraries(orogena_gui
+    PUBLIC
+        Qt6::Widgets
+        orogena_render
+)
+```
+
+#### Benefits
+
+1. **Testability**: Core logic can be unit tested without Qt
+2. **Portability**: Simulation code could run on a server or CLI tool
+3. **Maintainability**: Changing UI framework only affects GUI layer
+4. **Clarity**: Clear contracts between layers
+
 ---
 
 ## 3. Multi-Scale Architecture
