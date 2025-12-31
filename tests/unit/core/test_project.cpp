@@ -160,6 +160,12 @@ class MockSettings : public ISettings
         // Not implemented for mock
     }
 
+    std::string GetDefaultProjectsDirectory() const override
+    {
+        // Return temp directory for testing
+        return (std::filesystem::temp_directory_path() / "orogena_mock_projects").string();
+    }
+
   private:
     std::unordered_map<std::string, std::string>              m_StringValues;
     std::unordered_map<std::string, int32_t>                  m_IntValues;
@@ -419,7 +425,11 @@ TEST_F(ProjectManagerTest, CreateProjectCreatesFiles)
 {
     ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "File Check"));
 
-    std::filesystem::path expected_project = m_TempDir / "File_Check.oro";
+    // Project is created in a subdirectory: TempDir/File_Check/File_Check.oro
+    std::filesystem::path expected_dir = m_TempDir / "File_Check";
+    std::filesystem::path expected_project = expected_dir / "File_Check.oro";
+    EXPECT_TRUE(std::filesystem::exists(expected_dir));
+    EXPECT_TRUE(std::filesystem::is_directory(expected_dir));
     EXPECT_TRUE(std::filesystem::exists(expected_project));
 }
 
@@ -427,7 +437,10 @@ TEST_F(ProjectManagerTest, CreateProjectWithSpacesInName)
 {
     ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "My Epic World"));
 
-    std::filesystem::path expected = m_TempDir / "My_Epic_World.oro";
+    // Project is created in a subdirectory with spaces replaced by underscores
+    std::filesystem::path expected_dir = m_TempDir / "My_Epic_World";
+    std::filesystem::path expected = expected_dir / "My_Epic_World.oro";
+    EXPECT_TRUE(std::filesystem::exists(expected_dir));
     EXPECT_TRUE(std::filesystem::exists(expected));
 
     auto info = m_Manager->GetProjectInfo();
@@ -703,7 +716,7 @@ TEST_F(ProjectManagerTest, ErrorCallbackInvokedOnFailure)
 
 TEST_F(ProjectManagerTest, SaveAsUpdatesProjectNameAndDatabaseFilename)
 {
-    // Create initial project
+    // Create initial project (creates TempDir/OriginalProject/OriginalProject.oro)
     ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "OriginalProject"));
 
     // Verify original state
@@ -712,13 +725,14 @@ TEST_F(ProjectManagerTest, SaveAsUpdatesProjectNameAndDatabaseFilename)
     EXPECT_EQ("OriginalProject", original_info->name);
     EXPECT_EQ("OriginalProject.db", original_info->databaseFilename);
 
-    // Create .db file to simulate database existence (since we don't have real DB in tests)
-    std::filesystem::path original_db = m_TempDir / "OriginalProject.db";
+    // Create .db file in the project subdirectory to simulate database existence
+    std::filesystem::path original_dir = m_TempDir / "OriginalProject";
+    std::filesystem::path original_db = original_dir / "OriginalProject.db";
     std::ofstream{original_db} << "dummy";
     ASSERT_TRUE(std::filesystem::exists(original_db));
 
-    // Save as new name
-    std::filesystem::path new_path = m_TempDir / "RenamedProject.oro";
+    // Save as new name in the same directory
+    std::filesystem::path new_path = original_dir / "RenamedProject.oro";
     ASSERT_TRUE(m_Manager->SaveProjectAs(new_path));
 
     // Verify updated state
@@ -731,17 +745,18 @@ TEST_F(ProjectManagerTest, SaveAsUpdatesProjectNameAndDatabaseFilename)
     EXPECT_TRUE(std::filesystem::exists(new_path));
 
     // Verify new .db file was created (copied from original)
-    std::filesystem::path new_db = m_TempDir / "RenamedProject.db";
+    std::filesystem::path new_db = original_dir / "RenamedProject.db";
     EXPECT_TRUE(std::filesystem::exists(new_db));
 }
 
 TEST_F(ProjectManagerTest, SaveAsToDifferentDirectory)
 {
-    // Create initial project
+    // Create initial project (creates TempDir/OriginalDir/OriginalDir.oro)
     ASSERT_TRUE(m_Manager->CreateProject(m_TempDir, "OriginalDir"));
 
-    // Create .db file
-    std::filesystem::path original_db = m_TempDir / "OriginalDir.db";
+    // Create .db file in the project subdirectory
+    std::filesystem::path original_dir = m_TempDir / "OriginalDir";
+    std::filesystem::path original_db = original_dir / "OriginalDir.db";
     std::ofstream{original_db} << "dummy";
 
     // Create new directory
