@@ -100,7 +100,7 @@ class LoggerTest : public ::testing::Test
      */
     static std::filesystem::path FindLatestLogFile()
     {
-        std::filesystem::path latest_file;
+        std::filesystem::path           latest_file;
         std::filesystem::file_time_type latest_time{};
 
         for (const auto& entry : std::filesystem::directory_iterator("."))
@@ -226,7 +226,7 @@ TEST_F(LoggerTest, TraceMessageWrittenToFile)
 
     // Assert - Check file contains trace message
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test trace message") != std::string::npos)
         << "Trace message not found in log file";
 }
@@ -239,7 +239,7 @@ TEST_F(LoggerTest, DebugMessageWrittenToFile)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test debug message") != std::string::npos)
         << "Debug message not found in log file";
 }
@@ -252,7 +252,7 @@ TEST_F(LoggerTest, InfoMessageWrittenToFile)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test info message") != std::string::npos)
         << "Info message not found in log file";
 }
@@ -265,7 +265,7 @@ TEST_F(LoggerTest, WarnMessageWrittenToFile)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test warning message") != std::string::npos)
         << "Warning message not found in log file";
 }
@@ -278,7 +278,7 @@ TEST_F(LoggerTest, ErrorMessageWrittenToFile)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test error message") != std::string::npos)
         << "Error message not found in log file";
 }
@@ -291,7 +291,7 @@ TEST_F(LoggerTest, CriticalMessageWrittenToFile)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test critical message") != std::string::npos)
         << "Critical message not found in log file";
 }
@@ -311,7 +311,7 @@ TEST_F(LoggerTest, FormattedMessageWithSingleArgument)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Test value: 42") != std::string::npos)
         << "Formatted message not found in log file";
 }
@@ -319,8 +319,8 @@ TEST_F(LoggerTest, FormattedMessageWithSingleArgument)
 TEST_F(LoggerTest, FormattedMessageWithMultipleArguments)
 {
     // Arrange
-    int x = 10;
-    int y = 20;
+    int         x = 10;
+    int         y = 20;
     std::string operation = "add";
 
     // Act
@@ -329,7 +329,7 @@ TEST_F(LoggerTest, FormattedMessageWithMultipleArguments)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Operation: add with values x=10, y=20") != std::string::npos)
         << "Formatted message not found in log file";
 }
@@ -345,7 +345,7 @@ TEST_F(LoggerTest, FormattedMessageWithFloatingPoint)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Pi value: 3.14") != std::string::npos)
         << "Formatted floating point message not found in log file";
 }
@@ -368,7 +368,7 @@ TEST_F(LoggerTest, SetLevelFiltersLowerPriorityMessages)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
 
     EXPECT_TRUE(log_contents.find("This debug message should not appear") == std::string::npos)
         << "Debug message should be filtered out";
@@ -396,7 +396,7 @@ TEST_F(LoggerTest, SetConsoleLevelIndependentFromFileLevel)
     // Assert
     // All messages should be in file (TRACE level)
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
 
     EXPECT_TRUE(log_contents.find("Trace message") != std::string::npos)
         << "Trace message should be in file";
@@ -420,7 +420,7 @@ TEST_F(LoggerTest, ConvenienceAliasWorks)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find("Testing convenience alias") != std::string::npos)
         << "Message logged via convenience alias not found";
 }
@@ -450,7 +450,7 @@ TEST_F(LoggerTest, VeryLongMessageLogged)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
     EXPECT_TRUE(log_contents.find(long_message) != std::string::npos)
         << "Long message not found in log file";
 }
@@ -476,8 +476,8 @@ TEST_F(LoggerTest, SpecialCharactersInMessage)
 TEST_F(LoggerTest, ConcurrentLoggingDoesNotCrash)
 {
     // Arrange
-    constexpr int c_NumThreads = 10;
-    constexpr int c_MessagesPerThread = 100;
+    constexpr int            c_NumThreads = 10;
+    constexpr int            c_MessagesPerThread = 100;
     std::vector<std::thread> threads;
     threads.reserve(c_NumThreads);
 
@@ -502,7 +502,7 @@ TEST_F(LoggerTest, ConcurrentLoggingDoesNotCrash)
 
     // Assert
     std::filesystem::path log_file = FindLatestLogFile();
-    std::string log_contents = ReadFile(log_file);
+    std::string           log_contents = ReadFile(log_file);
 
     // Verify at least some messages from each thread are present
     for (int t = 0; t < c_NumThreads; ++t)

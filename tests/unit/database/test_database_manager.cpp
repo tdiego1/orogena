@@ -35,8 +35,8 @@ class DatabaseTestEnvironment : public ::testing::Environment
         if (!QCoreApplication::instance())
         {
             // Create fake argc/argv for QCoreApplication
-            static int argc = 1;
-            static char appName[] = "test_database_manager";
+            static int   argc = 1;
+            static char  appName[] = "test_database_manager";
             static char* argv[] = {appName, nullptr};
             m_App = std::make_unique<QCoreApplication>(argc, argv);
         }
@@ -93,7 +93,7 @@ class DatabaseManagerTest : public ::testing::Test
     }
 
     std::filesystem::path m_TestDbPath;
-    DatabaseManager* m_Database{nullptr};
+    DatabaseManager*      m_Database{nullptr};
 };
 
 //=================================================================================================
@@ -513,8 +513,8 @@ TEST_F(DatabaseManagerTest, DISABLED_ConcurrentQueriesUsePool)
                                              auto error = m_Database->GetLastError();
                                              if (error)
                                              {
-                                                 std::cerr << "Query failed for i=" << i
-                                                           << ": " << error->message << std::endl;
+                                                 std::cerr << "Query failed for i=" << i << ": "
+                                                           << error->message << std::endl;
                                              }
                                          }
                                          return result.has_value() && !result->IsEmpty();
@@ -522,7 +522,7 @@ TEST_F(DatabaseManagerTest, DISABLED_ConcurrentQueriesUsePool)
     }
 
     // Wait for all queries to complete
-    bool allSucceeded = true;
+    bool    allSucceeded = true;
     int32_t failureCount = 0;
     for (auto& future : futures)
     {
@@ -548,7 +548,7 @@ TEST_F(DatabaseManagerTest, PoolBlocksWhenAllConnectionsBusy)
     m_Database->Connect(m_TestDbPath.string());
 
     // Act - start 3 concurrent operations (should block on 3rd)
-    std::atomic<int32_t> completedCount{0};
+    std::atomic<int32_t>     completedCount{0};
     std::vector<std::thread> threads;
 
     for (int32_t i = 0; i < 3; ++i)
