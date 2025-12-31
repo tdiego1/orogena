@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include <QElapsedTimer>
+#include <chrono>
+#include <string>
+
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLWidget>
-#include <qopenglfunctions_4_5_core.h>
-#include <qopenglwidget.h>
 
 #include "utils/utils_types.h"
 
@@ -104,14 +104,15 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
      * @param renderer GPU renderer string.
      * @param version OpenGL version string.
      */
-    void OpenGLInitialized(const QString& vendor, const QString& renderer, const QString& version);
+    void OpenGLInitialized(const std::string& vendor, const std::string& renderer,
+                           const std::string& version);
 
     /**
      * @brief Emitted when OpenGL error occurs
      *
      * @param error Error message.
      */
-    void OpenGLError(const QString& error);
+    void OpenGLError(const std::string& error);
 
   protected:
     //=============================================================================================
@@ -152,7 +153,7 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
      * @return true An error occured.
      * @return false No error occure.
      */
-    bool CheckGLError(const QString& context);
+    bool CheckGLError(const std::string& context);
 
     /**
      * @brief Update FPS counter
@@ -167,10 +168,10 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     Utils::ColorRGBF m_ClearColor{.r = 0.53F, .g = 0.81F, .b = 0.92F};
 
     // FPS tracking
-    QElapsedTimer m_FrameTimer; ///< Timer for frame timing.
-    int32_t m_FrameCount{0};    ///< Number of frames rendered in the current second.
-    int32_t m_CurrentFPS{0};    ///< Current FPS value.
-    qint64 m_LastFPSUpdate{0};  ///< Timestamp of last FPS update.
+    std::chrono::steady_clock::time_point m_FrameStartTime; ///< Start time for frame timing.
+    int32_t m_FrameCount{0};                                ///< Frames rendered in current second.
+    int32_t m_CurrentFPS{0};                                ///< Current FPS value.
+    int64_t m_LastFPSUpdateMs{0};                           ///< Timestamp of last FPS update (ms).
 };
 
 } // namespace Orogena::Render

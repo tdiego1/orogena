@@ -11,9 +11,9 @@
 
 #include "render_viewport.h"
 
+#include <format>
+
 #include <QSurfaceFormat>
-#include <qopenglext.h>
-#include <qsurfaceformat.h>
 
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
@@ -40,11 +40,12 @@ Viewport::Viewport(QWidget* parent) : QOpenGLWidget(parent)
 
 #ifdef Q_OS_LINUX
     const char* qpa_platform = qgetenv("QT_QPA_PLATFORM");
-    if (qpa_platform && QString(qpa_platform).contains("wayland"))
+    std::string platform_str = qpa_platform ? qpa_platform : "";
+    if (platform_str.find("wayland") != std::string::npos)
     {
         Log::Debug("Platform: Linux (Wayland/EGL)");
     }
-    else if (qpa_platform && QString(qpa_platform).contains("xcb"))
+    else if (platform_str.find("xcb") != std::string::npos)
     {
         Log::Debug("Platform: Linux (X11/GLX)");
     }
@@ -92,8 +93,8 @@ void Viewport::initializeGL()
     // Initialize OpenGL functions
     if (!initializeOpenGLFunctions())
     {
-        QString error = "Failed to initialize OpenGL functions";
-        Log::Critical("Viewport: {}", error.toStdString());
+        std::string error = "Failed to initialize OpenGL functions";
+        Log::Critical("Viewport: {}", error);
         emit OpenGLError(error);
         return;
     }
@@ -103,22 +104,21 @@ void Viewport::initializeGL()
     int32_t major_version = actual_format.majorVersion();
     int32_t minor_version = actual_format.minorVersion();
 
-    // Get OpenGL info
-    const GLubyte* vendor = glGetString(GL_VENDOR);
-    const GLubyte* renderer = glGetString(GL_RENDERER);
-    const GLubyte* version = glGetString(GL_VERSION);
-    const GLubyte* glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
+    // Get OpenGL info - safely convert GLubyte* to std::string
+    auto glStringToStd = [](const GLubyte* str) -> std::string {
+        return str ? reinterpret_cast<const char*>(str) : "Unknown";
+    };
 
-    QString vendor_str = reinterpret_cast<const char_t*>(vendor);
-    QString renderer_str = reinterpret_cast<const char_t*>(renderer);
-    QString version_str = reinterpret_cast<const char_t*>(version);
-    QString glsl_version_str = reinterpret_cast<const char_t*>(glsl_version);
+    std::string vendor_str = glStringToStd(glGetString(GL_VENDOR));
+    std::string renderer_str = glStringToStd(glGetString(GL_RENDERER));
+    std::string version_str = glStringToStd(glGetString(GL_VERSION));
+    std::string glsl_version_str = glStringToStd(glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     Log::Info("Viewport: OpenGL initialized successfully");
-    Log::Info("  Vendor: {}", vendor_str.toStdString());
-    Log::Info("  Renderer: {}", renderer_str.toStdString());
-    Log::Info("  Version: {} ({}.{})", version_str.toStdString(), major_version, minor_version);
-    Log::Info("  GLSL Version: {}", glsl_version_str.toStdString());
+    Log::Info("  Vendor: {}", vendor_str);
+    Log::Info("  Renderer: {}", renderer_str);
+    Log::Info("  Version: {} ({}.{})", version_str, major_version, minor_version);
+    Log::Info("  GLSL Version: {}", glsl_version_str);
 
     // Warn if version is below 4.5
     if (major_version < 4 || (major_version == 4 && minor_version < 5))
@@ -144,12 +144,12 @@ void Viewport::initializeGL()
     CheckGLError("OpenGL state setup");
 
     // Start FPS timer
-    m_FrameTimer.start();
-    m_LastFPSUpdate = m_FrameTimer.elapsed();
+    m_FrameStartTime = std::chrono::steady_clock::now();
+    m_LastFPSUpdateMs = 0;
 
     // Emit success signal
     emit OpenGLInitialized(vendor_str, renderer_str,
-                           QString("%1.%2").arg(major_version).arg(minor_version));
+                           std::format("{}.{}", major_version, minor_version));
 }
 
 void Viewport::paintGL()
@@ -182,12 +182,12 @@ void Viewport::resizeGL(int32_t widthPx, int32_t heightPx)
 // Private Functions
 //=================================================================================================
 
-bool Viewport::CheckGLError(const QString& context)
+bool Viewport::CheckGLError(const std::string& context)
 {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
     {
-        QString error_msg;
+        std::string error_msg;
         switch (error)
         {
             case GL_INVALID_ENUM:
@@ -206,11 +206,11 @@ bool Viewport::CheckGLError(const QString& context)
                 error_msg = "GL_INVALID_FRAMEBUFFER_OPERATION";
                 break;
             default:
-                error_msg = QString("Unkown error 0x%1").arg(error, 0, 16);
+                error_msg = std::format("Unknown error 0x{:X}", error);
                 break;
         }
-        QString full_msg = QString("%1: %2").arg(context, error_msg);
-        Log::Error("Viewport: OpenGL error - {}", full_msg.toStdString());
+        std::string full_msg = std::format("{}: {}", context, error_msg);
+        Log::Error("Viewport: OpenGL error - {}", full_msg);
         emit OpenGLError(full_msg);
         return true;
     }
@@ -221,18 +221,20 @@ void Viewport::UpdateFPS()
 {
     m_FrameCount++;
 
-    qint64 current_time = m_FrameTimer.elapsed();
-    qint64 delta_time = current_time - m_LastFPSUpdate;
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_FrameStartTime);
+    int64_t current_time_ms = elapsed.count();
+    int64_t delta_time = current_time_ms - m_LastFPSUpdateMs;
 
     // Update FPS counter every second
     if (delta_time >= 1000)
     {
         m_CurrentFPS =
-            static_cast<int>((m_FrameCount * 1000.0) / static_cast<float64_t>(delta_time));
+            static_cast<int32_t>((m_FrameCount * 1000.0) / static_cast<float64_t>(delta_time));
         emit FPSUpdated(m_CurrentFPS);
 
         m_FrameCount = 0;
-        m_LastFPSUpdate = current_time;
+        m_LastFPSUpdateMs = current_time_ms;
     }
 }
 

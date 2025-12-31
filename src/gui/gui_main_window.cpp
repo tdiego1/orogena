@@ -204,18 +204,16 @@ void MainWindow::SetupViewport()
 
     // Connect OpenGL initialization
     connect(m_Viewport, &Render::Viewport::OpenGLInitialized, this,
-            [](const QString& vendor, const QString& renderer, const QString& version)
-            {
-                Log::Info("MainWindow: GPU initialized - {} / {}", vendor.toStdString(),
-                          renderer.toStdString());
-            });
+            [](const std::string& vendor, const std::string& renderer, const std::string& version)
+            { Log::Info("MainWindow: GPU initialized - {} / {}", vendor, renderer); });
 
-    // Connect OpenGL erros
+    // Connect OpenGL errors
     connect(m_Viewport, &Render::Viewport::OpenGLError, this,
-            [this](const QString& error)
+            [this](const std::string& error)
             {
                 QMessageBox::critical(this, "OpenGL Error",
-                                      QString("OpenGL error ocurred:\n%1").arg(error));
+                                      QString("OpenGL error occurred:\n%1")
+                                          .arg(QString::fromStdString(error)));
             });
 }
 
