@@ -29,8 +29,11 @@
 
 #include <memory>
 
+#include <queue>
+
 #include "database/database_interface.h"
 
+#include <condition_variable>
 #include <mutex>
 
 // Forward declare Qt types to avoid leaking Qt headers
@@ -41,11 +44,45 @@ namespace Orogena::Database
 {
 
 /**
+ * @brief Connection pool entry
+ */
+struct PooledConnection
+{
+    std::string connectionName; ///< Unique connection name.
+    bool inUse{false};          ///< Connection usage status.
+};
+
+/**
+ * @brief RAII wrapper for pooled database connection
+ */
+class PooledConnectionGuard
+{
+  public:
+    PooledConnectionGuard(class DatabaseManager& manager, const std::string& connectionName);
+    ~PooledConnectionGuard();
+
+    PooledConnectionGuard(const PooledConnectionGuard&) = delete;
+    PooledConnectionGuard& operator=(const PooledConnectionGuard&) = delete;
+
+    const std::string& GetConnectionName() const
+    {
+        return m_ConnectionName;
+    }
+
+  private:
+    DatabaseManager& m_Manager;
+    std::string m_ConnectionName;
+};
+
+/**
  * @brief SQLite database manager with singleton access
  *
  * @details
  * Thread-safe singleton managing SQLite database connection.
  * Uses Qt SQL internally but exposes pure C++ interface.
+ *
+ * Connection pool allows concurrent database access from multiple threads.
+ * Each thread aquires a connection from the pool, uses it, then returns it.
  */
 class DatabaseManager : public IDatabase
 {
@@ -108,6 +145,22 @@ class DatabaseManager : public IDatabase
      */
     bool MigrateSchema(int32_t targetVersion);
 
+    //=============================================================================================
+    // Connection Pool Management
+    //=============================================================================================
+
+    /**
+     * @brief Configure connection pool size
+     * @param poolSize Number of connections in pool (default: 5)
+     */
+    void SetPoolSize(int32_t poolSize);
+
+    /**
+     * @brief Get current pool size
+     * @return Number of connections in pool
+     */
+    int32_t GetPoolSize() const;
+
   private:
     //=============================================================================================
     // Private Constructor (Singleton)
@@ -124,10 +177,42 @@ class DatabaseManager : public IDatabase
 
     // Allow unique_ptr to delete this object.
     friend std::default_delete<DatabaseManager>;
+    friend class PooledConnectionGuard;
 
     //=============================================================================================
     // Private Functions
     //=============================================================================================
+
+    /**
+     * @brief Acquire connection from pool (blocks if none available)
+     * @param timeoutMs Timeout in milliseconds (0 = wait forever)
+     * @return Connection name or empty string on timeout
+     */
+    std::string AcquireConnection(int32_t timeoutMs = 0);
+
+    /**
+     * @brief Release connection back to pool
+     * @param connectionName Connection to release
+     */
+    void ReleaseConnection(const std::string& connectionName);
+
+    /**
+     * @brief Initialize connection pool
+     * @return true if successful
+     */
+    bool InitializePool();
+
+    /**
+     * @brief Destroy connection pool
+     */
+    void DestroyPool();
+
+    /**
+     * @brief Get QSqlDatabase for connection name
+     * @param connectionName Connection name
+     * @return QSqlDatabase reference
+     */
+    QSqlDatabase GetDatabase(const std::string& connectionName);
 
     /**
      * @brief Convert QSqlQuery results to QueryResult
@@ -139,7 +224,7 @@ class DatabaseManager : public IDatabase
     /**
      * @brief Store last error from QSqlDatabase
      */
-    void StoreLastError();
+    void StoreLastError(const std::string& connectionName = "");
 
     /**
      * @brief Execute schema migration SQL
@@ -152,10 +237,14 @@ class DatabaseManager : public IDatabase
     // Private Members
     //=============================================================================================
 
-    std::unique_ptr<QSqlDatabase> m_Database; ///< Qt SQL database connection.
-    mutable std::mutex m_Mutex;               ///< Mutex for thread safety.
-    std::optional<DatabaseError> m_LastError; ///< Last error information.
-    bool m_Connected;                         ///< Connection status.
+    std::string m_DatabasePath;                     ///< Path to database file.
+    std::vector<PooledConnection> m_ConnectionPool; ///< Connection pool.
+    mutable std::mutex m_PoolMutex;                 ///< Mutex for connection pool.
+    std::condition_variable m_PoolCondition;        ///< Condition variable for pool.
+    int32_t m_PoolSize;                             ///< Number of connections in pool.
+    mutable std::mutex m_ErrorMutex;                ///< Mutex for error access;
+    std::optional<DatabaseError> m_LastError;       ///< Last error information.
+    bool m_Connected;                               ///< Connection status.
 
     static std::unique_ptr<DatabaseManager> s_Instance; ///< Singleton instance.
     static std::mutex s_InstanceMutex;                  ///< Mutex for singleton instance creation.
