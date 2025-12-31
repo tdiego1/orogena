@@ -448,29 +448,42 @@ bool ProjectManager::SaveProjectAs(const std::filesystem::path& newPath)
 
     try
     {
-        // Update database filename if path directory changed
         std::filesystem::path new_dir = newPath.parent_path();
         std::filesystem::path old_dir = m_ProjectPath->parent_path();
 
-        if (new_dir != old_dir && m_Database)
+        // Derive new database filename from new project filename
+        std::string new_db_filename = newPath.stem().string() + ".db";
+        std::filesystem::path old_db_path = old_dir / m_ProjectInfo->databaseFilename;
+        std::filesystem::path new_db_path = new_dir / new_db_filename;
+
+        // Copy database to new location with new name (if database file exists and paths differ)
+        if (std::filesystem::exists(old_db_path) && old_db_path != new_db_path)
         {
-            // Copy database to new location
-            std::filesystem::path old_db = old_dir / m_ProjectInfo->databaseFilename;
-            std::filesystem::path new_db = new_dir / m_ProjectInfo->databaseFilename;
+            // Disconnect from database if we have an active connection
+            if (m_Database)
+            {
+                DisconnectDatabase();
+            }
 
-            DisconnectDatabase();
-
-            std::filesystem::copy_file(old_db, new_db,
+            std::filesystem::copy_file(old_db_path, new_db_path,
                                        std::filesystem::copy_options::overwrite_existing);
 
-            if (!ConnectDatabase(new_db))
+            // Reconnect to the new database location if we have a database interface
+            if (m_Database)
             {
-                // Try to reconnect to old database
-                ConnectDatabase(old_db);
-                m_State = ProjectState::MODIFIED;
-                return false;
+                if (!ConnectDatabase(new_db_path))
+                {
+                    // Try to reconnect to old database
+                    ConnectDatabase(old_db_path);
+                    m_State = ProjectState::MODIFIED;
+                    return false;
+                }
             }
         }
+
+        // Always update project name and database filename to match new path
+        m_ProjectInfo->name = newPath.stem().string();
+        m_ProjectInfo->databaseFilename = new_db_filename;
 
         // Update modified timestamp
         m_ProjectInfo->SetModifiedTime(std::chrono::system_clock::now());
