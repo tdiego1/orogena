@@ -169,7 +169,7 @@ class Star
      */
     float32_t GetMaximumAge() const
     {
-        return m_MaxiumAgeGyr;
+        return m_MaximumAgeGyr;
     }
 
     /**
@@ -241,7 +241,7 @@ class Star
      * @param massMsol Mass of the star in Msol
      * @return float32_t Solar luminosity in Lsol
      */
-    float32_t CalculateLuminosityFromMass(float32_t massMsol);
+    static float32_t CalculateLuminosityFromMass(float32_t massMsol);
 
     /**
      * @brief Calculate radius from mass
@@ -249,7 +249,7 @@ class Star
      * @param massMsol Mass of the star in Msol
      * @return float32_t Solar radius in Rsol
      */
-    float32_t CalculateRadiusFromMass(float32_t massMsol);
+    static float32_t CalculateRadiusFromMass(float32_t massMsol);
 
     /**
      * @brief Calculate Maximum age from mass
@@ -257,7 +257,7 @@ class Star
      * @param massMsol Mass of the star in Msol
      * @return float32_t Maximum main sequence lifetime
      */
-    float32_t CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol);
+    static float32_t CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol);
 
     //=============================================================================================
     // Private Members
@@ -271,7 +271,7 @@ class Star
     SpectralType     m_SpectralType;     ///< Spectral classification of the star
     float32_t        m_SpectralSubClass; ///< Spectral subclass (0.0 to 9.0)
     bool             m_IsMainSequence;   ///< Whether star is on main sequence
-    float32_t        m_MaxiumAgeGyr;     ///< Main sequence lifetime (1 Gyr = 1 billion earth years)
+    float32_t        m_MaximumAgeGyr;    ///< Main sequence lifetime (1 Gyr = 1 billion earth years)
     float32_t        m_RadiusRsol;     ///< Radius in solar radii (Our sun = 1.0 Rsol = 695,700 km)
     float32_t        m_LuminosityLsol; ///< Solar luminosity (Our sun = 1.0 Lsol = 3.828 x 10^26 W)
     float32_t        m_DensityDsol;    ///< Star density in Dsol (Our sun = 1.0 Dsol = 1.408 g/cm^3)

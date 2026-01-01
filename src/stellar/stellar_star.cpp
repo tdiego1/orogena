@@ -45,6 +45,12 @@ void Star::RecalculateProperties()
 
     // Calculate radius using mass-radius relation (approximate)
     m_RadiusRsol = CalculateRadiusFromMass(m_MassMsol);
+
+    // Calculate maximum main sequence lifetime
+    m_MaximumAgeGyr = CalculateMaximumAge(m_MassMsol, m_LuminosityLsol);
+
+    // Determine if star is still on main sequence
+    m_IsMainSequence = (m_CurrentAgeGyr < m_MaximumAgeGyr);
 }
 
 //=================================================================================================
