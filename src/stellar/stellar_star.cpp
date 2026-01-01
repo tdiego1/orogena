@@ -205,4 +205,36 @@ float32_t Star::CalculateDensity(float32_t massMsol, float32_t radiusRsol)
     return density_dsol;
 }
 
+float32_t Star::CalculateTemperature(float32_t luminosityLsol, float32_t radiusRsol)
+{
+    // Calculate effective temperature using Stefan-Boltzmann law
+    // T = Tsol * (L/R^2)^0.25
+    // Where Tsol = 5776 K (Sun's effective temperature)
+
+    // Constants
+    static constexpr float32_t c_solar_temp_k = 5776.0F; // Kelvin
+    static constexpr float32_t c_min_radius_rsol = 0.001F;
+    static constexpr float32_t c_stefan_boltzmann_exponent = 0.25F; // 1/4 power
+
+    // Validate input radius
+    if (radiusRsol < c_min_radius_rsol)
+    {
+        Log::Warn("Star radius too small ({} Rsol) for temperature calculation, clamping",
+                  radiusRsol);
+        radiusRsol = c_min_radius_rsol;
+    }
+
+    // Calculate R^2
+    const float32_t c_radius_squared = radiusRsol * radiusRsol;
+
+    // Calculate luminosity-to-area ratio
+    const float32_t c_lum_per_area = luminosityLsol / c_radius_squared;
+
+    // Apply Stefan-Boltzmann law: T = Tsol * (L/A)^0.25
+    const float32_t c_temperature_k =
+        c_solar_temp_k * std::pow(c_lum_per_area, c_stefan_boltzmann_exponent);
+
+    return c_temperature_k;
+}
+
 } // namespace Orogena::Stellar

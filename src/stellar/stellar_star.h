@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "utils/utils_types.h"
@@ -205,9 +206,9 @@ class Star
     /**
      * @brief Get star effective temperature
      *
-     * @return uint32_t Temperature in Kelvin (K)
+     * @return float32_t Temperature in Kelvin (K)
      */
-    uint32_t GetTemperature() const
+    float32_t GetTemperature() const
     {
         return m_TemperatureK;
     }
@@ -268,6 +269,15 @@ class Star
      */
     static float32_t CalculateDensity(float32_t massMsol, float32_t radiusRsol);
 
+    /**
+     * @brief Calculate temperature
+     *
+     * @param luminosityLsol Solar luminosity in Lsol
+     * @param radiusRsol Solar radius in Rsol
+     * @return float32_t Temperature of star in kelvin
+     */
+    static float32_t CalculateTemperature(float32_t luminosityLsol, float32_t radiusRsol);
+
     //=============================================================================================
     // Private Members
     //=============================================================================================
@@ -284,7 +294,7 @@ class Star
     float32_t        m_RadiusRsol;     ///< Radius in solar radii (Our sun = 1.0 Rsol = 695,700 km)
     float32_t        m_LuminosityLsol; ///< Solar luminosity (Our sun = 1.0 Lsol = 3.828 x 10^26 W)
     float32_t        m_DensityDsol;    ///< Star density in Dsol (Our sun = 1.0 Dsol = 1.408 g/cm^3)
-    uint32_t         m_TemperatureK;   ///< Effective temperature in Kelvin
+    float32_t        m_TemperatureK;   ///< Effective temperature in Kelvin
     Utils::ColorRGBF m_ColorRGB;       ///< Star color as RGB (0.0-1.0), derived from temperature
 };
 
