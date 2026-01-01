@@ -1,10 +1,12 @@
 /**************************************************************************************************/
 /**
  * @file stellar_star.h
- * @brief Brief description
+ * @brief Star class definition with stellar properties and classification
  *
  * @details
- * Detailed description of the class purpose and responsibilities.
+ * Defines the Star class representing a star with properties such as mass, age, spectral type,
+ * luminosity, radius, temperature, and color. Provides methods to recalculate derived properties
+ * based on mass and age, following standard astrophysical models.
  *
  * @author Diego Torres
  * @date 2026
@@ -27,10 +29,12 @@ namespace Orogena::Stellar
 {
 
 /**
- * @brief Brief description of the class
+ * @brief Star class representing stellar properties and classification
  *
  * @details
- * Detailed explanation of what this class does and its responsibilities.
+ * The Star class encapsulates properties of a star including mass, age, spectral type,
+ * luminosity, radius, temperature, and color. It provides methods to recalculate derived
+ * properties based on mass and age, following standard astrophysical models.
  */
 class Star
 {
@@ -230,6 +234,14 @@ class Star
     //=============================================================================================
     // Private Functions
     //=============================================================================================
+
+    /**
+     * @brief Caclulate luminosity from mass
+     *
+     * @param massMsol Mass of the star in Msol
+     * @return float32_t Solar luminosity in Lsol
+     */
+    float32_t CalculateLuminosityFromMass(float32_t massMsol);
 
     //=============================================================================================
     // Private Members
