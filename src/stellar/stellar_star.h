@@ -243,6 +243,22 @@ class Star
      */
     float32_t CalculateLuminosityFromMass(float32_t massMsol);
 
+    /**
+     * @brief Calculate radius from mass
+     *
+     * @param massMsol Mass of the star in Msol
+     * @return float32_t Solar radius in Rsol
+     */
+    float32_t CalculateRadiusFromMass(float32_t massMsol);
+
+    /**
+     * @brief Calculate Maximum age from mass
+     *
+     * @param massMsol Mass of the star in Msol
+     * @return float32_t Maximum main sequence lifetime
+     */
+    float32_t CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol);
+
     //=============================================================================================
     // Private Members
     //=============================================================================================
