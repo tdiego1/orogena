@@ -1,4 +1,22 @@
+#[[************************************************************************************************/
+/**
+ * @brief CMake configuration for the Orogena project.
+ *
+ * @author Diego Torres
+ * @date 2025
+ * @copyright Copyright (C) 2025 Diego Torres. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+/************************************************************************************************]]#
+
+#===================================================================================================
 # Core library (shared by all components)
+#===================================================================================================
+
 add_library(orogena_core
     core/core_application.cpp
     core/core_project.cpp
@@ -11,7 +29,25 @@ target_link_libraries(orogena_core
         nlohmann_json::nlohmann_json
 )
 
+#===================================================================================================
+# Stellar system library
+#===================================================================================================
+
+add_library(orogena_stellar
+    stellar/stellar_star.cpp
+    stellar/stellar_system.cpp
+    stellar/stellar_habitable_zone.cpp
+)
+
+target_link_libraries(orogena_stellar
+    PUBLIC
+        orogena_core
+)
+
+#===================================================================================================
 # Global simulation library (Scale 1)
+#===================================================================================================
+
 add_library(orogena_global
     global/global_tectonic_sim.cpp
     global/global_plate_manager.cpp
@@ -25,7 +61,10 @@ target_link_libraries(orogena_global
         glm::glm
 )
 
+#===================================================================================================
 # Region generation library (Scale 2)
+#===================================================================================================
+
 add_library(orogena_region
     region/region_manager.cpp
     region/region_stream_erosion.cpp
@@ -38,7 +77,10 @@ target_link_libraries(orogena_region
         orogena_global
 )
 
+#===================================================================================================
 # Local detail library (Scale 3)
+#===================================================================================================
+
 add_library(orogena_local
     local/local_detail_synthesizer.cpp
     local/local_geo_aware_noise.cpp
@@ -49,7 +91,10 @@ target_link_libraries(orogena_local
         orogena_region
 )
 
-# render library
+#===================================================================================================
+# Render library
+#===================================================================================================
+
 add_library(orogena_render
     render/render_multiscale.cpp
     render/render_heightmap.cpp
@@ -65,6 +110,10 @@ target_link_libraries(orogena_render
         OpenGL::GL
         orogena_local
 )
+
+#===================================================================================================
+# GUI library
+#===================================================================================================
 
 # GUI library
 add_library(orogena_gui
@@ -82,6 +131,10 @@ target_link_libraries(orogena_gui
         orogena_render
 )
 
+#===================================================================================================
+# Database library
+#===================================================================================================
+
 # Database library
 add_library(orogena_database
     database/database_manager.cpp
@@ -95,6 +148,10 @@ target_link_libraries(orogena_database
         orogena_utils
 )
 
+#===================================================================================================
+# Utilities library
+#===================================================================================================
+
 # Utilities library
 add_library(orogena_utils
     utils/utils_logger.cpp
@@ -106,7 +163,10 @@ target_link_libraries(orogena_utils
         spdlog::spdlog
 )
 
+#===================================================================================================
 # Main executable
+#===================================================================================================
+
 add_executable(orogena
     main.cpp
 )
