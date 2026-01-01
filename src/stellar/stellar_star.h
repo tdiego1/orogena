@@ -259,6 +259,15 @@ class Star
      */
     static float32_t CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol);
 
+    /**
+     * @brief Calculate density
+     *
+     * @param massMsol Mass of the star in Msol
+     * @param radiusRsol Radius of star in Rsol
+     * @return float32_t Density of star
+     */
+    static float32_t CalculateDensity(float32_t massMsol, float32_t radiusRsol);
+
     //=============================================================================================
     // Private Members
     //=============================================================================================

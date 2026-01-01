@@ -11,6 +11,8 @@
 
 #include "stellar_star.h"
 
+#include "utils/utils_logger.h"
+
 #include <cmath>
 
 namespace Orogena::Stellar
@@ -45,6 +47,9 @@ void Star::RecalculateProperties()
 
     // Calculate radius using mass-radius relation (approximate)
     m_RadiusRsol = CalculateRadiusFromMass(m_MassMsol);
+
+    // Calculate density from mass and radius
+    m_DensityDsol = CalculateDensity(m_MassMsol, m_RadiusRsol);
 
     // Calculate maximum main sequence lifetime
     m_MaximumAgeGyr = CalculateMaximumAge(m_MassMsol, m_LuminosityLsol);
@@ -167,6 +172,37 @@ float32_t Star::CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol
     float32_t lifetimeGyr = c_SolarLifetimeGyr * (massMsol * hydrogenFraction) / luminosityLsol;
 
     return lifetimeGyr;
+}
+
+float32_t Star::CalculateDensity(float32_t massMsol, float32_t radiusRsol)
+{
+    // Density calculation: Density = M / R^3 in solar units
+
+    // Constants for validation
+    static constexpr float32_t c_MinRadiusRsol = 0.001F;
+    static constexpr float32_t c_MaxDensityDsol = 10000.0F;
+
+    // Validate input radius
+    if (radiusRsol < c_MinRadiusRsol)
+    {
+        Log::Warn("Star radius too small ({} Rsol), clamping to minimum", radiusRsol);
+        radiusRsol = c_MinRadiusRsol;
+    }
+
+    // Calculate R^3
+    const float32_t radius_cubed = radiusRsol * radiusRsol * radiusRsol;
+
+    // Density in solar units
+    const float32_t density_dsol = massMsol / radius_cubed;
+
+    // Sanity check: clamp to resonable maximum
+    if (density_dsol > c_MaxDensityDsol)
+    {
+        Log::Warn("Calculated density {} Dsol exceeds maximum, clamping", density_dsol);
+        return c_MaxDensityDsol;
+    }
+
+    return density_dsol;
 }
 
 } // namespace Orogena::Stellar
