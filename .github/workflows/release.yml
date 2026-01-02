@@ -68,7 +68,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.8.*'
-        modules: 'qtbase qtsvg'
+        modules: 'qtsvg'
         cache: true
         arch: ${{ matrix.os == 'windows-latest' && 'win64_msvc2022_64' || '' }}
 
