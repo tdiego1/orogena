@@ -42,20 +42,21 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Cache vcpkg packages
+    - name: Create vcpkg cache directory
+      run: mkdir -p ${{ runner.temp }}/vcpkg-cache
+
+    - name: Cache vcpkg binary packages
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ github.workspace }}/vcpkg_cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ runner.temp }}/vcpkg-cache
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
+        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
 
     - name: Configure CMake (CI preset)
       run: |
@@ -98,20 +99,22 @@ jobs:
         cache: true
         arch: 'win64_msvc2022_64'
 
-    - name: Cache vcpkg packages
+    - name: Create vcpkg cache directory
+      run: New-Item -ItemType Directory -Force -Path ${{ runner.temp }}\vcpkg-cache
+      shell: pwsh
+
+    - name: Cache vcpkg binary packages
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ github.workspace }}/vcpkg_cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ runner.temp }}/vcpkg-cache
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
+        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -153,21 +156,22 @@ jobs:
       with:
         version: '6.8.*'
         cache: true
-    
-    - name: Cache vcpkg packages
+
+    - name: Create vcpkg cache directory
+      run: mkdir -p ${{ runner.temp }}/vcpkg-cache
+
+    - name: Cache vcpkg binary packages
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ github.workspace }}/vcpkg_cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ runner.temp }}/vcpkg-cache
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
-        VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
+        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
 
     - name: Configure CMake (CI preset)
       run: |
@@ -181,12 +185,24 @@ jobs:
     - name: Run tests
       run: ctest --preset ci --output-on-failure
 
-    - name: Upload build artifacts
+    - name: Upload test results
+      if: always()  # Upload even if tests pass
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ runner.os }}
+        path: build/ci/Testing/
+        retention-days: 14
+        if-no-files-found: ignore
+
+    - name: Upload build logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: build-logs-macos
-        path: build/ci/
+        name: build-logs-${{ runner.os }}
+        path: |
+          build/ci/CMakeFiles/CMakeOutput.log
+          build/ci/CMakeFiles/CMakeError.log
+          build/ci/**/*.log
         retention-days: 7
         if-no-files-found: ignore
 
