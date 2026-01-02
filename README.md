@@ -51,7 +51,7 @@ Orogena is a professional-grade worldbuilding application following [Artifexian'
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/orogena.git
+git clone https://github.com/tdiego1/orogena.git
 cd orogena
 
 # Setup vcpkg (first time only)
@@ -146,14 +146,13 @@ orogena/
 
 ### Getting Started
 - **[SETUP.md](SETUP.md)** - First-time setup guide (start here!)
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Basic usage tutorial
 - **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - Comprehensive CMake Presets guide
-- **[PRESETS_SUMMARY.md](PRESETS_SUMMARY.md)** - Quick preset reference
 
 ### Development
 - [Software Development Plan v2.0](docs/001_sdp_orogena_v2.md) - Complete 12-phase roadmap
 - [Coding Standard](docs/002_coding_standard.md) - Code style guide
 - [Design Standard](docs/003_design_standard.md) - Architecture patterns
-- [CLAUDE.md](CLAUDE.md) - AI-assisted development guide
 
 ---
 
@@ -196,7 +195,29 @@ Contributions are welcome! Please read the coding and design standards before su
 
 ## License
 
-[License TBD]
+Orogena is dual-licensed:
+
+### For Personal & Open Source Use
+
+This project is free software licensed under the **GNU Public License v3.0 (GPL-3.0)**. You can freely use, modify, and distribute this software for personal, educational, and open-source projects.
+See [LICENSE](LICENSE) for the full GPL-3.0 text.
+
+### For Commercial Use
+
+If you want to use Orogena in a commercial, closed-source project (such as a commercial game or proprietary application) without complying with GPL-3.0 requirements, you must obtain a **commercial license**.
+
+**Contact** tdiego001@gmail.com for commercial licensing inquiries.
+
+### Third-Party Licenses
+
+Orogena uses the following open-source libraries:
+- **Qt 6** - LGPL v3 (dynamically linked)
+- **GLM** - MIT License
+- **spdlog** - MIT License
+- **nlohmann-json** - MIT License
+- **libassert** - MIT License
+- **SQLite** - Public Domain
+- **GoogleTest** - BSD 3-Clause License
 
 ---
 
