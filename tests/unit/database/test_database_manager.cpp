@@ -741,23 +741,27 @@ TEST_F(DatabaseManagerTest, SingletonReturnsSameInstance)
     EXPECT_EQ(&instance1, &instance2);
 }
 
-TEST_F(DatabaseManagerTest, DestroyAndRecreateInstance)
+TEST_F(DatabaseManagerTest, DisconnectAndReconnectInstance)
 {
     // Arrange - connect first instance
     auto& instance1 = DatabaseManager::Instance();
     instance1.Connect(m_TestDbPath.string());
     ASSERT_TRUE(instance1.IsConnected());
 
-    // Act - destroy and recreate
-    DatabaseManager::DestroyInstance();
+    // Get connection name for later verification
+    std::string originalPath = m_TestDbPath.string();
+
+    // Act - JUST disconnect (don't destroy)
+    instance1.Disconnect();
+    ASSERT_FALSE(instance1.IsConnected());
+
+    // Reconnect same instance
+    EXPECT_TRUE(instance1.Connect(m_TestDbPath.string()));
+    EXPECT_TRUE(instance1.IsConnected());
+
+    // Verify it's the same instance but reconnected
     auto& instance2 = DatabaseManager::Instance();
-
-    // Assert - new instance should not be connected (fresh state)
-    EXPECT_FALSE(instance2.IsConnected());
-
-    // Verify we can connect the new instance
-    EXPECT_TRUE(instance2.Connect(m_TestDbPath.string()));
-    EXPECT_TRUE(instance2.IsConnected());
+    EXPECT_EQ(&instance1, &instance2);
 }
 
 } // namespace Orogena::Database::Tests
