@@ -1,7 +1,0 @@
-# .github/labeler.yml
-test:
-  - tests/**/*
-
-docs:
-  - docs/**/*
-  - '**/*.md'
