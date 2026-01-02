@@ -12,6 +12,7 @@
 #include "stellar_star.h"
 
 #include "utils/utils_logger.h"
+#include "utils/utils_types.h"
 
 #include <cmath>
 
@@ -21,6 +22,78 @@ namespace Orogena::Stellar
 //=================================================================================================
 // Static Member Initialization
 //=================================================================================================
+
+// Blackbody color table based on Mitchell Charity's work
+// Source: http://www.vendian.org/mncharity/dir3/blackbody/
+//
+// These values are computed from Planck's law and CIE color matching functions,
+// converted to sRGB color space with D58 white point.
+//
+// Temperature (K) -> RGB (0-1 scale, sRGB)
+static constexpr struct ColorEntry
+{
+    float32_t        temperatureK;
+    Utils::ColorRGBF color;
+} c_ColorTable[] = {
+    // Red dwarfs (M-type)
+    {1000.0F, {1.0000F, 0.0402F, 0.0000F}},
+    {1500.0F, {1.0000F, 0.1801F, 0.0000F}},
+    {2000.0F, {1.0000F, 0.2996F, 0.0041F}},
+    {2500.0F, {1.0000F, 0.4317F, 0.0735F}},
+    {3000.0F, {1.0000F, 0.5512F, 0.1765F}},
+    {3500.0F, {1.0000F, 0.6575F, 0.3042F}},
+
+    // Orange/red dwarfs (K-type)
+    {4000.0F, {1.0000F, 0.7512F, 0.4481F}},
+    {4500.0F, {1.0000F, 0.8331F, 0.6005F}},
+
+    // Yellow stars (G-type, Sun-like)
+    {5000.0F, {1.0000F, 0.9046F, 0.7559F}},
+    {5500.0F, {1.0000F, 0.9668F, 0.9098F}},
+    {5772.0F, {1.0000F, 0.9180F, 0.8400F}}, // Sun (exact)
+    {6000.0F, {0.9438F, 0.9636F, 1.0000F}},
+    {6500.0F, {0.8313F, 0.8878F, 1.0000F}},
+
+    // White stars (F-type)
+    {7000.0F, {0.7467F, 0.8283F, 1.0000F}},
+    {7500.0F, {0.6814F, 0.7804F, 1.0000F}},
+
+    // Blue-white stars (A-type)
+    {8000.0F, {0.6297F, 0.7412F, 1.0000F}},
+    {8500.0F, {0.5880F, 0.7085F, 1.0000F}},
+    {9000.0F, {0.5538F, 0.6809F, 1.0000F}},
+    {9500.0F, {0.5253F, 0.6574F, 1.0000F}},
+    {10000.0F, {0.5013F, 0.6372F, 1.0000F}},
+
+    // Blue stars (B-type)
+    {10500.0F, {0.4808F, 0.6196F, 1.0000F}},
+    {11000.0F, {0.4631F, 0.6041F, 1.0000F}},
+    {11500.0F, {0.4478F, 0.5905F, 1.0000F}},
+    {12000.0F, {0.4344F, 0.5784F, 1.0000F}},
+    {12500.0F, {0.4226F, 0.5676F, 1.0000F}},
+    {13000.0F, {0.4120F, 0.5578F, 1.0000F}},
+    {13500.0F, {0.4027F, 0.5491F, 1.0000F}},
+    {14000.0F, {0.3943F, 0.5411F, 1.0000F}},
+    {14500.0F, {0.3867F, 0.5339F, 1.0000F}},
+    {15000.0F, {0.3798F, 0.5273F, 1.0000F}},
+
+    // Hot blue stars (O-type)
+    {16000.0F, {0.3678F, 0.5156F, 1.0000F}},
+    {17000.0F, {0.3578F, 0.5057F, 1.0000F}},
+    {18000.0F, {0.3493F, 0.4972F, 1.0000F}},
+    {19000.0F, {0.3419F, 0.4898F, 1.0000F}},
+    {20000.0F, {0.3356F, 0.4833F, 1.0000F}},
+
+    {22000.0F, {0.3251F, 0.4724F, 1.0000F}},
+    {24000.0F, {0.3168F, 0.4638F, 1.0000F}},
+    {26000.0F, {0.3101F, 0.4567F, 1.0000F}},
+    {28000.0F, {0.3046F, 0.4509F, 1.0000F}},
+    {30000.0F, {0.3000F, 0.4459F, 1.0000F}},
+
+    {35000.0F, {0.2912F, 0.4364F, 1.0000F}},
+    {40000.0F, {0.2850F, 0.4296F, 1.0000F}}};
+
+static constexpr int32_t c_ColorTableSize = sizeof(c_ColorTable) / sizeof(c_ColorTable[0]);
 
 //=================================================================================================
 // Constructors/Destructor
@@ -235,6 +308,44 @@ float32_t Star::CalculateTemperature(float32_t luminosityLsol, float32_t radiusR
         c_solar_temp_k * std::pow(c_lum_per_area, c_stefan_boltzmann_exponent);
 
     return c_temperature_k;
+}
+
+Utils::ColorRGBF Star::CalculateColorFromTemperature(float32_t temperatureK)
+{
+    // Handle edge cases
+    if (temperatureK <= c_ColorTable[0].temperatureK)
+    {
+        return c_ColorTable[0].color;
+    }
+
+    if (temperatureK >= c_ColorTable[c_ColorTableSize - 1].temperatureK)
+    {
+        return c_ColorTable[c_ColorTableSize - 1].color;
+    }
+
+    // Find bracketing entries for linear interpolation
+    for (int32_t i = 0; i < c_ColorTableSize - 1; ++i)
+    {
+        if (temperatureK >= c_ColorTable[i].temperatureK &&
+            temperatureK <= c_ColorTable[i + 1].temperatureK)
+        {
+            // Linear interpolation
+            const float32_t t = (temperatureK - c_ColorTable[i].temperatureK) /
+                                (c_ColorTable[i + 1].temperatureK - c_ColorTable[i].temperatureK);
+
+            Utils::ColorRGBF color;
+            color.r = c_ColorTable[i].color.r +
+                      t * (c_ColorTable[i + 1].color.r - c_ColorTable[i].color.r);
+            color.g = c_ColorTable[i].color.g +
+                      t * (c_ColorTable[i + 1].color.g - c_ColorTable[i].color.g);
+            color.b = c_ColorTable[i].color.b +
+                      t * (c_ColorTable[i + 1].color.b - c_ColorTable[i].color.b);
+
+            return color;
+        }
+    }
+    // Should never reach here
+    return c_ColorTable[c_ColorTableSize / 2].color;
 }
 
 } // namespace Orogena::Stellar

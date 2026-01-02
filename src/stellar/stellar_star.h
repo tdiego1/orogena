@@ -278,6 +278,14 @@ class Star
      */
     static float32_t CalculateTemperature(float32_t luminosityLsol, float32_t radiusRsol);
 
+    /**
+     * @brief Calculate color from temperature using blackbody approximation
+     *
+     * @param temperatureK Temperature in kelvin
+     * @return Utils::ColorRGBF Color of star
+     */
+    static Utils::ColorRGBF CalculateColorFromTemperature(float32_t temperatureK);
+
     //=============================================================================================
     // Private Members
     //=============================================================================================
