@@ -26,6 +26,8 @@
 
 #include "stellar_star.h"
 
+#include <algorithm>
+
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
 
