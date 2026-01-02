@@ -86,6 +86,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install Ninja
+      run: choco install ninja
+
     - name: Install Qt 6
       uses: jurplel/install-qt-action@v4
       with:

@@ -16,10 +16,6 @@
                     "type": "FILEPATH",
                     "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
                 },
-                "CMAKE_MAKE_PROGRAM": {
-                    "type": "FILEPATH",
-                    "value": "/usr/bin/ninja"
-                },
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
