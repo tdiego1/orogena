@@ -246,7 +246,7 @@ float32_t Star::CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol
     // Lifetime = (Fuel Supply / Burn Rate) x Efficiency Factor
 
     // Solar lifetime baseline (Gyr)
-    static constexpr float32_t c_SolarLifetimeGyr = 10.0F;
+    static constexpr float32_t c_SolarLifetimeGyr = 100.0F;
 
     // Mass thresholds for efficiency correction
     static constexpr float32_t c_LowMassThreshold = 0.5F;
@@ -272,8 +272,8 @@ float32_t Star::CalculateMaximumAge(float32_t massMsol, float32_t luminosityLsol
         hydrogenFraction = 0.07F;
     }
 
-    // Calculate lifetime: (Mass x Fuel Fraction / Luminosity) x Solar Constant
-    // The formula naturally gives ~10 Gyr for the Sun (M=1, L=1, fraction=0.1)
+    // Calculate lifetime:
+    // For solar-type stars:
     float32_t lifetimeGyr = c_SolarLifetimeGyr * (massMsol * hydrogenFraction) / luminosityLsol;
 
     return lifetimeGyr;
