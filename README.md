@@ -176,14 +176,14 @@ orogena/
 
 ## Development Status
 
-**Current Phase**: Phase 0 - Foundation Completion
+**Current Phase**: Phase 1 - Stellar Foundation
 
 ### Roadmap
 
 | Phase | Milestone | Status |
 |-------|-----------|--------|
-| **0** | Foundation (database, settings, viewport) | In Progress |
-| **1** | Stellar Foundation | Planned |
+| ~~**0**~~ | ~~Foundation (database, settings, viewport)~~ | ~~DONE~~ |
+| **1** | Stellar Foundation | In Progress |
 | **2** | Planetary Parameters | Planned |
 | **3** | Enhanced Plate Tectonics | Planned |
 | **4** | Topography Generation | **MVP v1.0** |
