@@ -9,14 +9,21 @@
 <p align="center">Complete Worldbuilding Suite</p>
 
 <p align="center">
-
-[![Linux](https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=Linux&logo=linux)](https://github.com/tdiego1/orogena/actions/workflows/ci.yml)
-[![Windows](https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=Windows&logo=windows)](https://github.com/tdiego1/orogena/actions/workflows/ci.yml)
-[![macOS](https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=macOS&logo=apple)](https://github.com/tdiego1/orogena/actions/workflows/ci.yml)
-
-[![License](https://img.shields.io/badge/license-GPL--3.0%20%7C%20Commercial-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/tdiego1/orogena?include_prereleases)](https://github.com/tdiego1/orogena/releases)
-
+    <a href="https://github.com/tdiego1/orogena/actions/workflows/ci.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=Linux&logo=linux" alt="Linux Build">
+    </a>
+    <a href="https://github.com/tdiego1/orogena/actions/workflows/ci.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=Windows&logo=windows" alt="Windows Build">
+    </a>
+    <a href="https://github.com/tdiego1/orogena/actions/workflows/ci.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/tdiego1/orogena/ci.yml?branch=develop&label=macOS&logo=apple" alt="macOS Build">
+    </a>
+    <a href="LICENSE">
+        <img src="https://img.shields.io/badge/license-GPL--3.0%20%7C%20Commercial-blue.svg" alt="License">
+    </a>
+    <a href="https://github.com/tdiego1/orogena/releases">
+        <img src="https://img.shields.io/github/v/release/tdiego1/orogena?include_prereleases" alt="Release">
+    </a>
 </p>
 
 ## Overview
