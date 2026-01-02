@@ -33,6 +33,7 @@
 #include <gtest/gtest.h>
 #include <numbers>
 #include <regex>
+#include <thread>
 
 using namespace Orogena::Utils;
 
