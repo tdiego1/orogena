@@ -149,7 +149,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        brew install ninja llvm
+        brew install ninja
 
     - name: Install Qt 6
       uses: jurplel/install-qt-action@v4
@@ -174,10 +174,7 @@ jobs:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
 
     - name: Configure CMake (CI preset)
-      run: |
-        export CC=$(brew --prefix llvm)/bin/clang
-        export CXX=$(brew --prefix llvm)/bin/clang++
-        cmake --preset ci
+      run: cmake --preset ci
 
     - name: Build
       run: cmake --build --preset ci -j$(sysctl -n hw.ncpu)

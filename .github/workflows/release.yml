@@ -62,7 +62,7 @@ jobs:
 
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
-      run: brew install ninja llvm
+      run: brew install ninja
 
     - name: Install Qt 6
       uses: jurplel/install-qt-action@v4
