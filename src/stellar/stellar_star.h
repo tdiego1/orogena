@@ -137,6 +137,13 @@ class Star
     }
 
     /**
+     * @brief Get star spectral type string
+     *
+     * @return std::string Spectral type as string
+     */
+    std::string GetSpectralTypeString() const;
+
+    /**
      * @brief Get star spectral subclass
      *
      * @return float32_t Spectral subclass (0.0 to 9.0)
@@ -145,13 +152,6 @@ class Star
     {
         return m_SpectralSubClass;
     }
-
-    /**
-     * @brief Get spectral classification as string
-     *
-     * @return std::string Spectral type as string (e.g., "G2.8")
-     */
-    std::string GetSpectralClassString() const;
 
     /**
      * @brief Get bool indicating if star is on main sequence.
@@ -285,6 +285,17 @@ class Star
      * @return Utils::ColorRGBF Color of star
      */
     static Utils::ColorRGBF CalculateColorFromTemperature(float32_t temperatureK);
+
+    /**
+     * @brief Calculate spectral classification
+     *
+     * @param spectralType Output spectral type (O, B, A, etc.)
+     * @param spectralSubClass Output spectral subclass (0.0 to 9.0)
+     * @param temperatureK Temperature in kelvin
+     */
+    static void CalculateSpectralClass(SpectralType& spectralType,
+                                       float32_t&    spectralSubClass,
+                                       float32_t     temperatureK);
 
     //=============================================================================================
     // Private Members

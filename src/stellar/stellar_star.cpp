@@ -124,11 +124,43 @@ void Star::RecalculateProperties()
     // Calculate density from mass and radius
     m_DensityDsol = CalculateDensity(m_MassMsol, m_RadiusRsol);
 
+    // Calculate temperature from luminosity and radius
+    m_TemperatureK = CalculateTemperature(m_LuminosityLsol, m_RadiusRsol);
+
+    // Calculate spectral classification from temperature
+    CalculateSpectralClass(m_SpectralType, m_SpectralSubClass, m_TemperatureK);
+
+    // Calculate color from temperature using blackbody approximation
+    m_ColorRGB = CalculateColorFromTemperature(m_TemperatureK);
+
     // Calculate maximum main sequence lifetime
     m_MaximumAgeGyr = CalculateMaximumAge(m_MassMsol, m_LuminosityLsol);
 
     // Determine if star is still on main sequence
     m_IsMainSequence = (m_CurrentAgeGyr < m_MaximumAgeGyr);
+}
+
+std::string Star::GetSpectralTypeString() const
+{
+    switch (m_SpectralType)
+    {
+        case SpectralType::O:
+            return "O";
+        case SpectralType::B:
+            return "B";
+        case SpectralType::A:
+            return "A";
+        case SpectralType::F:
+            return "F";
+        case SpectralType::G:
+            return "G";
+        case SpectralType::K:
+            return "K";
+        case SpectralType::M:
+            return "M";
+        default:
+            return "Unknown";
+    }
 }
 
 //=================================================================================================
@@ -346,6 +378,82 @@ Utils::ColorRGBF Star::CalculateColorFromTemperature(float32_t temperatureK)
     }
     // Should never reach here
     return c_ColorTable[c_ColorTableSize / 2].color;
+}
+
+void Star::CalculateSpectralClass(SpectralType& spectralType,
+                                  float32_t&    spectralSubClass,
+                                  float32_t     temperatureK)
+{
+    // Spectral type temperature ranges (Kelvin)
+    // Based on Morgan-Keenan (MK) classification system
+
+    // Temperature boundaries between spectral types
+    static constexpr float32_t c_temp_O_B = 30000.0F; // O/B boundary
+    static constexpr float32_t c_temp_B_A = 10000.0F; // B/A boundary
+    static constexpr float32_t c_temp_A_F = 7500.0F;  // A/F boundary
+    static constexpr float32_t c_temp_F_G = 6000.0F;  // F/G boundary
+    static constexpr float32_t c_temp_G_K = 5200.0F;  // G/K boundary
+    static constexpr float32_t c_temp_K_M = 3700.0F;  // K/M boundary
+
+    // Determine spectral type and calculate subclass
+    if (temperatureK >= c_temp_O_B)
+    {
+        // O-type: 30,000K to ~50,000K
+        spectralType = SpectralType::O;
+        // Map temperature to subclass (0-9)
+        // O stars range from O9 (coolest) to O0 (hottest)
+        float32_t fraction = (temperatureK - c_temp_O_B) / (50000.0F - c_temp_O_B);
+        spectralSubClass = 9.0F - (fraction * 9.0F); // Inverted: higher temp = lower number
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else if (temperatureK >= c_temp_B_A)
+    {
+        // B-type: 10,000K to 30,000K
+        spectralType = SpectralType::B;
+        float32_t fraction = (temperatureK - c_temp_B_A) / (c_temp_O_B - c_temp_B_A);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else if (temperatureK >= c_temp_A_F)
+    {
+        // A-type: 7,500K to 10,000K
+        spectralType = SpectralType::A;
+        float32_t fraction = (temperatureK - c_temp_A_F) / (c_temp_B_A - c_temp_A_F);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else if (temperatureK >= c_temp_F_G)
+    {
+        // F-type: 6,000K to 7,500K
+        spectralType = SpectralType::F;
+        float32_t fraction = (temperatureK - c_temp_F_G) / (c_temp_A_F - c_temp_F_G);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else if (temperatureK >= c_temp_G_K)
+    {
+        // G-type: 5,200K to 6,000K (Sun is G2)
+        spectralType = SpectralType::G;
+        float32_t fraction = (temperatureK - c_temp_G_K) / (c_temp_F_G - c_temp_G_K);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else if (temperatureK >= c_temp_K_M)
+    {
+        // K-type: 3,700K to 5,200K
+        spectralType = SpectralType::K;
+        float32_t fraction = (temperatureK - c_temp_K_M) / (c_temp_G_K - c_temp_K_M);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
+    else
+    {
+        // M-type: <3,700K to ~2,400K
+        spectralType = SpectralType::M;
+        float32_t fraction = (temperatureK - 2400.0F) / (c_temp_K_M - 2400.0F);
+        spectralSubClass = 9.0F - (fraction * 9.0F);
+        spectralSubClass = std::clamp(spectralSubClass, 0.0F, 9.0F);
+    }
 }
 
 } // namespace Orogena::Stellar
