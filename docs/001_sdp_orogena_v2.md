@@ -395,12 +395,21 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 - Day length, year length from orbital parameters
 - Parameter validation with warnings for unphysical values
 
+**Rendering Updates** (`orogena_render`):
+- Basic sphere rendering with OpenGL
+- Camera system (arcball rotation, zoom)
+- Simple lighting (directional light)
+- Wireframe/solid toggle
+
 **Key Files**:
 - `src/stellar/stellar_star.cpp/.h`
 - `src/stellar/stellar_system.cpp/.h`
 - `src/stellar/stellar_habitable_zone.cpp/.h`
+- `src/render/render_sphere.cpp/.h`
+- `src/render/render_camera.cpp/.h`
+- `src/render/render_shader.cpp/.h`
 
-**Deliverable**: Stellar system configuration with validated parameters.
+**Deliverable**: Stellar system configuration with validated parameters + basic 3D sphere visualization.
 
 ---
 
@@ -417,13 +426,21 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 - Tidal force calculations from moons + star
 - Seasonal variation from axial tilt
 
+**Rendering Updates** (`orogena_render`):
+- Icosphere mesh generation (subdivision-based)
+- Texture coordinate mapping (UV sphere)
+- Basic color mapping (water = blue, land = green placeholder)
+- Orbit visualization for moon(s)
+
 **Key Files**:
 - `src/planetary/planetary_parameters.cpp/.h`
 - `src/planetary/planetary_moon.cpp/.h`
 - `src/planetary/planetary_tides.cpp/.h`
 - `src/planetary/planetary_seasons.cpp/.h`
+- `src/render/render_icosphere.cpp/.h`
+- `src/render/render_mesh.cpp/.h`
 
-**Deliverable**: Complete planet configuration with calculated tides and seasons.
+**Deliverable**: Complete planet configuration with calculated tides and seasons + textured sphere rendering.
 
 ---
 
@@ -442,6 +459,13 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 - **Week 14-15**: Hotspot volcanism (mantle plumes, island chains)
 - **Week 15-16**: Full geological history timeline with events
 
+**Rendering Updates** (`orogena_render`):
+- Plate boundary visualization (colored lines/edges)
+- Velocity vector field rendering (arrows on sphere)
+- Animation system for plate motion playback
+- Time slider for geological history scrubbing
+- Color-coded plates (continental vs oceanic)
+
 **Key Files**:
 - `src/global/global_supercontinent.cpp/.h`
 - `src/global/global_subduction.cpp/.h`
@@ -449,14 +473,17 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 - `src/global/global_hotspot.cpp/.h`
 - `src/global/global_lip.cpp/.h`
 - `src/global/global_geology_history.cpp/.h`
+- `src/render/render_plate_boundaries.cpp/.h`
+- `src/render/render_vector_field.cpp/.h`
+- `src/render/render_animation.cpp/.h`
 
-**Deliverable**: Complete tectonic simulation with geologically plausible features.
+**Deliverable**: Complete tectonic simulation with geologically plausible features + animated plate visualization.
 
 ---
 
 ### Phase 4: Topography Generation (Weeks 17-20) — **MVP RELEASE v1.0**
 
-**Goal**: High-fidelity land and sea floor topography.
+**Goal**: High-fidelity land and sea floor topography with full 3D visualization.
 
 **New Module**: `orogena_topography`
 
@@ -474,12 +501,26 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
   - Seamounts and guyots
   - Continental shelves
 
+**Rendering Updates** (`orogena_render`):
+- Heightmap-based terrain displacement on sphere
+- Normal map generation from heightmap for lighting
+- Hypsometric tinting (elevation-based color gradients)
+- Level-of-detail (LOD) system for adaptive mesh resolution
+- Shaded relief rendering (hillshade + color)
+- Water plane rendering with transparency
+- Export framebuffer to PNG (screenshots)
+
 **Key Files**:
 - `src/topography/topo_land_generator.cpp/.h`
 - `src/topography/topo_bathymetry.cpp/.h`
 - `src/topography/topo_continental_shelf.cpp/.h`
+- `src/render/render_terrain.cpp/.h`
+- `src/render/render_heightmap.cpp/.h`
+- `src/render/render_lod.cpp/.h`
+- `src/render/render_hypsometric.cpp/.h`
+- `src/render/render_export.cpp/.h`
 
-**Deliverable**: Complete terrain generation pipeline. **MVP Release v1.0**.
+**Deliverable**: Complete terrain generation pipeline with full 3D visualization. **MVP Release v1.0**.
 
 ---
 
@@ -716,6 +757,7 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 
 ### Included in MVP
 
+**Simulation & Data**:
 - Stellar system configuration (star type, habitable zone)
 - Planet parameters (size, rotation, tilt, moons, tides)
 - Full plate tectonic simulation:
@@ -729,15 +771,27 @@ CREATE INDEX idx_region_lookup ON storage_regions(planet_id, grid_x, grid_y);
 - Land and sea topography generation
 - Multi-scale terrain export
 
+**3D Visualization**:
+- Interactive 3D globe rendering with OpenGL
+- Arcball camera (rotation, zoom, pan)
+- Heightmap-based terrain displacement
+- Hypsometric tinting (elevation colors)
+- Plate boundary visualization
+- Animated plate motion playback
+- Shaded relief rendering (hillshade lighting)
+- Level-of-detail (LOD) mesh optimization
+- Screenshot export to PNG
+
 ### Deferred to v2.0
 
 - Ocean currents, atmosphere, climate (Phases 5-7)
 - Rivers, weather patterns (Phases 8-9)
 - Geology, minerals, resources (Phases 10-11)
+- Advanced rendering (regional/local scale detail, GPU compute shaders for procedural generation)
 
 ### MVP Value Proposition
 
-Complete terrain generation from stellar parameters down to regional detail — the core Artifexian workflow for physical geography.
+Complete terrain generation from stellar parameters down to regional detail with full interactive 3D visualization — the core Artifexian workflow for physical geography in a usable, visually compelling application.
 
 ---
 
@@ -759,6 +813,7 @@ Complete terrain generation from stellar parameters down to regional detail — 
 | Planetary | Day/night, seasons match Earth-like calculations |
 | Tectonics | Realistic continent shapes, no artifacts |
 | Topography | Mountains/ocean floors match real-world patterns |
+| **Rendering** | **60 FPS at 1080p, no visual artifacts, smooth camera controls** |
 | Ocean | Currents resemble Earth's major gyres |
 | Atmosphere | Wind patterns produce correct rain shadows |
 | Climate | Köppen zones match test cases |
@@ -842,5 +897,6 @@ The 56-week timeline is ambitious but achievable for a focused solo developer, w
 
 ---
 
-**Document Version**: 2.0 (December 2025)
-**Supersedes**: Version 1.0 (Tectonic Simulator only)
+**Document Version**: 2.1 (January 2026)
+**Last Updated**: Added incremental 3D visualization development across Phases 1-4 for MVP v1.0
+**Supersedes**: Version 2.0 (December 2025)
