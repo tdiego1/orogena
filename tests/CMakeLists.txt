@@ -56,6 +56,7 @@ add_executable(test_integration
 
 target_link_libraries(test_integration
     PRIVATE
+        GTest::gtest
         GTest::gtest_main
         orogena_global
         orogena_region
