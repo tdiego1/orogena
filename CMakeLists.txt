@@ -53,17 +53,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wshadow
     )
 
-    # Use libc++ on macOS (required for GoogleTest compatibility)
-    if(APPLE)
-        add_compile_options(-stdlib=libc++)
-        add_link_options(-stdlib=libc++)
-    endif()
-
     # Release optimizations
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         # Enable LTO for better performance
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-        add_compile_options(-O3 -march=native -flto=thin)
+        add_compile_options(-O3)
+        if(NOT APPLE)
+            # Avoid -march=native on macOS as it can cause cross-compilation issues
+            add_compile_options(-march=native)
+        endif()
+        add_compile_options(-flto=thin)
         add_link_options(-flto=thin)
     endif()
 
