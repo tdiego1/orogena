@@ -50,17 +50,18 @@ target_link_libraries(test_unit
 
 gtest_discover_tests(test_unit)
 
-# Integration tests
-add_executable(test_integration
-)
-
-target_link_libraries(test_integration
-    PRIVATE
-        GTest::gtest
-        GTest::gtest_main
-        orogena_global
-        orogena_region
-        orogena_local
-)
-
-gtest_discover_tests(test_integration)
+# Integration tests - currently disabled until integration test files are added
+# add_executable(test_integration
+#     integration/test_placeholder.cpp  # Add integration test files here
+# )
+#
+# target_link_libraries(test_integration
+#     PRIVATE
+#         GTest::gtest
+#         GTest::gtest_main
+#         orogena_global
+#         orogena_region
+#         orogena_local
+# )
+#
+# gtest_discover_tests(test_integration)
