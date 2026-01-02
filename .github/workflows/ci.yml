@@ -10,6 +10,9 @@ jobs:
   build-linux:
     name: Build & Test (Linux)
     runs-on: ubuntu-latest
+    permissions:
+      packages: write  # Required for NuGet push
+      contents: read
 
     steps:
     - name: Checkout repository
@@ -42,21 +45,12 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Create vcpkg cache directory
-      run: mkdir -p ${{ runner.temp }}/vcpkg-cache
-
-    - name: Cache vcpkg binary packages
-      uses: actions/cache@v4
-      with:
-        path: ${{ runner.temp }}/vcpkg-cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
-
-    - name: Setup vcpkg
+    - name: Setup vcpkg with NuGet cache
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
+        VCPKG_NUGET_USER: ${{ github.actor }}
+        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Configure CMake (CI preset)
       run: |
@@ -82,6 +76,9 @@ jobs:
   build-windows:
     name: Build & Test (Windows)
     runs-on: windows-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
     - name: Checkout repository
@@ -99,22 +96,12 @@ jobs:
         cache: true
         arch: 'win64_msvc2022_64'
 
-    - name: Create vcpkg cache directory
-      run: New-Item -ItemType Directory -Force -Path ${{ runner.temp }}\vcpkg-cache
-      shell: pwsh
-
-    - name: Cache vcpkg binary packages
-      uses: actions/cache@v4
-      with:
-        path: ${{ runner.temp }}/vcpkg-cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
-
-    - name: Setup vcpkg
+    - name: Setup vcpkg with NuGet cache
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
+        VCPKG_NUGET_USER: ${{ github.actor }}
+        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -140,6 +127,9 @@ jobs:
   build-macos:
     name: Build & Test (macOS)
     runs-on: macos-latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
     - name: Checkout repository
@@ -157,21 +147,12 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Create vcpkg cache directory
-      run: mkdir -p ${{ runner.temp }}/vcpkg-cache
-
-    - name: Cache vcpkg binary packages
-      uses: actions/cache@v4
-      with:
-        path: ${{ runner.temp }}/vcpkg-cache
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
-        restore-keys: |
-          vcpkg-${{ runner.os }}-
-
-    - name: Setup vcpkg
+    - name: Setup vcpkg with NuGet cache
       uses: lukka/run-vcpkg@v11
       env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/vcpkg-cache
+        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
+        VCPKG_NUGET_USER: ${{ github.actor }}
+        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Configure CMake (CI preset)
       run: cmake --preset ci
@@ -183,7 +164,7 @@ jobs:
       run: ctest --preset ci --output-on-failure
 
     - name: Upload test results
-      if: always()  # Upload even if tests pass
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ runner.os }}
