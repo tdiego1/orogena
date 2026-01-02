@@ -25,7 +25,7 @@ Each platform job performs:
 
 1. **Checkout** - Clones repository with submodules
 2. **Install Dependencies**
-   - System packages (OpenGL, X11 libs on Linux)
+   - System packages (Clang, OpenGL, X11 libs on Linux)
    - Qt 6.8+ via `jurplel/install-qt-action`
    - vcpkg dependencies via `lukka/run-vcpkg`
 3. **Configure** - Uses `ci` CMake preset
@@ -125,17 +125,17 @@ Runs configure → build → test in sequence:
 
 ### Linux (Ubuntu)
 
-**Compiler:** Clang 21 with libc++
+**Compiler:** Clang (latest available from Ubuntu repos) with libc++
 **Dependencies:**
 - `ninja-build` - Build system
-- `clang-21`, `libc++-21-dev`, `libc++abi-21-dev` - Toolchain
+- `clang`, `libc++-dev`, `libc++abi-dev` - Toolchain
 - `libgl-dev`, `libglu1-mesa-dev` - OpenGL
 - X11/XCB libraries for Qt
 
 **Build commands:**
 ```bash
-export CC=clang-21
-export CXX=clang++-21
+export CC=clang
+export CXX=clang++
 cmake --preset ci
 cmake --build --preset ci -j$(nproc)
 ctest --preset ci --output-on-failure
@@ -161,15 +161,15 @@ ctest --preset ci --output-on-failure -C Release
 
 ### macOS
 
-**Compiler:** Homebrew LLVM (Clang 21)
+**Compiler:** Homebrew LLVM (Clang, latest)
 **Dependencies:**
-- Homebrew: `ninja`, `llvm@21`
+- Homebrew: `ninja`, `llvm`
 - Qt 6.8 via `install-qt-action`
 
 **Build commands:**
 ```bash
-export CC=$(brew --prefix llvm@21)/bin/clang
-export CXX=$(brew --prefix llvm@21)/bin/clang++
+export CC=$(brew --prefix llvm)/bin/clang
+export CXX=$(brew --prefix llvm)/bin/clang++
 cmake --preset ci
 cmake --build --preset ci -j$(sysctl -n hw.ncpu)
 ctest --preset ci --output-on-failure

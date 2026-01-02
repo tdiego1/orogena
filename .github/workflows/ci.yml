@@ -25,9 +25,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y \
           ninja-build \
-          clang-21 \
-          libc++-21-dev \
-          libc++abi-21-dev \
+          clang \
+          libc++-dev \
+          libc++abi-dev \
           libgl-dev \
           libglu1-mesa-dev \
           libxkbcommon-dev \
@@ -60,8 +60,8 @@ jobs:
 
     - name: Configure CMake (CI preset)
       run: |
-        export CC=clang-21
-        export CXX=clang++-21
+        export CC=clang
+        export CXX=clang++
         cmake --preset ci
 
     - name: Build
@@ -144,7 +144,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        brew install ninja llvm@21
+        brew install ninja llvm
 
     - name: Install Qt 6
       uses: jurplel/install-qt-action@v4
@@ -167,8 +167,8 @@ jobs:
 
     - name: Configure CMake (CI preset)
       run: |
-        export CC=$(brew --prefix llvm@21)/bin/clang
-        export CXX=$(brew --prefix llvm@21)/bin/clang++
+        export CC=$(brew --prefix llvm)/bin/clang
+        export CXX=$(brew --prefix llvm)/bin/clang++
         cmake --preset ci
 
     - name: Build
@@ -198,11 +198,11 @@ jobs:
     - name: Install clang-format
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-format-21
+        sudo apt-get install -y clang-format
 
     - name: Check code formatting
       run: |
-        find src tests -name "*.h" -o -name "*.cpp" | xargs clang-format-21 --dry-run --Werror
+        find src tests -name "*.h" -o -name "*.cpp" | xargs clang-format --dry-run --Werror
 
     - name: Check for trailing whitespace
       run: |

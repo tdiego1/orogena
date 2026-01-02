@@ -58,11 +58,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build clang-21 libc++-21-dev libc++abi-21-dev libgl-dev
+        sudo apt-get install -y ninja-build clang libc++-dev libc++abi-dev libgl-dev
 
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
-      run: brew install ninja llvm@21
+      run: brew install ninja llvm
 
     - name: Install Qt 6
       uses: jurplel/install-qt-action@v4
