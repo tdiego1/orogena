@@ -8,12 +8,14 @@ add_executable(test_unit
     unit/database/test_database_manager.cpp
     unit/utils/test_logger.cpp
     unit/gui/test_qt_settings.cpp
+    unit/stellar/test_star.cpp
 )
 
 target_link_libraries(test_unit
     PRIVATE
         GTest::gtest
         GTest::gtest_main
+        orogena_stellar
         orogena_core
         orogena_database
         orogena_utils
