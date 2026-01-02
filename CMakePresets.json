@@ -164,6 +164,18 @@
                 "noTestsAction": "error",
                 "stopOnFailure": true
             }
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Tests",
+            "configurePreset": "ci",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
         }
     ],
     "workflowPresets": [
@@ -212,6 +224,10 @@
                 },
                 {
                     "type": "build",
+                    "name": "ci"
+                },
+                {
+                    "type": "test",
                     "name": "ci"
                 }
             ]

@@ -8,6 +8,18 @@
 
 <p align="center">Complete Worldbuilding Suite - Version 2.0</p>
 
+<p align="center">
+  <a href="https://github.com/tdiego1/orogena/actions/workflows/ci.yml">
+    <img src="https://github.com/tdiego1/orogena/workflows/CI/badge.svg" alt="CI Status">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3.0%20%7C%20Commercial-blue.svg" alt="License">
+  </a>
+  <a href="https://github.com/tdiego1/orogena/releases">
+    <img src="https://img.shields.io/github/v/release/tdiego1/orogena?include_prereleases" alt="Release">
+  </a>
+</p>
+
 ## Overview
 
 Orogena is a professional-grade worldbuilding application following [Artifexian's methodology](https://www.youtube.com/c/Artifexian), enabling the creation of geologically and climatologically plausible worlds from stellar parameters down to local detail.
@@ -181,15 +193,13 @@ See the [Software Development Plan v2.0](docs/001_sdp_orogena_v2.md) for detaile
 
 ## Contributing
 
-Contributions are welcome! Please read the coding and design standards before submitting pull requests.
+Contributions are welcome! Please read [CONTRIBUTING.md](.github/CONTRIBUTING.md) for our development workflow and the [Coding Standard](docs/002_coding_standard.md) before submitting pull requests.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow the [Coding Standard](docs/002_coding_standard.md)
-4. Write tests for new functionality
-5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+All pull requests must:
+- Pass CI checks on Linux, Windows, and macOS
+- Follow the established code style (enforced by `clang-format`)
+- Include tests for new functionality
+- Build without warnings (`-Werror` in CI)
 
 ---
 
