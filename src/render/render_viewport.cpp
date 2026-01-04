@@ -30,6 +30,7 @@
 #include <QSurfaceFormat>
 #include <QWheelEvent>
 
+#include "render_sphere.h"
 #include "utils/utils_logger.h"
 #include "utils/utils_types.h"
 
@@ -108,6 +109,16 @@ void Viewport::SetClearColor(Utils::ColorRGBF color)
     update(); // Trigger repaint
 }
 
+void Viewport::SetWireframeMode(bool enable)
+{
+    if (m_Sphere)
+    {
+        m_Sphere->SetRenderMode(enable ? RenderMode::WIREFRAME : RenderMode::SOLID);
+        Log::Debug("Viewport: Wireframe mode {}", enable ? "enabled" : "disabled");
+        update(); // Trigger repaint
+    }
+}
+
 //=================================================================================================
 // Protected Functions
 //=================================================================================================
@@ -174,6 +185,19 @@ void Viewport::initializeGL()
         m_Grid.reset();
     }
 
+    // Initialize sphere renderer
+    m_Sphere = std::make_unique<Sphere>(static_cast<QOpenGLFunctions_4_5_Core*>(this), 2.0F);
+    if (!m_Sphere->Initialize())
+    {
+        Log::Error("Viewport: Failed to initialize sphere renderer");
+        m_Sphere.reset();
+    }
+    else
+    {
+        // Set initial sphere properties
+        m_Sphere->SetColor(glm::vec3(0.3F, 0.6F, 0.9F)); // Blue planet color
+    }
+
     // Start FPS timer
     m_FrameStartTime = std::chrono::steady_clock::now();
     m_LastFPSUpdateMs = 0;
@@ -195,6 +219,12 @@ void Viewport::paintGL()
     if (m_Grid && m_Grid->IsInitialized())
     {
         m_Grid->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+    }
+
+    // Render sphere if available
+    if (m_Sphere && m_Sphere->IsInitialized())
+    {
+        m_Sphere->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
     }
 
     // Update FPS counter

@@ -38,6 +38,7 @@
 
 #include "render_camera.h"
 #include "render_grid.h"
+#include "render_sphere.h"
 #include "utils/utils_types.h"
 
 #include <chrono>
@@ -102,6 +103,13 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
      * @param color RGB color structure.
      */
     void SetClearColor(Utils::ColorRGBF color);
+
+    /**
+     * @brief Toggle wireframe rendering mode
+     *
+     * @param enable True for wireframe, false for solid.
+     */
+    void SetWireframeMode(bool enable);
 
   signals:
     /**
@@ -219,6 +227,7 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     // Camera and rendering
     std::unique_ptr<Camera> m_Camera; ///< Camera for viewport navigation.
     std::unique_ptr<Grid>   m_Grid;   ///< Reference grid renderer.
+    std::unique_ptr<Sphere> m_Sphere; ///< Sphere renderer for planet visualization.
 
     // Mouse interaction state
     bool   m_LeftMousePressed{false};  ///< Left mouse button state.

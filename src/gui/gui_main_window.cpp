@@ -90,8 +90,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::SetupUI()
 {
-    setWindowTitle("Orogena - Multi-Scale Tectonic Simulator");
-    resize(1280, 720);
+    setWindowTitle("Orogena");
+    resize(1440, 900);
 
     // Set window icon with multiple sizes for different contexts
     QIcon app_icon;
@@ -170,6 +170,15 @@ void MainWindow::SetupMenuBar()
     view_menu->addAction(tr("&Global View"));
     view_menu->addAction(tr("&Regional View"));
     view_menu->addAction(tr("&Local View"));
+    view_menu->addSeparator();
+
+    // Rendering options
+    m_ActionWireframe = view_menu->addAction(tr("&Wireframe Mode"));
+    m_ActionWireframe->setCheckable(true);
+    m_ActionWireframe->setChecked(false);
+    m_ActionWireframe->setShortcut(QKeySequence(tr("W")));
+    connect(m_ActionWireframe, &QAction::triggered, this, &MainWindow::OnToggleWireframe);
+
     view_menu->addSeparator();
 
     // Add dock visibility toggles to View menu
@@ -583,6 +592,14 @@ void MainWindow::OnSaveProjectAs()
     }
 
     m_ProjectManager->SaveProjectAs(file_path.toStdString());
+}
+
+void MainWindow::OnToggleWireframe(bool checked)
+{
+    if (m_Viewport)
+    {
+        m_Viewport->SetWireframeMode(checked);
+    }
 }
 
 } // namespace Orogena::GUI

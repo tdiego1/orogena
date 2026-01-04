@@ -110,6 +110,8 @@ add_library(orogena_render
     render/render_heightmap.cpp
     render/render_camera.cpp
     render/render_grid.cpp
+    render/render_mesh.cpp
+    render/render_sphere.cpp
     render/render_viewport.cpp
 )
 
