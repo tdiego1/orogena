@@ -38,11 +38,11 @@
 
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions_4_5_Core>
-#include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
 #include <glm/glm.hpp>
 
+#include "render_shader.h"
 #include "utils/utils_types.h"
 
 namespace Orogena::Render
@@ -210,7 +210,7 @@ class Mesh
     std::vector<uint32_t> m_Indices;  ///< Index data
 
     // OpenGL resources
-    std::unique_ptr<QOpenGLShaderProgram>     m_ShaderProgram;
+    std::unique_ptr<Shader>                   m_Shader;
     std::unique_ptr<QOpenGLVertexArrayObject> m_VAO;
     std::unique_ptr<QOpenGLBuffer>            m_VBO;
     std::unique_ptr<QOpenGLBuffer>            m_EBO;

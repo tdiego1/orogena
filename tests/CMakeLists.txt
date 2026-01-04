@@ -34,6 +34,7 @@ add_executable(test_unit
     unit/utils/test_logger.cpp
     unit/gui/test_qt_settings.cpp
     unit/stellar/test_star.cpp
+    unit/render/test_shader.cpp
 )
 
 target_link_libraries(test_unit
@@ -45,6 +46,7 @@ target_link_libraries(test_unit
         orogena_database
         orogena_utils
         orogena_gui
+        orogena_render
         Qt6::Core
 )
 
