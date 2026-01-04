@@ -117,6 +117,12 @@ class MainWindow : public QMainWindow
      */
     void OnSaveProjectAs();
 
+    /**
+     * @brief Toggle wireframe rendering mode.
+     * @param checked True for wireframe, false for solid
+     */
+    void OnToggleWireframe(bool checked);
+
   private:
     //=============================================================================================
     // Private Types
@@ -201,6 +207,9 @@ class MainWindow : public QMainWindow
     QAction* m_ActionSave{nullptr};         ///< Save action.
     QAction* m_ActionSaveAs{nullptr};       ///< Save As action.
     QMenu*   m_RecentProjectsMenu{nullptr}; ///< Recent projects submenu.
+
+    // View menu actions
+    QAction* m_ActionWireframe{nullptr}; ///< Wireframe toggle action.
 };
 
 } // namespace Orogena::GUI
