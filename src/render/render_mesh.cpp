@@ -116,23 +116,18 @@ void Mesh::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix
     }
 
     // Bind shader program
-    m_ShaderProgram->bind();
+    m_Shader->Bind();
 
     // Create model matrix (translation only for now)
     glm::mat4 model_matrix = glm::translate(glm::mat4(1.0F), m_Position);
-    glm::mat4 mvp = projectionMatrix * viewMatrix * model_matrix;
 
-    // Set uniforms
-    m_ShaderProgram->setUniformValue("uModelViewProjection",
-                                     QMatrix4x4(glm::value_ptr(mvp)).transposed());
-    m_ShaderProgram->setUniformValue("uModel",
-                                     QMatrix4x4(glm::value_ptr(model_matrix)).transposed());
-    m_ShaderProgram->setUniformValue("uView", QMatrix4x4(glm::value_ptr(viewMatrix)).transposed());
-    m_ShaderProgram->setUniformValue("uProjection",
-                                     QMatrix4x4(glm::value_ptr(projectionMatrix)).transposed());
-    m_ShaderProgram->setUniformValue("uMeshColor",
-                                     QVector3D(m_MeshColor.x, m_MeshColor.y, m_MeshColor.z));
-    m_ShaderProgram->setUniformValue("uLightDirection", QVector3D(0.0F, 1.0F, 1.0F));
+    // Set uniforms using our custom Shader class
+    m_Shader->SetUniform("uModel", model_matrix);
+    m_Shader->SetUniform("uView", viewMatrix);
+    m_Shader->SetUniform("uProjection", projectionMatrix);
+    m_Shader->SetUniform("uColor", m_MeshColor);
+    m_Shader->SetUniform("uLightDirection", glm::vec3(0.0F, 1.0F, 1.0F));
+    m_Shader->SetUniform("uUseTexture", false);
 
     // Set polygon mode based on render mode
     if (m_RenderMode == RenderMode::WIREFRAME)
@@ -152,7 +147,7 @@ void Mesh::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix
     // Reset polygon mode
     m_GL->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    m_ShaderProgram->release();
+    m_Shader->Unbind();
 }
 
 //=================================================================================================
@@ -161,82 +156,13 @@ void Mesh::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix
 
 bool Mesh::CreateShaders()
 {
-    m_ShaderProgram = std::make_unique<QOpenGLShaderProgram>();
+    // Create shader using our custom Shader class
+    m_Shader = std::make_unique<Shader>(m_GL);
 
-    // Vertex shader with Phong lighting
-    const char* vertex_shader_source = R"(
-        #version 450 core
-        layout(location = 0) in vec3 aPosition;
-        layout(location = 1) in vec3 aNormal;
-        layout(location = 2) in vec2 aUV;
-
-        uniform mat4 uModelViewProjection;
-        uniform mat4 uModel;
-        uniform mat4 uView;
-        uniform mat4 uProjection;
-
-        out vec3 vNormal;
-        out vec3 vFragPos;
-        out vec2 vUV;
-
-        void main()
-        {
-            gl_Position = uModelViewProjection * vec4(aPosition, 1.0);
-            vFragPos = vec3(uModel * vec4(aPosition, 1.0));
-            vNormal = mat3(transpose(inverse(uModel))) * aNormal;
-            vUV = aUV;
-        }
-    )";
-
-    // Fragment shader with basic Phong lighting
-    const char* fragment_shader_source = R"(
-        #version 450 core
-        in vec3 vNormal;
-        in vec3 vFragPos;
-        in vec2 vUV;
-
-        uniform vec3 uMeshColor;
-        uniform vec3 uLightDirection;
-
-        out vec4 FragColor;
-
-        void main()
-        {
-            // Normalize inputs
-            vec3 normal = normalize(vNormal);
-            vec3 lightDir = normalize(uLightDirection);
-
-            // Ambient lighting
-            float ambientStrength = 0.3;
-            vec3 ambient = ambientStrength * uMeshColor;
-
-            // Diffuse lighting
-            float diff = max(dot(normal, lightDir), 0.0);
-            vec3 diffuse = diff * uMeshColor;
-
-            // Combine lighting components
-            vec3 result = ambient + diffuse;
-            FragColor = vec4(result, 1.0);
-        }
-    )";
-
-    if (!m_ShaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, vertex_shader_source))
+    // Load shaders from files
+    if (!m_Shader->LoadFromFiles("shaders/basic.vert", "shaders/basic.frag"))
     {
-        Log::Error("Mesh: Failed to compile vertex shader: {}",
-                   m_ShaderProgram->log().toStdString());
-        return false;
-    }
-
-    if (!m_ShaderProgram->addShaderFromSourceCode(QOpenGLShader::Fragment, fragment_shader_source))
-    {
-        Log::Error("Mesh: Failed to compile fragment shader: {}",
-                   m_ShaderProgram->log().toStdString());
-        return false;
-    }
-
-    if (!m_ShaderProgram->link())
-    {
-        Log::Error("Mesh: Failed to link shader program: {}", m_ShaderProgram->log().toStdString());
+        Log::Error("Mesh: Failed to load shader files");
         return false;
     }
 
@@ -257,22 +183,21 @@ void Mesh::UploadGeometry()
     m_EBO->bind();
     m_EBO->allocate(m_Indices.data(), static_cast<int32_t>(m_Indices.size() * sizeof(uint32_t)));
 
-    // Set vertex attribute pointers
-    m_ShaderProgram->bind();
-
+    // Set vertex attribute pointers using raw OpenGL
     // Position attribute (location = 0)
-    m_ShaderProgram->enableAttributeArray(0);
-    m_ShaderProgram->setAttributeBuffer(0, GL_FLOAT, offsetof(Vertex, position), 3, sizeof(Vertex));
+    m_GL->glEnableVertexAttribArray(0);
+    m_GL->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                reinterpret_cast<void*>(offsetof(Vertex, position)));
 
     // Normal attribute (location = 1)
-    m_ShaderProgram->enableAttributeArray(1);
-    m_ShaderProgram->setAttributeBuffer(1, GL_FLOAT, offsetof(Vertex, normal), 3, sizeof(Vertex));
+    m_GL->glEnableVertexAttribArray(1);
+    m_GL->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                reinterpret_cast<void*>(offsetof(Vertex, normal)));
 
     // UV attribute (location = 2)
-    m_ShaderProgram->enableAttributeArray(2);
-    m_ShaderProgram->setAttributeBuffer(2, GL_FLOAT, offsetof(Vertex, uv), 2, sizeof(Vertex));
-
-    m_ShaderProgram->release();
+    m_GL->glEnableVertexAttribArray(2);
+    m_GL->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                                reinterpret_cast<void*>(offsetof(Vertex, uv)));
 
     // Unbind VBO (but keep EBO bound to VAO)
     m_VBO->release();
