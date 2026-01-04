@@ -71,6 +71,14 @@ jobs:
         restore-keys: |
           vcpkg-downloads-
 
+    - name: Cache vcpkg binary archives
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/vcpkg/archives
+        key: vcpkg-archives-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-archives-${{ runner.os }}-
+
     - name: Cache vcpkg installed packages
       uses: actions/cache@v4
       with:
@@ -151,6 +159,14 @@ jobs:
         restore-keys: |
           vcpkg-downloads-
 
+    - name: Cache vcpkg binary archives
+      uses: actions/cache@v4
+      with:
+        path: ~\AppData\Local\vcpkg\archives
+        key: vcpkg-archives-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-archives-${{ runner.os }}-
+
     - name: Cache vcpkg installed packages
       uses: actions/cache@v4
       with:
@@ -228,6 +244,14 @@ jobs:
         key: vcpkg-downloads-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
           vcpkg-downloads-
+
+    - name: Cache vcpkg binary archives
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/vcpkg/archives
+        key: vcpkg-archives-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-archives-${{ runner.os }}-
 
     - name: Cache vcpkg installed packages
       uses: actions/cache@v4
