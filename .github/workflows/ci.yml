@@ -45,24 +45,39 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup vcpkg
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
-        cd $HOME/vcpkg
-        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
-        ./bootstrap-vcpkg.sh
-        echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
-
-    - name: Cache vcpkg packages
+    - name: Cache vcpkg
+      id: cache-vcpkg
       uses: actions/cache@v4
       with:
-        path: |
-          $HOME/vcpkg/downloads
-          $HOME/vcpkg/packages
-          $HOME/vcpkg/buildtrees
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ github.workspace }}/vcpkg
+        key: vcpkg-repo-64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git ${{ github.workspace }}/vcpkg
+        cd ${{ github.workspace }}/vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        ./bootstrap-vcpkg.sh
+
+    - name: Set vcpkg root
+      run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
+
+    - name: Cache vcpkg downloads
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/vcpkg/downloads
+        key: vcpkg-downloads-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-          vcpkg-${{ runner.os }}-
+          vcpkg-downloads-
+
+    - name: Cache vcpkg installed packages
+      uses: actions/cache@v4
+      with:
+        path: build/ci/vcpkg_installed
+        key: vcpkg-installed-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-installed-${{ runner.os }}-
 
     - name: Configure CMake (CI preset)
       run: |
@@ -108,25 +123,41 @@ jobs:
         cache: true
         arch: 'win64_msvc2022_64'
 
-    - name: Setup vcpkg
-      shell: pwsh
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git $env:USERPROFILE\vcpkg
-        cd $env:USERPROFILE\vcpkg
-        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
-        .\bootstrap-vcpkg.bat
-        echo "VCPKG_ROOT=$env:USERPROFILE\vcpkg" >> $env:GITHUB_ENV
-
-    - name: Cache vcpkg packages
+    - name: Cache vcpkg
+      id: cache-vcpkg
       uses: actions/cache@v4
       with:
-        path: |
-          ~\vcpkg\downloads
-          ~\vcpkg\packages
-          ~\vcpkg\buildtrees
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ github.workspace }}\vcpkg
+        key: vcpkg-repo-64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git ${{ github.workspace }}\vcpkg
+        cd ${{ github.workspace }}\vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        .\bootstrap-vcpkg.bat
+
+    - name: Set vcpkg root
+      shell: pwsh
+      run: echo "VCPKG_ROOT=${{ github.workspace }}\vcpkg" >> $env:GITHUB_ENV
+
+    - name: Cache vcpkg downloads
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}\vcpkg\downloads
+        key: vcpkg-downloads-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-          vcpkg-${{ runner.os }}-
+          vcpkg-downloads-
+
+    - name: Cache vcpkg installed packages
+      uses: actions/cache@v4
+      with:
+        path: build\ci\vcpkg_installed
+        key: vcpkg-installed-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-installed-${{ runner.os }}-
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -172,24 +203,39 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup vcpkg
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
-        cd $HOME/vcpkg
-        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
-        ./bootstrap-vcpkg.sh
-        echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
-
-    - name: Cache vcpkg packages
+    - name: Cache vcpkg
+      id: cache-vcpkg
       uses: actions/cache@v4
       with:
-        path: |
-          $HOME/vcpkg/downloads
-          $HOME/vcpkg/packages
-          $HOME/vcpkg/buildtrees
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        path: ${{ github.workspace }}/vcpkg
+        key: vcpkg-repo-64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git ${{ github.workspace }}/vcpkg
+        cd ${{ github.workspace }}/vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        ./bootstrap-vcpkg.sh
+
+    - name: Set vcpkg root
+      run: echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
+
+    - name: Cache vcpkg downloads
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/vcpkg/downloads
+        key: vcpkg-downloads-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-          vcpkg-${{ runner.os }}-
+          vcpkg-downloads-
+
+    - name: Cache vcpkg installed packages
+      uses: actions/cache@v4
+      with:
+        path: build/ci/vcpkg_installed
+        key: vcpkg-installed-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-installed-${{ runner.os }}-
 
     - name: Configure CMake (CI preset)
       run: cmake --preset ci
