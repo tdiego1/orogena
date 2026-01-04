@@ -101,5 +101,10 @@ if(OROGENA_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+# Copy shader files to build directory
+file(GLOB SHADER_FILES "${CMAKE_SOURCE_DIR}/src/render/shaders/*")
+file(COPY ${SHADER_FILES} DESTINATION "${CMAKE_BINARY_DIR}/shaders")
+
 # Installation rules (for future)
 # install(TARGETS orogena DESTINATION bin)
+# install(DIRECTORY src/render/shaders DESTINATION share/orogena)
