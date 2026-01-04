@@ -177,7 +177,8 @@ class Mesh
      * @param vertices Output vector for vertex data.
      * @param indices Output vector for index data.
      */
-    virtual void GenerateGeometry(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) = 0;
+    virtual void GenerateGeometry(std::vector<Vertex>&   vertices,
+                                  std::vector<uint32_t>& indices) = 0;
 
     /**
      * @brief Create and compile shader program
@@ -200,8 +201,8 @@ class Mesh
     bool                       m_Initialized{false}; ///< Initialization state
 
     // Mesh parameters
-    glm::vec3  m_MeshColor{0.8F, 0.8F, 0.8F}; ///< Mesh color (light gray)
-    glm::vec3  m_Position{0.0F, 0.0F, 0.0F};  ///< World position
+    glm::vec3  m_MeshColor{0.8F, 0.8F, 0.8F};   ///< Mesh color (light gray)
+    glm::vec3  m_Position{0.0F, 0.0F, 0.0F};    ///< World position
     RenderMode m_RenderMode{RenderMode::SOLID}; ///< Rendering mode
 
     // Geometry data

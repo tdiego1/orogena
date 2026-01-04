@@ -26,10 +26,10 @@
 
 #include "render_sphere.h"
 
+#include "utils/utils_logger.h"
+
 #include <cmath>
 #include <numbers>
-
-#include "utils/utils_logger.h"
 
 namespace Orogena::Render
 {
@@ -38,8 +38,10 @@ namespace Orogena::Render
 // Constructors/Destructor
 //=================================================================================================
 
-Sphere::Sphere(QOpenGLFunctions_4_5_Core* gl, float32_t radius, uint32_t latSegments,
-               uint32_t lonSegments)
+Sphere::Sphere(QOpenGLFunctions_4_5_Core* gl,
+               float32_t                  radius,
+               uint32_t                   latSegments,
+               uint32_t                   lonSegments)
     : Mesh(gl), m_Radius(radius), m_LatSegments(latSegments), m_LonSegments(lonSegments)
 {
     Log::Debug("Sphere: Created (radius={}, lat={}, lon={})", radius, latSegments, lonSegments);
@@ -124,9 +126,8 @@ void Sphere::GenerateGeometry(std::vector<Vertex>& vertices, std::vector<uint32_
         for (uint32_t lon = 0; lon <= m_LonSegments; ++lon)
         {
             // Longitude angle: 0 to 2π
-            float32_t phi =
-                static_cast<float32_t>(lon) / static_cast<float32_t>(m_LonSegments) * 2.0F *
-                static_cast<float32_t>(pi);
+            float32_t phi = static_cast<float32_t>(lon) / static_cast<float32_t>(m_LonSegments) *
+                            2.0F * static_cast<float32_t>(pi);
             float32_t sin_phi = std::sin(phi);
             float32_t cos_phi = std::cos(phi);
 

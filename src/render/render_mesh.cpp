@@ -251,13 +251,11 @@ void Mesh::UploadGeometry()
 
     // Upload vertex data
     m_VBO->bind();
-    m_VBO->allocate(m_Vertices.data(),
-                    static_cast<int32_t>(m_Vertices.size() * sizeof(Vertex)));
+    m_VBO->allocate(m_Vertices.data(), static_cast<int32_t>(m_Vertices.size() * sizeof(Vertex)));
 
     // Upload index data
     m_EBO->bind();
-    m_EBO->allocate(m_Indices.data(),
-                    static_cast<int32_t>(m_Indices.size() * sizeof(uint32_t)));
+    m_EBO->allocate(m_Indices.data(), static_cast<int32_t>(m_Indices.size() * sizeof(uint32_t)));
 
     // Set vertex attribute pointers
     m_ShaderProgram->bind();

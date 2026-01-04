@@ -64,8 +64,10 @@ class Sphere : public Mesh
      * @param latSegments Number of latitude divisions (default: 64).
      * @param lonSegments Number of longitude divisions (default: 128).
      */
-    explicit Sphere(QOpenGLFunctions_4_5_Core* gl, float32_t radius = 1.0F,
-                    uint32_t latSegments = 64, uint32_t lonSegments = 128);
+    explicit Sphere(QOpenGLFunctions_4_5_Core* gl,
+                    float32_t                  radius = 1.0F,
+                    uint32_t                   latSegments = 64,
+                    uint32_t                   lonSegments = 128);
 
     ~Sphere() override;
 
@@ -137,17 +139,16 @@ class Sphere : public Mesh
      * @param vertices Output vector for vertex data.
      * @param indices Output vector for index data.
      */
-    void GenerateGeometry(std::vector<Vertex>& vertices,
-                          std::vector<uint32_t>& indices) override;
+    void GenerateGeometry(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) override;
 
   private:
     //=============================================================================================
     // Private Members
     //=============================================================================================
 
-    float32_t m_Radius{1.0F};        ///< Sphere radius in world units
-    uint32_t  m_LatSegments{64};     ///< Number of latitude divisions
-    uint32_t  m_LonSegments{128};    ///< Number of longitude divisions
+    float32_t m_Radius{1.0F};     ///< Sphere radius in world units
+    uint32_t  m_LatSegments{64};  ///< Number of latitude divisions
+    uint32_t  m_LonSegments{128}; ///< Number of longitude divisions
 };
 
 } // namespace Orogena::Render
