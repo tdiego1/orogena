@@ -45,22 +45,24 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup NuGet for vcpkg binary caching
-      shell: bash
+    - name: Setup vcpkg
       run: |
-        mono $(vcpkg fetch nuget | tail -n 1) sources add \
-          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-          -storepasswordincleartext \
-          -name "GitHubPackages" \
-          -username "${{ github.actor }}" \
-          -password "${{ secrets.GITHUB_TOKEN }}" || true
+        git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
+        cd $HOME/vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        ./bootstrap-vcpkg.sh
+        echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
 
-    - name: Setup vcpkg with binary caching
-      uses: lukka/run-vcpkg@v11
+    - name: Cache vcpkg packages
+      uses: actions/cache@v4
       with:
-        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
+        path: |
+          $HOME/vcpkg/downloads
+          $HOME/vcpkg/packages
+          $HOME/vcpkg/buildtrees
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
 
     - name: Configure CMake (CI preset)
       run: |
@@ -106,24 +108,25 @@ jobs:
         cache: true
         arch: 'win64_msvc2022_64'
 
-    - name: Setup NuGet for vcpkg binary caching
+    - name: Setup vcpkg
       shell: pwsh
       run: |
-        $nuget = & vcpkg fetch nuget | Select-Object -Last 1
-        & $nuget sources add `
-          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-          -storepasswordincleartext `
-          -name "GitHubPackages" `
-          -username "${{ github.actor }}" `
-          -password "${{ secrets.GITHUB_TOKEN }}"
-        if ($LASTEXITCODE -ne 0) { Write-Host "NuGet source already exists or failed to add" }
+        git clone https://github.com/microsoft/vcpkg.git $env:USERPROFILE\vcpkg
+        cd $env:USERPROFILE\vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        .\bootstrap-vcpkg.bat
+        echo "VCPKG_ROOT=$env:USERPROFILE\vcpkg" >> $env:GITHUB_ENV
 
-    - name: Setup vcpkg with binary caching
-      uses: lukka/run-vcpkg@v11
+    - name: Cache vcpkg packages
+      uses: actions/cache@v4
       with:
-        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
+        path: |
+          ~\vcpkg\downloads
+          ~\vcpkg\packages
+          ~\vcpkg\buildtrees
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -169,22 +172,24 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup NuGet for vcpkg binary caching
-      shell: bash
+    - name: Setup vcpkg
       run: |
-        mono $(vcpkg fetch nuget | tail -n 1) sources add \
-          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-          -storepasswordincleartext \
-          -name "GitHubPackages" \
-          -username "${{ github.actor }}" \
-          -password "${{ secrets.GITHUB_TOKEN }}" || true
+        git clone https://github.com/microsoft/vcpkg.git $HOME/vcpkg
+        cd $HOME/vcpkg
+        git checkout 64e1fbee7d9f40eab5d112aaff648c4dcffe9e47
+        ./bootstrap-vcpkg.sh
+        echo "VCPKG_ROOT=$HOME/vcpkg" >> $GITHUB_ENV
 
-    - name: Setup vcpkg with binary caching
-      uses: lukka/run-vcpkg@v11
+    - name: Cache vcpkg packages
+      uses: actions/cache@v4
       with:
-        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
-      env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
+        path: |
+          $HOME/vcpkg/downloads
+          $HOME/vcpkg/packages
+          $HOME/vcpkg/buildtrees
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
 
     - name: Configure CMake (CI preset)
       run: cmake --preset ci
