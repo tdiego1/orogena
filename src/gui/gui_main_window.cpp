@@ -90,8 +90,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::SetupUI()
 {
-    setWindowTitle("Orogena - Multi-Scale Tectonic Simulator");
-    resize(1280, 720);
+    setWindowTitle("Orogena");
+    resize(1440, 900);
 
     // Set window icon with multiple sizes for different contexts
     QIcon app_icon;
