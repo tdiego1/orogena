@@ -45,12 +45,22 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup vcpkg with NuGet cache
+    - name: Setup NuGet for vcpkg binary caching
+      shell: bash
+      run: |
+        mono $(vcpkg fetch nuget | tail -n 1) sources add \
+          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          -storepasswordincleartext \
+          -name "GitHubPackages" \
+          -username "${{ github.actor }}" \
+          -password "${{ secrets.GITHUB_TOKEN }}" || true
+
+    - name: Setup vcpkg with binary caching
       uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
       env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
-        VCPKG_NUGET_USER: ${{ github.actor }}
-        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
 
     - name: Configure CMake (CI preset)
       run: |
@@ -96,12 +106,24 @@ jobs:
         cache: true
         arch: 'win64_msvc2022_64'
 
-    - name: Setup vcpkg with NuGet cache
+    - name: Setup NuGet for vcpkg binary caching
+      shell: pwsh
+      run: |
+        $nuget = & vcpkg fetch nuget | Select-Object -Last 1
+        & $nuget sources add `
+          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+          -storepasswordincleartext `
+          -name "GitHubPackages" `
+          -username "${{ github.actor }}" `
+          -password "${{ secrets.GITHUB_TOKEN }}"
+        if ($LASTEXITCODE -ne 0) { Write-Host "NuGet source already exists or failed to add" }
+
+    - name: Setup vcpkg with binary caching
       uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
       env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
-        VCPKG_NUGET_USER: ${{ github.actor }}
-        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -147,12 +169,22 @@ jobs:
         version: '6.8.*'
         cache: true
 
-    - name: Setup vcpkg with NuGet cache
+    - name: Setup NuGet for vcpkg binary caching
+      shell: bash
+      run: |
+        mono $(vcpkg fetch nuget | tail -n 1) sources add \
+          -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          -storepasswordincleartext \
+          -name "GitHubPackages" \
+          -username "${{ github.actor }}" \
+          -password "${{ secrets.GITHUB_TOKEN }}" || true
+
+    - name: Setup vcpkg with binary caching
       uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '64e1fbee7d9f40eab5d112aaff648c4dcffe9e47'
       env:
-        VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json,readwrite"
-        VCPKG_NUGET_USER: ${{ github.actor }}
-        VCPKG_NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VCPKG_BINARY_SOURCES: "clear;nuget,GitHubPackages,readwrite"
 
     - name: Configure CMake (CI preset)
       run: cmake --preset ci
