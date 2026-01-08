@@ -123,6 +123,11 @@ class MainWindow : public QMainWindow
      */
     void OnToggleWireframe(bool checked);
 
+    /**
+     * @brief Display Galaxy view.
+     */
+    void OnGalaxyClicked();
+
   private:
     //=============================================================================================
     // Private Types

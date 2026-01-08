@@ -33,10 +33,14 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QStatusBar>
+#include <QStyle>
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <qdialog.h>
+#include <qstyle.h>
 
 #include "database/database_manager.h"
 #include "render/render_viewport.h"
@@ -124,7 +128,10 @@ void MainWindow::SetupUI()
 
 void MainWindow::SetupMenuBar()
 {
-    // File menu
+    //-------------------------------------------------------------------------
+    // File Menu
+    //-------------------------------------------------------------------------
+
     auto* file_menu = menuBar()->addMenu(tr("&File"));
 
     auto* action_new = file_menu->addAction(tr("&New Project..."));
@@ -154,7 +161,10 @@ void MainWindow::SetupMenuBar()
     action_exit->setShortcut(QKeySequence::Quit);
     connect(action_exit, &QAction::triggered, this, &QWidget::close);
 
-    // Edit menu
+    //-------------------------------------------------------------------------
+    // Edit Menu
+    //-------------------------------------------------------------------------
+
     auto* edit_menu = menuBar()->addMenu(tr("&Edit"));
     edit_menu->addAction(tr("&Undo"));
     edit_menu->addAction(tr("&Redo"));
@@ -165,7 +175,10 @@ void MainWindow::SetupMenuBar()
     edit_menu->addSeparator();
     edit_menu->addAction(tr("&Preferences..."));
 
-    // View menu
+    //-------------------------------------------------------------------------
+    // View Menu
+    //-------------------------------------------------------------------------
+
     auto* view_menu = menuBar()->addMenu(tr("&View"));
     view_menu->addAction(tr("&Global View"));
     view_menu->addAction(tr("&Regional View"));
@@ -187,13 +200,19 @@ void MainWindow::SetupMenuBar()
     view_menu->addAction(tr("Show &Properties Panel"), [this]()
                          { m_PropertiesDock->setVisible(!m_PropertiesDock->isVisible()); });
 
-    // Simulation menu
+    //-------------------------------------------------------------------------
+    // Simulation Menu
+    //-------------------------------------------------------------------------
+
     auto* sim_menu = menuBar()->addMenu(tr("&Simulation"));
     sim_menu->addAction(tr("&Start"));
     sim_menu->addAction(tr("&Pause"));
     sim_menu->addAction(tr("&Reset"));
 
-    // Help menu
+    //-------------------------------------------------------------------------
+    // Help Menu
+    //-------------------------------------------------------------------------
+
     auto* help_menu = menuBar()->addMenu(tr("&Help"));
     help_menu->addAction(tr("&Documentation"));
     help_menu->addAction(tr("&About Orogena"), this, &MainWindow::ShowAboutDialog);
@@ -203,19 +222,22 @@ void MainWindow::SetupToolBar()
 {
     auto* toolbar = addToolBar(tr("Main Toolbar"));
 
-    auto* action_new = toolbar->addAction(tr("New"));
+    auto* action_new =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_FileIcon), tr("New Project"));
     connect(action_new, &QAction::triggered, this, &MainWindow::OnNewProject);
 
-    auto* action_open = toolbar->addAction(tr("Open"));
+    auto* action_open =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), tr("Open Project"));
     connect(action_open, &QAction::triggered, this, &MainWindow::OnOpenProject);
 
-    auto* action_save = toolbar->addAction(tr("Save"));
+    auto* action_save =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), tr("Save Project"));
     connect(action_save, &QAction::triggered, this, &MainWindow::OnSaveProject);
 
     toolbar->addSeparator();
-    toolbar->addAction(tr("Play"));
-    toolbar->addAction(tr("Pause"));
-    toolbar->addAction(tr("Stop"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaPause), tr("Pause"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaStop), tr("Stop"));
 }
 
 void MainWindow::SetupStatusBar()
@@ -231,21 +253,85 @@ void MainWindow::SetupStatusBar()
 
 void MainWindow::SetupDockPanels()
 {
-    // Left sidebar - Parameters Panel
-    m_ParametersDock = new QDockWidget(tr("Parameters"), this);
+    //-------------------------------------------------------------------------
+    // Left sidebar - Project View Panel
+    //-------------------------------------------------------------------------
+
+    m_ParametersDock = new QDockWidget(tr("Project View"), this);
     m_ParametersDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
-    // Create placeholder content for parameters
+    // Create content for project view
     auto* params_widget = new QWidget();
     auto* params_layout = new QVBoxLayout(params_widget);
-    params_layout->addWidget(new QLabel(tr("Simulation Parameters")));
-    params_layout->addWidget(new QLabel(tr("(Coming in Phase 3)")));
+    params_layout->addWidget(new QLabel(tr("My World")));
+
+    // Add project buttons
+    auto* galaxy_button = new QPushButton(tr("Galaxy"));
+    galaxy_button->setToolTip(tr("View and edit galaxy parameters"));
+    connect(galaxy_button, &QPushButton::clicked, this, &MainWindow::OnGalaxyClicked);
+    params_layout->addWidget(galaxy_button);
+
+    auto* stellar_system_button = new QPushButton(tr("Stellar System"));
+    stellar_system_button->setToolTip(tr("View and edit stellar system parameters"));
+    params_layout->addWidget(stellar_system_button);
+
+    auto* star_button = new QPushButton(tr("Star"));
+    star_button->setToolTip(tr("View and edit star parameters"));
+    params_layout->addWidget(star_button);
+
+    auto* planet_button = new QPushButton(tr("Planet"));
+    planet_button->setToolTip(tr("View and edit planet parameters"));
+    params_layout->addWidget(planet_button);
+
+    auto* moons_button = new QPushButton(tr("Moons"));
+    moons_button->setToolTip(tr("View and edit moons parameters"));
+    params_layout->addWidget(moons_button);
+
+    auto* tectonics_button = new QPushButton(tr("Plate Tectonics"));
+    tectonics_button->setToolTip(tr("View and edit plate tectonics parameters"));
+    params_layout->addWidget(tectonics_button);
+
+    auto* topography_button = new QPushButton(tr("Topography"));
+    topography_button->setToolTip(tr("View and edit topography parameters"));
+    params_layout->addWidget(topography_button);
+
+    auto* ocean_currents_button = new QPushButton(tr("Ocean Currents"));
+    ocean_currents_button->setToolTip(tr("View and edit ocean currents parameters"));
+    params_layout->addWidget(ocean_currents_button);
+
+    auto* atmosphere_button = new QPushButton(tr("Atmosphere"));
+    atmosphere_button->setToolTip(tr("View and edit atmosphere parameters"));
+    params_layout->addWidget(atmosphere_button);
+
+    auto* climate_button = new QPushButton(tr("Climate"));
+    climate_button->setToolTip(tr("View and edit climate parameters"));
+    params_layout->addWidget(climate_button);
+
+    auto* hydrology_button = new QPushButton(tr("Hydrology"));
+    hydrology_button->setToolTip(tr("View and edit hydrology parameters"));
+    params_layout->addWidget(hydrology_button);
+
+    auto* weather_button = new QPushButton(tr("Weather"));
+    weather_button->setToolTip(tr("View and edit weather parameters"));
+    params_layout->addWidget(weather_button);
+
+    auto* geology_button = new QPushButton(tr("Geology"));
+    geology_button->setToolTip(tr("View and edit geology parameters"));
+    params_layout->addWidget(geology_button);
+
+    auto* resources_button = new QPushButton(tr("Resources"));
+    resources_button->setToolTip(tr("View and edit resources parameters"));
+    params_layout->addWidget(resources_button);
+
     params_layout->addStretch();
 
     m_ParametersDock->setWidget(params_widget);
     addDockWidget(Qt::LeftDockWidgetArea, m_ParametersDock);
 
+    //-------------------------------------------------------------------------
     // Right sidebar - Properties Panel
+    //-------------------------------------------------------------------------
+
     m_PropertiesDock = new QDockWidget(tr("Properties"), this);
     m_PropertiesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
@@ -600,6 +686,12 @@ void MainWindow::OnToggleWireframe(bool checked)
     {
         m_Viewport->SetWireframeMode(checked);
     }
+}
+
+void MainWindow::OnGalaxyClicked()
+{
+    QMessageBox::information(this, tr("Galaxy View"), tr("Galaxy view is under development."));
+    Log::Debug("Galaxy button clicked - feature under development");
 }
 
 } // namespace Orogena::GUI
