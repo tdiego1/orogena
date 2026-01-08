@@ -27,9 +27,9 @@ layout(location = 2) in vec2 aTexCoord; ///< Texture coordinates
 // Uniforms
 //=================================================================================================
 
-uniform mat4 uModel;      ///< Model matrix (model → world space)
-uniform mat4 uView;       ///< View matrix (world → view space)
-uniform mat4 uProjection; ///< Projection matrix (view → clip space)
+uniform mat4 uModel;      ///< Model matrix (model -> world space)
+uniform mat4 uView;       ///< View matrix (world -> view space)
+uniform mat4 uProjection; ///< Projection matrix (view -> clip space)
 
 //=================================================================================================
 // Output Variables
