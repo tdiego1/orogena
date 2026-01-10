@@ -513,7 +513,7 @@ void MainWindow::ShowAboutDialog()
     QString about_text =
         tr("<h2>Orogena</h2>"
            "<p><b>Complete Worldbuilding Suite</b></p>"
-           "<p>Version 1.0.0 (Phase 0)</p>"
+           "<p>Version 1.0.0 (Phase 1)</p>"
            "<p>Copyright (C) 2025 Diego Torres. All rights reserved.</p>"
            "<p>Licensed under the GNU General Public License v3.0</p>"
            "<hr>"
