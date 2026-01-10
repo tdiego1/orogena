@@ -40,6 +40,24 @@ target_link_libraries(orogena_core
 )
 
 #===================================================================================================
+# Galaxy View library
+#===================================================================================================
+
+add_library(orogena_galaxy
+    galaxy/galaxy_cdf.cpp
+    galaxy/galaxy_model.cpp
+    galaxy/galaxy_types.cpp
+)
+
+target_link_libraries(orogena_galaxy
+    PUBLIC
+        orogena_core
+        orogena_utils
+        orogena_math
+        glm::glm
+)
+
+#===================================================================================================
 # Stellar system library
 #===================================================================================================
 
@@ -158,6 +176,21 @@ target_link_libraries(orogena_database
     PUBLIC
         Qt6::Sql
         orogena_core
+        orogena_utils
+)
+
+#===================================================================================================
+# Math library
+#===================================================================================================
+
+add_library(orogena_math
+    math/math_constants.h
+    math/math_interpolation.cpp
+    math/math_orbital.cpp
+)
+
+target_link_libraries(orogena_math
+    PUBLIC
         orogena_utils
 )
 
