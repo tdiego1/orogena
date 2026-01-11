@@ -93,7 +93,7 @@ struct GalaxyParticle
  * renderer->Render(camera.GetViewMatrix(), camera.GetProjectionMatrix());
  * @endcode
  */
-class Galaxy
+class GalaxyRenderer
 {
   public:
     //=============================================================================================
@@ -109,17 +109,17 @@ class Galaxy
      *
      * @param gl OpenGL function pointers (must remain valid).
      */
-    explicit Galaxy(QOpenGLFunctions_4_5_Core* gl);
+    explicit GalaxyRenderer(QOpenGLFunctions_4_5_Core* gl);
 
-    ~Galaxy();
+    ~GalaxyRenderer();
 
     // Delete copy operations
-    Galaxy(const Galaxy&) = delete;
-    Galaxy& operator=(const Galaxy&) = delete;
+    GalaxyRenderer(const GalaxyRenderer&) = delete;
+    GalaxyRenderer& operator=(const GalaxyRenderer&) = delete;
 
     // Delete move operations (OpenGL resources are non-movable)
-    Galaxy(Galaxy&&) = delete;
-    Galaxy& operator=(Galaxy&&) = delete;
+    GalaxyRenderer(GalaxyRenderer&&) = delete;
+    GalaxyRenderer& operator=(GalaxyRenderer&&) = delete;
 
     //=============================================================================================
     // Public Functions
@@ -234,8 +234,8 @@ class Galaxy
     bool                       m_Initialized{false};
 
     // Rendering components
-    std::unique_ptr<Shader>   m_Shader;           ///< Point sprite shader
-    std::unique_ptr<Spectral> m_SpectralRenderer; ///< Texture generator
+    std::unique_ptr<Shader>           m_Shader;           ///< Point sprite shader
+    std::unique_ptr<SpectralRenderer> m_SpectralRenderer; ///< Texture generator
 
     // OpenGL resources - Stars
     std::unique_ptr<QOpenGLVertexArrayObject> m_StarVAO;

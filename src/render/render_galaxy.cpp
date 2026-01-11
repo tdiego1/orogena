@@ -42,13 +42,13 @@ namespace Orogena::Render
 //=================================================================================================
 
 /**************************************************************************************************/
-Galaxy::Galaxy(QOpenGLFunctions_4_5_Core* gl) : m_GL(gl)
+GalaxyRenderer::GalaxyRenderer(QOpenGLFunctions_4_5_Core* gl) : m_GL(gl)
 {
     Log::Debug("Galaxy: Created");
 }
 
 /**************************************************************************************************/
-Galaxy::~Galaxy()
+GalaxyRenderer::~GalaxyRenderer()
 {
     Log::Debug("GalaxyRenderer: Destroyed");
 }
@@ -58,7 +58,7 @@ Galaxy::~Galaxy()
 //=================================================================================================
 
 /**************************************************************************************************/
-bool Galaxy::Initialize()
+bool GalaxyRenderer::Initialize()
 {
     if (m_Initialized)
     {
@@ -67,7 +67,7 @@ bool Galaxy::Initialize()
     }
 
     // Create spectral renderer for textures
-    m_SpectralRenderer = std::make_unique<Spectral>(m_GL);
+    m_SpectralRenderer = std::make_unique<SpectralRenderer>(m_GL);
     if (!m_SpectralRenderer->Initialize())
     {
         Log::Error("GalaxyRenderer: Failed to initialize spectral renderer");
@@ -133,7 +133,7 @@ bool Galaxy::Initialize()
 }
 
 /**************************************************************************************************/
-void Galaxy::UpdateFromModel(const Orogena::Galaxy::Model& model)
+void GalaxyRenderer::UpdateFromModel(const Orogena::Galaxy::Model& model)
 {
     if (!m_Initialized)
     {
@@ -250,7 +250,7 @@ void Galaxy::UpdateFromModel(const Orogena::Galaxy::Model& model)
                m_NumDust, m_NumH2);
 }
 
-void Galaxy::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void GalaxyRenderer::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     if (!m_Initialized || m_NumStars == 0)
     {
@@ -284,7 +284,7 @@ void Galaxy::Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatr
 //=================================================================================================
 
 /**************************************************************************************************/
-void Galaxy::RenderStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void GalaxyRenderer::RenderStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     m_Shader->Bind();
     m_Shader->SetUniform("uView", viewMatrix);
@@ -310,7 +310,8 @@ void Galaxy::RenderStars(const glm::mat4& viewMatrix, const glm::mat4& projectio
 }
 
 /**************************************************************************************************/
-void Galaxy::RenderBrightStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void GalaxyRenderer::RenderBrightStars(const glm::mat4& viewMatrix,
+                                       const glm::mat4& projectionMatrix)
 {
     // Render first 1/30th of stars with larger points for emphasis
     const int32_t numBrightStars = m_NumStars / 30;
@@ -342,7 +343,7 @@ void Galaxy::RenderBrightStars(const glm::mat4& viewMatrix, const glm::mat4& pro
 }
 
 /**************************************************************************************************/
-void Galaxy::RenderDust(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void GalaxyRenderer::RenderDust(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     if (m_NumDust == 0)
     {
@@ -371,7 +372,7 @@ void Galaxy::RenderDust(const glm::mat4& viewMatrix, const glm::mat4& projection
 }
 
 /**************************************************************************************************/
-void Galaxy::RenderH2Regions(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void GalaxyRenderer::RenderH2Regions(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
     if (m_NumH2 == 0)
     {
@@ -400,7 +401,7 @@ void Galaxy::RenderH2Regions(const glm::mat4& viewMatrix, const glm::mat4& proje
 }
 
 /**************************************************************************************************/
-void Galaxy::SetupRenderState()
+void GalaxyRenderer::SetupRenderState()
 {
     // Enable point sprites and blending
     m_GL->glEnable(GL_BLEND);
@@ -410,7 +411,7 @@ void Galaxy::SetupRenderState()
 }
 
 /**************************************************************************************************/
-void Galaxy::RestoreRenderState()
+void GalaxyRenderer::RestoreRenderState()
 {
     m_GL->glDisable(GL_BLEND);
     m_GL->glEnable(GL_DEPTH_TEST);
