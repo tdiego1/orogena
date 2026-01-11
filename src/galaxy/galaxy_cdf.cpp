@@ -45,19 +45,19 @@ void CumulativeDistributionFunction::SetupRealistic(float64_t maxIntensity,
                                                     float64_t bulgeRadius,
                                                     float64_t min,
                                                     float64_t max,
-                                                    int32_t   numPoints)
+                                                    size_t    numPoints)
 {
     // Clear existing data
     m_X.clear();
     m_Y.clear();
 
     // Reserve space for efficiency
-    const int32_t numSteps = numPoints / 2; // Simpson's rule uses pairs
-    m_X.reserve(numSteps + 1);
-    m_Y.reserve(numSteps + 1);
+    const size_t numSteps = numPoints / 2U; // Simpson's rule uses pairs
+    m_X.reserve(numSteps + 1U);
+    m_Y.reserve(numSteps + 1U);
 
     // Build the cumulative distribution function using Simpson's rule
-    const float64_t h = (max - min) / numPoints;
+    const float64_t h = (max - min) / (float64_t)numPoints;
     float64_t       x = 0.0;
     float64_t       y = 0.0;
 
@@ -66,7 +66,7 @@ void CumulativeDistributionFunction::SetupRealistic(float64_t maxIntensity,
     m_X.push_back(0.0);
 
     // Integrate using Simpson's rule: ∫f(x)dx ≈ h/3 * [f(x₀) + 4f(x₁) + f(x₂)]
-    for (int32_t i = 0; i < numPoints; i += 2)
+    for (uint32_t i = 0; i < numPoints; i += 2)
     {
         const float64_t x0 = min + i * h;
         const float64_t x1 = min + (i + 1) * h;

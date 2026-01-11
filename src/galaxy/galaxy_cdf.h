@@ -77,7 +77,7 @@ class CumulativeDistributionFunction
                         float64_t bulgeRadius,
                         float64_t min,
                         float64_t max,
-                        int32_t   numPoints);
+                        size_t    numPoints);
 
     /**
      * @brief Get radius value from probability
