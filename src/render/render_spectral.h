@@ -44,7 +44,7 @@ namespace Orogena::Render
  * @details
  * Handles temperature to color mapping and texture generation for spectral rendering of stars.
  */
-class Spectral
+class SpectralRenderer
 {
   public:
     //=============================================================================================
@@ -55,16 +55,16 @@ class Spectral
     // Constructors/Destructor
     //=============================================================================================
 
-    explicit Spectral(QOpenGLFunctions_4_5_Core* gl);
-    ~Spectral();
+    explicit SpectralRenderer(QOpenGLFunctions_4_5_Core* gl);
+    ~SpectralRenderer();
 
     // Delete copy operations
-    Spectral(const Spectral&) = delete;
-    Spectral& operator=(const Spectral&) = delete;
+    SpectralRenderer(const SpectralRenderer&) = delete;
+    SpectralRenderer& operator=(const SpectralRenderer&) = delete;
 
     // Default move operations
-    Spectral(Spectral&&) = default;
-    Spectral& operator=(Spectral&&) = default;
+    SpectralRenderer(SpectralRenderer&&) = default;
+    SpectralRenderer& operator=(SpectralRenderer&&) = default;
 
     //=============================================================================================
     // Public Functions

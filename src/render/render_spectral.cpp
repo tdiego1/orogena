@@ -101,13 +101,13 @@ static constexpr int32_t   c_PointSpriteSize = 64; // 2D texture dimensions
 //=================================================================================================
 
 /**************************************************************************************************/
-Spectral::Spectral(QOpenGLFunctions_4_5_Core* gl) : m_GL(gl)
+SpectralRenderer::SpectralRenderer(QOpenGLFunctions_4_5_Core* gl) : m_GL(gl)
 {
     Log::Debug("Spectral Renderer: Created");
 }
 
 /**************************************************************************************************/
-Spectral::~Spectral()
+SpectralRenderer::~SpectralRenderer()
 {
     if (m_ColorRampTexture != 0)
     {
@@ -125,7 +125,7 @@ Spectral::~Spectral()
 //=================================================================================================
 
 /**************************************************************************************************/
-bool Spectral::Initialize()
+bool SpectralRenderer::Initialize()
 {
     GenerateColorRampTexture();
     GeneratePointSpriteTexture();
@@ -137,7 +137,7 @@ bool Spectral::Initialize()
 }
 
 /**************************************************************************************************/
-Utils::ColorRGBF Spectral::TemperatureToColor(float32_t temperatureK)
+Utils::ColorRGBF SpectralRenderer::TemperatureToColor(float32_t temperatureK)
 {
     // Clamp to valid range
     temperatureK = Math::Clamp(temperatureK, c_ColorTable[0].temperatureK,
@@ -174,7 +174,7 @@ Utils::ColorRGBF Spectral::TemperatureToColor(float32_t temperatureK)
 //=================================================================================================
 
 /**************************************************************************************************/
-void Spectral::GenerateColorRampTexture()
+void SpectralRenderer::GenerateColorRampTexture()
 {
     // Generate 1D texture data: sample color table at regular intervals
     std::vector<uint8_t> pixels(c_ColorRampSize * 3); // RGB
@@ -215,7 +215,7 @@ void Spectral::GenerateColorRampTexture()
 }
 
 /**************************************************************************************************/
-void Spectral::GeneratePointSpriteTexture()
+void SpectralRenderer::GeneratePointSpriteTexture()
 {
     // Generate 2D texture with Gaussian soft-glow falloff
     std::vector<uint8_t> pixels(c_PointSpriteSize * c_PointSpriteSize * 4); // RGBA
