@@ -36,7 +36,9 @@
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLWidget>
 
+#include "galaxy/galaxy_model.h"
 #include "render_camera.h"
+#include "render_galaxy.h"
 #include "render_grid.h"
 #include "render_sphere.h"
 #include "utils/utils_types.h"
@@ -110,6 +112,28 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
      * @param enable True for wireframe, false for solid.
      */
     void SetWireframeMode(bool enable);
+
+    /**
+     * @brief Initialize galaxy simulation with default parameters
+     */
+    void InitializeGalaxy();
+
+    /**
+     * @brief Get galaxy model for external manipulation
+     *
+     * @return Galaxy::Model* Non-owning pointer to galaxy model (nullptr if not initialized).
+     */
+    Galaxy::Model* GetGalaxyModel()
+    {
+        return m_GalaxyModel.get();
+    }
+
+    /**
+     * @brief Update galaxy rendering from current model state
+     *
+     * @details Call this after modifying galaxy parameters or advancing simulation.
+     */
+    void UpdateGalaxyRendering();
 
   signals:
     /**
@@ -216,7 +240,7 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     //=============================================================================================
 
     // Clear color (Sky blue by default)
-    Utils::ColorRGBF m_ClearColor{.r = 0.53F, .g = 0.81F, .b = 0.92F};
+    Utils::ColorRGBF m_ClearColor{.r = 0.0F, .g = 0.0F, .b = 0.0F};
 
     // FPS tracking
     std::chrono::steady_clock::time_point m_FrameStartTime; ///< Start time for frame timing.
@@ -228,6 +252,10 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     std::unique_ptr<Camera> m_Camera; ///< Camera for viewport navigation.
     std::unique_ptr<Grid>   m_Grid;   ///< Reference grid renderer.
     std::unique_ptr<Sphere> m_Sphere; ///< Sphere renderer for planet visualization.
+
+    // Galaxy rendering
+    std::unique_ptr<GalaxyRenderer>         m_GalaxyRenderer; ///< Galaxy renderer.
+    std::unique_ptr<Orogena::Galaxy::Model> m_GalaxyModel;    ///< Galaxy simulation model.
 
     // Mouse interaction state
     bool   m_LeftMousePressed{false};  ///< Left mouse button state.

@@ -95,6 +95,7 @@ Viewport::~Viewport()
 // Public Functions
 //=================================================================================================
 
+/**************************************************************************************************/
 void Viewport::SetClearColor(Utils::ColorRGBF color)
 {
     m_ClearColor = color;
@@ -109,6 +110,7 @@ void Viewport::SetClearColor(Utils::ColorRGBF color)
     update(); // Trigger repaint
 }
 
+/**************************************************************************************************/
 void Viewport::SetWireframeMode(bool enable)
 {
     if (m_Sphere)
@@ -116,6 +118,48 @@ void Viewport::SetWireframeMode(bool enable)
         m_Sphere->SetRenderMode(enable ? RenderMode::WIREFRAME : RenderMode::SOLID);
         Log::Debug("Viewport: Wireframe mode {}", enable ? "enabled" : "disabled");
         update(); // Trigger repaint
+    }
+}
+
+/**************************************************************************************************/
+void Viewport::InitializeGalaxy()
+{
+    // Create galaxy with default configuration
+    Galaxy::GalaxyConfig config;
+    config.radius = 15000.0;         // 15,000 parsecs
+    config.coreRadius = 4000.0;      // 4,000 parsecs
+    config.angularOffset = 0.0004;   // Spiral tightness
+    config.excentricityInner = 0.85; // Inner orbit shape
+    config.excentricityOuter = 0.95; // Outer orbit shape
+    config.sigma = 0.5;
+    config.numStars = 30000; // 30,000 stars
+    config.hasDarkMatter = true;
+    config.perturbationN = 2; // 2 spiral arms
+    config.perturbationAmp = 40.0;
+    config.dustRenderSize = 80.0;
+
+    m_GalaxyModel = std::make_unique<Galaxy::Model>(config);
+
+    // Upload to GPU
+    UpdateGalaxyRendering();
+
+    // Adjust camera to view galaxy
+    if (m_Camera)
+    {
+        m_Camera->Reset();
+        // Position camera to see the whole galaxy (30,000 parsecs diameter)
+        m_Camera->Zoom(-20.0F); // Zoom out to see full extent
+    }
+
+    Log::Info("Viewport: Galaxy initialized with {} stars", config.numStars);
+}
+
+/**************************************************************************************************/
+void Viewport::UpdateGalaxyRendering()
+{
+    if (m_GalaxyModel && m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->UpdateFromModel(*m_GalaxyModel);
     }
 }
 
@@ -202,6 +246,18 @@ void Viewport::initializeGL()
     m_FrameStartTime = std::chrono::steady_clock::now();
     m_LastFPSUpdateMs = 0;
 
+    // Initialize galaxy renderer
+    m_GalaxyRenderer =
+        std::make_unique<GalaxyRenderer>(static_cast<QOpenGLFunctions_4_5_Core*>(this));
+    if (!m_GalaxyRenderer->Initialize())
+    {
+        emit OpenGLError("Failed to initialize galaxy renderer");
+        return;
+    }
+
+    // Create default galaxy
+    InitializeGalaxy();
+
     // Emit success signal
     emit OpenGLInitialized(vendor_str, renderer_str,
                            std::format("{}.{}", major_version, minor_version));
@@ -209,22 +265,30 @@ void Viewport::initializeGL()
 
 void Viewport::paintGL()
 {
-    // Clear buffers
+    m_FrameStartTime = std::chrono::steady_clock::now();
+
+    // Clear with background color
+    glClearColor(m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Check for errors
     CheckGLError("paintGL clear");
 
-    // Render grid if available
-    if (m_Grid && m_Grid->IsInitialized())
+    // Get camera matrices
+    const glm::mat4 view = m_Camera->GetViewMatrix();
+    const glm::mat4 projection = m_Camera->GetProjectionMatrix();
+
+    // Animate galaxy (optional - advance simulation each frame)
+    if (m_GalaxyModel)
     {
-        m_Grid->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+        m_GalaxyModel->SingleTimeStep(100000.0); // 100,000 years per frame
+        UpdateGalaxyRendering();
     }
 
-    // Render sphere if available
-    if (m_Sphere && m_Sphere->IsInitialized())
+    // Render galaxy (if initialized)
+    if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
     {
-        m_Sphere->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+        m_GalaxyRenderer->Render(view, projection);
     }
 
     // Update FPS counter
