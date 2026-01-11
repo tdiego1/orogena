@@ -142,6 +142,7 @@ target_link_libraries(orogena_render
         Qt6::OpenGLWidgets
         OpenGL::GL
         orogena_local
+        orogena_galaxy
 )
 
 #===================================================================================================
