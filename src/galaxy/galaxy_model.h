@@ -81,7 +81,7 @@ class Model
      */
     explicit Model(const GalaxyConfig& config);
 
-    ~Model();
+    ~Model() = default;
 
     // Delete copy operations
     Model(const Model&) = delete;
