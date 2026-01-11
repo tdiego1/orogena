@@ -129,6 +129,7 @@ add_library(orogena_render
     render/render_camera.cpp
     render/render_grid.cpp
     render/render_mesh.cpp
+    render/render_spectral.cpp
     render/render_shader.cpp
     render/render_sphere.cpp
     render/render_viewport.cpp
