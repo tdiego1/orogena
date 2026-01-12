@@ -126,6 +126,20 @@ class Camera
     void Reset();
 
     /**
+     * @brief Set camera to orthographic projection mode (for 2D/galaxy view)
+     *
+     * @param orthoSize Half-width/height of the orthographic view in world units
+     */
+    void SetOrthographic(float32_t orthoSize);
+
+    /**
+     * @brief Set camera to perspective projection mode (for 3D view)
+     *
+     * @param fovDegrees Field of view in degrees
+     */
+    void SetPerspective(float32_t fovDegrees = 45.0F);
+
+    /**
      * @brief Get current camera distance from target
      *
      * @return float32_t Distance in world units.
@@ -143,6 +157,16 @@ class Camera
     [[nodiscard]] glm::vec3 GetTarget() const
     {
         return m_Target;
+    }
+
+    /**
+     * @brief Get orthographic view half-size (FOV for galaxy rendering)
+     *
+     * @return float32_t Orthographic size in world units.
+     */
+    [[nodiscard]] float32_t GetOrthoSize() const
+    {
+        return m_OrthoSize;
     }
 
   private:
@@ -172,14 +196,21 @@ class Camera
     float32_t m_NearPlane{0.1F};           ///< Near clipping plane
     float32_t m_FarPlane{1000.0F};         ///< Far clipping plane
 
+    // Orthographic projection parameters
+    bool      m_UseOrthographic{false}; ///< Use orthographic instead of perspective
+    float32_t m_OrthoSize{15000.0F};    ///< Half-size of orthographic view (parsecs for galaxy)
+
     // Control sensitivity
     static constexpr float32_t c_PanSpeed = 5.0F;
     static constexpr float32_t c_ZoomSpeed = 1.2F;
     static constexpr float32_t c_RotateSpeed = 0.005F;
     static constexpr float32_t c_MinDistance = 1.0F;
     static constexpr float32_t c_MaxDistance = 100.0F;
-    static constexpr float32_t c_MinPolar = 0.1F;  // Prevent gimbal lock
-    static constexpr float32_t c_MaxPolar = 3.04F; // ~174 degrees
+    static constexpr float32_t c_MinPolar =
+        0.0F; // Allow top-down view (gimbal lock handled in GetViewMatrix)
+    static constexpr float32_t c_MaxPolar = 3.14159265F;  // 180 degrees (allow bottom-up view too)
+    static constexpr float32_t c_MinOrthoSize = 1000.0F;  // Minimum zoom for galaxy
+    static constexpr float32_t c_MaxOrthoSize = 50000.0F; // Maximum zoom for galaxy
 };
 
 } // namespace Orogena::Render

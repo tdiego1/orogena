@@ -22,3 +22,8 @@ Diagnostics:
   Suppress: '*'
   ClangTidy:
     Add: []
+
+---
+
+Documentation:
+  CommentFormat: Doxygen

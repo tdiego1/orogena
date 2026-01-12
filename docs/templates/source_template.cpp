@@ -48,21 +48,23 @@ int ClassName::s_InstanceCount = 0;
 // Constructors/Destructor
 //=================================================================================================
 
+/**************************************************************************************************/
 ClassName::ClassName()
-    : m_Config{}
-    , m_Status(Status::IDLE)
-    , m_IsInitialized(false)
-    , m_InternalData(std::make_unique<InternalData>())
+    : m_Config{},
+      m_Status(Status::IDLE),
+      m_IsInitialized(false),
+      m_InternalData(std::make_unique<InternalData>())
 {
     ++s_InstanceCount;
     spdlog::debug("ClassName constructed (instance #{})", s_InstanceCount);
 }
 
+/**************************************************************************************************/
 ClassName::ClassName(const Config& config)
-    : m_Config(config)
-    , m_Status(Status::IDLE)
-    , m_IsInitialized(false)
-    , m_InternalData(std::make_unique<InternalData>())
+    : m_Config(config),
+      m_Status(Status::IDLE),
+      m_IsInitialized(false),
+      m_InternalData(std::make_unique<InternalData>())
 {
     if (!ValidateConfig())
     {
@@ -73,6 +75,7 @@ ClassName::ClassName(const Config& config)
     spdlog::debug("ClassName constructed with config (instance #{})", s_InstanceCount);
 }
 
+/**************************************************************************************************/
 ClassName::~ClassName()
 {
     --s_InstanceCount;
@@ -83,6 +86,7 @@ ClassName::~ClassName()
 // Public Functions
 //=================================================================================================
 
+/**************************************************************************************************/
 int ClassName::DoSomething(int paramName)
 {
     if (paramName < 0)
@@ -103,11 +107,13 @@ int ClassName::DoSomething(int paramName)
     return result;
 }
 
+/**************************************************************************************************/
 ClassName::Status ClassName::GetStatus() const
 {
     return m_Status;
 }
 
+/**************************************************************************************************/
 bool ClassName::IsComplete() const
 {
     return m_Status == Status::COMPLETED;
@@ -117,6 +123,7 @@ bool ClassName::IsComplete() const
 // Protected Functions
 //=================================================================================================
 
+/**************************************************************************************************/
 void ClassName::ProtectedHelper()
 {
     // Protected method implementation
@@ -127,6 +134,7 @@ void ClassName::ProtectedHelper()
 // Private Functions
 //=================================================================================================
 
+/**************************************************************************************************/
 void ClassName::CalculateInternals()
 {
     // Internal calculation logic
@@ -137,6 +145,7 @@ void ClassName::CalculateInternals()
                   m_InternalData->counter);
 }
 
+/**************************************************************************************************/
 bool ClassName::ValidateConfig() const
 {
     if (m_Config.maxIterations <= 0)

@@ -26,6 +26,7 @@
 
 #include "gui/gui_main_window.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
 #include <QDockWidget>
 #include <QFileDialog>
@@ -33,7 +34,9 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QStatusBar>
+#include <QStyle>
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -124,7 +127,10 @@ void MainWindow::SetupUI()
 
 void MainWindow::SetupMenuBar()
 {
-    // File menu
+    //-------------------------------------------------------------------------
+    // File Menu
+    //-------------------------------------------------------------------------
+
     auto* file_menu = menuBar()->addMenu(tr("&File"));
 
     auto* action_new = file_menu->addAction(tr("&New Project..."));
@@ -154,7 +160,10 @@ void MainWindow::SetupMenuBar()
     action_exit->setShortcut(QKeySequence::Quit);
     connect(action_exit, &QAction::triggered, this, &QWidget::close);
 
-    // Edit menu
+    //-------------------------------------------------------------------------
+    // Edit Menu
+    //-------------------------------------------------------------------------
+
     auto* edit_menu = menuBar()->addMenu(tr("&Edit"));
     edit_menu->addAction(tr("&Undo"));
     edit_menu->addAction(tr("&Redo"));
@@ -165,7 +174,10 @@ void MainWindow::SetupMenuBar()
     edit_menu->addSeparator();
     edit_menu->addAction(tr("&Preferences..."));
 
-    // View menu
+    //-------------------------------------------------------------------------
+    // View Menu
+    //-------------------------------------------------------------------------
+
     auto* view_menu = menuBar()->addMenu(tr("&View"));
     view_menu->addAction(tr("&Global View"));
     view_menu->addAction(tr("&Regional View"));
@@ -184,16 +196,24 @@ void MainWindow::SetupMenuBar()
     // Add dock visibility toggles to View menu
     view_menu->addAction(tr("Show &Parameters Panel"), [this]()
                          { m_ParametersDock->setVisible(!m_ParametersDock->isVisible()); });
+    view_menu->addAction(tr("Show &Galaxy Controls Panel"), [this]()
+                         { m_GalaxyControlsDock->setVisible(!m_GalaxyControlsDock->isVisible()); });
     view_menu->addAction(tr("Show &Properties Panel"), [this]()
                          { m_PropertiesDock->setVisible(!m_PropertiesDock->isVisible()); });
 
-    // Simulation menu
+    //-------------------------------------------------------------------------
+    // Simulation Menu
+    //-------------------------------------------------------------------------
+
     auto* sim_menu = menuBar()->addMenu(tr("&Simulation"));
     sim_menu->addAction(tr("&Start"));
     sim_menu->addAction(tr("&Pause"));
     sim_menu->addAction(tr("&Reset"));
 
-    // Help menu
+    //-------------------------------------------------------------------------
+    // Help Menu
+    //-------------------------------------------------------------------------
+
     auto* help_menu = menuBar()->addMenu(tr("&Help"));
     help_menu->addAction(tr("&Documentation"));
     help_menu->addAction(tr("&About Orogena"), this, &MainWindow::ShowAboutDialog);
@@ -203,19 +223,22 @@ void MainWindow::SetupToolBar()
 {
     auto* toolbar = addToolBar(tr("Main Toolbar"));
 
-    auto* action_new = toolbar->addAction(tr("New"));
+    auto* action_new =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_FileIcon), tr("New Project"));
     connect(action_new, &QAction::triggered, this, &MainWindow::OnNewProject);
 
-    auto* action_open = toolbar->addAction(tr("Open"));
+    auto* action_open =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), tr("Open Project"));
     connect(action_open, &QAction::triggered, this, &MainWindow::OnOpenProject);
 
-    auto* action_save = toolbar->addAction(tr("Save"));
+    auto* action_save =
+        toolbar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), tr("Save Project"));
     connect(action_save, &QAction::triggered, this, &MainWindow::OnSaveProject);
 
     toolbar->addSeparator();
-    toolbar->addAction(tr("Play"));
-    toolbar->addAction(tr("Pause"));
-    toolbar->addAction(tr("Stop"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaPause), tr("Pause"));
+    toolbar->addAction(style()->standardIcon(QStyle::SP_MediaStop), tr("Stop"));
 }
 
 void MainWindow::SetupStatusBar()
@@ -231,21 +254,150 @@ void MainWindow::SetupStatusBar()
 
 void MainWindow::SetupDockPanels()
 {
-    // Left sidebar - Parameters Panel
-    m_ParametersDock = new QDockWidget(tr("Parameters"), this);
+    //-------------------------------------------------------------------------
+    // Left sidebar - Project View Panel
+    //-------------------------------------------------------------------------
+
+    m_ParametersDock = new QDockWidget(tr("Project View"), this);
     m_ParametersDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
-    // Create placeholder content for parameters
+    // Create content for project view
     auto* params_widget = new QWidget();
     auto* params_layout = new QVBoxLayout(params_widget);
-    params_layout->addWidget(new QLabel(tr("Simulation Parameters")));
-    params_layout->addWidget(new QLabel(tr("(Coming in Phase 3)")));
+    params_layout->addWidget(new QLabel(tr("My World")));
+
+    // Add project buttons
+    m_GalaxyButton = new QPushButton(tr("Galaxy"));
+    m_GalaxyButton->setToolTip(tr("View and edit galaxy parameters"));
+    m_GalaxyButton->setCheckable(true);
+    m_GalaxyButton->setChecked(true); // Galaxy view is default
+    connect(m_GalaxyButton, &QPushButton::clicked, this, &MainWindow::OnGalaxyClicked);
+    params_layout->addWidget(m_GalaxyButton);
+
+    m_StellarSystemButton = new QPushButton(tr("Stellar System"));
+    m_StellarSystemButton->setToolTip(tr("View and edit stellar system parameters"));
+    m_StellarSystemButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_StellarSystemButton);
+
+    m_StarButton = new QPushButton(tr("Star"));
+    m_StarButton->setToolTip(tr("View and edit star parameters"));
+    m_StarButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_StarButton);
+
+    m_PlanetButton = new QPushButton(tr("Planet"));
+    m_PlanetButton->setToolTip(tr("View and edit planet parameters"));
+    m_PlanetButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_PlanetButton);
+
+    m_MoonsButton = new QPushButton(tr("Moons"));
+    m_MoonsButton->setToolTip(tr("View and edit moons parameters"));
+    m_MoonsButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_MoonsButton);
+
+    m_TectonicsButton = new QPushButton(tr("Plate Tectonics"));
+    m_TectonicsButton->setToolTip(tr("View and edit plate tectonics parameters"));
+    m_TectonicsButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_TectonicsButton);
+
+    m_TopographyButton = new QPushButton(tr("Topography"));
+    m_TopographyButton->setToolTip(tr("View and edit topography parameters"));
+    m_TopographyButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_TopographyButton);
+
+    m_OceanCurrentsButton = new QPushButton(tr("Ocean Currents"));
+    m_OceanCurrentsButton->setToolTip(tr("View and edit ocean currents parameters"));
+    m_OceanCurrentsButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_OceanCurrentsButton);
+
+    m_AtmosphereButton = new QPushButton(tr("Atmosphere"));
+    m_AtmosphereButton->setToolTip(tr("View and edit atmosphere parameters"));
+    m_AtmosphereButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_AtmosphereButton);
+
+    m_ClimateButton = new QPushButton(tr("Climate"));
+    m_ClimateButton->setToolTip(tr("View and edit climate parameters"));
+    m_ClimateButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_ClimateButton);
+
+    m_HydrologyButton = new QPushButton(tr("Hydrology"));
+    m_HydrologyButton->setToolTip(tr("View and edit hydrology parameters"));
+    m_HydrologyButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_HydrologyButton);
+
+    m_WeatherButton = new QPushButton(tr("Weather"));
+    m_WeatherButton->setToolTip(tr("View and edit weather parameters"));
+    m_WeatherButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_WeatherButton);
+
+    m_GeologyButton = new QPushButton(tr("Geology"));
+    m_GeologyButton->setToolTip(tr("View and edit geology parameters"));
+    m_GeologyButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_GeologyButton);
+
+    m_ResourcesButton = new QPushButton(tr("Resources"));
+    m_ResourcesButton->setToolTip(tr("View and edit resources parameters"));
+    m_ResourcesButton->setEnabled(false); // Disabled for now
+    params_layout->addWidget(m_ResourcesButton);
+
     params_layout->addStretch();
 
     m_ParametersDock->setWidget(params_widget);
     addDockWidget(Qt::LeftDockWidgetArea, m_ParametersDock);
 
+    //-------------------------------------------------------------------------
+    // Right sidebar - Galaxy Controls Panel
+    //-------------------------------------------------------------------------
+
+    m_GalaxyControlsDock = new QDockWidget(tr("Galaxy Controls"), this);
+    m_GalaxyControlsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+    // Create content for galaxy controls
+    auto* controls_widget = new QWidget();
+    auto* controls_layout = new QVBoxLayout(controls_widget);
+
+    // Add section label
+    controls_layout->addWidget(new QLabel(tr("<b>Display Options</b>")));
+
+    // Stars checkbox
+    m_ShowStarsCheckBox = new QCheckBox(tr("Show Stars"));
+    m_ShowStarsCheckBox->setChecked(true);
+    m_ShowStarsCheckBox->setToolTip(tr("Toggle star rendering"));
+    connect(m_ShowStarsCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleStars);
+    controls_layout->addWidget(m_ShowStarsCheckBox);
+
+    // Dust checkbox
+    m_ShowDustCheckBox = new QCheckBox(tr("Show Dust"));
+    m_ShowDustCheckBox->setChecked(true);
+    m_ShowDustCheckBox->setToolTip(tr("Toggle dust cloud rendering"));
+    connect(m_ShowDustCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleDust);
+    controls_layout->addWidget(m_ShowDustCheckBox);
+
+    // H2 regions checkbox
+    m_ShowH2CheckBox = new QCheckBox(tr("Show H2 Regions"));
+    m_ShowH2CheckBox->setChecked(true);
+    m_ShowH2CheckBox->setToolTip(tr("Toggle H2 region rendering"));
+    connect(m_ShowH2CheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleH2);
+    controls_layout->addWidget(m_ShowH2CheckBox);
+
+    controls_layout->addSpacing(10);
+    controls_layout->addWidget(new QLabel(tr("<b>Animation</b>")));
+
+    // Animation checkbox
+    m_AnimateCheckBox = new QCheckBox(tr("Animate Galaxy"));
+    m_AnimateCheckBox->setChecked(true);
+    m_AnimateCheckBox->setToolTip(tr("Toggle galaxy rotation animation"));
+    connect(m_AnimateCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleAnimation);
+    controls_layout->addWidget(m_AnimateCheckBox);
+
+    controls_layout->addStretch();
+
+    m_GalaxyControlsDock->setWidget(controls_widget);
+    addDockWidget(Qt::RightDockWidgetArea, m_GalaxyControlsDock);
+
+    //-------------------------------------------------------------------------
     // Right sidebar - Properties Panel
+    //-------------------------------------------------------------------------
+
     m_PropertiesDock = new QDockWidget(tr("Properties"), this);
     m_PropertiesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
@@ -259,7 +411,11 @@ void MainWindow::SetupDockPanels()
     m_PropertiesDock->setWidget(props_widget);
     addDockWidget(Qt::RightDockWidgetArea, m_PropertiesDock);
 
-    Log::Debug("Dockable panels initialized: Parameters (left), Properties (right)");
+    // Stack Properties dock below Galaxy Controls dock
+    splitDockWidget(m_GalaxyControlsDock, m_PropertiesDock, Qt::Vertical);
+
+    Log::Debug("Dockable panels initialized: Parameters (left), Galaxy Controls (top right), "
+               "Properties (bottom right)");
 }
 
 void MainWindow::SetupViewport()
@@ -427,7 +583,7 @@ void MainWindow::ShowAboutDialog()
     QString about_text =
         tr("<h2>Orogena</h2>"
            "<p><b>Complete Worldbuilding Suite</b></p>"
-           "<p>Version 1.0.0 (Phase 0)</p>"
+           "<p>Version 1.0.0 (Phase 1)</p>"
            "<p>Copyright (C) 2025 Diego Torres. All rights reserved.</p>"
            "<p>Licensed under the GNU General Public License v3.0</p>"
            "<hr>"
@@ -599,6 +755,49 @@ void MainWindow::OnToggleWireframe(bool checked)
     if (m_Viewport)
     {
         m_Viewport->SetWireframeMode(checked);
+    }
+}
+
+void MainWindow::OnGalaxyClicked()
+{
+    Log::Debug("Galaxy button clicked - displaying galaxy view");
+    // Galaxy view is already displayed in the viewport by default
+    // This handler is kept for future functionality (e.g., switching views)
+}
+
+void MainWindow::OnToggleStars(bool checked)
+{
+    if (m_Viewport)
+    {
+        m_Viewport->SetGalaxyDisplayFlag(Render::GALAXY_SHOW_STARS, checked);
+        Log::Debug("Stars rendering: {}", checked ? "enabled" : "disabled");
+    }
+}
+
+void MainWindow::OnToggleDust(bool checked)
+{
+    if (m_Viewport)
+    {
+        m_Viewport->SetGalaxyDisplayFlag(Render::GALAXY_SHOW_DUST, checked);
+        Log::Debug("Dust rendering: {}", checked ? "enabled" : "disabled");
+    }
+}
+
+void MainWindow::OnToggleH2(bool checked)
+{
+    if (m_Viewport)
+    {
+        m_Viewport->SetGalaxyDisplayFlag(Render::GALAXY_SHOW_H2, checked);
+        Log::Debug("H2 regions rendering: {}", checked ? "enabled" : "disabled");
+    }
+}
+
+void MainWindow::OnToggleAnimation(bool checked)
+{
+    if (m_Viewport)
+    {
+        m_Viewport->SetGalaxyAnimation(checked);
+        Log::Debug("Galaxy animation: {}", checked ? "enabled" : "disabled");
     }
 }
 

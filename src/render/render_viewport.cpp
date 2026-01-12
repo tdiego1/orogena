@@ -95,6 +95,7 @@ Viewport::~Viewport()
 // Public Functions
 //=================================================================================================
 
+/**************************************************************************************************/
 void Viewport::SetClearColor(Utils::ColorRGBF color)
 {
     m_ClearColor = color;
@@ -109,6 +110,7 @@ void Viewport::SetClearColor(Utils::ColorRGBF color)
     update(); // Trigger repaint
 }
 
+/**************************************************************************************************/
 void Viewport::SetWireframeMode(bool enable)
 {
     if (m_Sphere)
@@ -116,6 +118,54 @@ void Viewport::SetWireframeMode(bool enable)
         m_Sphere->SetRenderMode(enable ? RenderMode::WIREFRAME : RenderMode::SOLID);
         Log::Debug("Viewport: Wireframe mode {}", enable ? "enabled" : "disabled");
         update(); // Trigger repaint
+    }
+}
+
+/**************************************************************************************************/
+void Viewport::InitializeGalaxy()
+{
+    // Create galaxy with default configuration matching original Galaxy-Renderer
+    Galaxy::GalaxyConfig config;
+    config.radius = 13000.0;         // 13,000 parsecs (matches original)
+    config.coreRadius = 4000.0;      // 4,000 parsecs
+    config.angularOffset = 0.0004;   // Spiral tightness
+    config.excentricityInner = 0.85; // Inner orbit shape
+    config.excentricityOuter = 0.95; // Outer orbit shape
+    config.sigma = 0.5;
+    config.numStars = 30000; // 30,000 stars
+    config.hasDarkMatter = true;
+    config.perturbationN = 2; // 2 spiral arms
+    config.perturbationAmp = 40.0;
+    config.dustRenderSize = 100.0; // Matches original (70 base * 28174/fov)
+
+    m_GalaxyModel = std::make_unique<Galaxy::Model>(config);
+
+    // Set default display flags (show all)
+    m_GalaxyDisplayFlags = GALAXY_SHOW_ALL;
+    if (m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->SetDisplayFlags(m_GalaxyDisplayFlags);
+    }
+
+    // Upload to GPU
+    UpdateGalaxyRendering();
+
+    // Configure camera for galaxy view (orthographic, top-down)
+    if (m_Camera)
+    {
+        m_Camera->SetOrthographic(13000.0F); // Half-width to show 26000 parsec galaxy
+        m_Camera->Reset();                   // Reset to top-down view
+    }
+
+    Log::Info("Viewport: Galaxy initialized with {} stars (camera: orthographic)", config.numStars);
+}
+
+/**************************************************************************************************/
+void Viewport::UpdateGalaxyRendering()
+{
+    if (m_GalaxyModel && m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->UpdateFromModel(*m_GalaxyModel);
     }
 }
 
@@ -202,6 +252,18 @@ void Viewport::initializeGL()
     m_FrameStartTime = std::chrono::steady_clock::now();
     m_LastFPSUpdateMs = 0;
 
+    // Initialize galaxy renderer
+    m_GalaxyRenderer =
+        std::make_unique<GalaxyRenderer>(static_cast<QOpenGLFunctions_4_5_Core*>(this));
+    if (!m_GalaxyRenderer->Initialize())
+    {
+        emit OpenGLError("Failed to initialize galaxy renderer");
+        return;
+    }
+
+    // Create default galaxy
+    InitializeGalaxy();
+
     // Emit success signal
     emit OpenGLInitialized(vendor_str, renderer_str,
                            std::format("{}.{}", major_version, minor_version));
@@ -209,22 +271,34 @@ void Viewport::initializeGL()
 
 void Viewport::paintGL()
 {
-    // Clear buffers
+    m_FrameStartTime = std::chrono::steady_clock::now();
+
+    // Clear with background color
+    glClearColor(m_ClearColor.r, m_ClearColor.g, m_ClearColor.b, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Check for errors
     CheckGLError("paintGL clear");
 
-    // Render grid if available
-    if (m_Grid && m_Grid->IsInitialized())
+    // Get camera matrices
+    const glm::mat4 view = m_Camera->GetViewMatrix();
+    const glm::mat4 projection = m_Camera->GetProjectionMatrix();
+
+    // Animate galaxy (optional - advance simulation each frame)
+    if (m_GalaxyModel && m_GalaxyAnimationEnabled)
     {
-        m_Grid->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+        m_GalaxyModel->SingleTimeStep(10000.0); // 100,000 years per frame
+        UpdateGalaxyRendering();
     }
 
-    // Render sphere if available
-    if (m_Sphere && m_Sphere->IsInitialized())
+    // Render galaxy (if initialized)
+    if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
     {
-        m_Sphere->Render(m_Camera->GetViewMatrix(), m_Camera->GetProjectionMatrix());
+        // FOV = full visible height (2x ortho size) to match original Galaxy-Renderer
+        // Original uses: glOrtho(-fov/2, fov/2, ...) where fov is the FULL visible area
+        // Our orthoSize is already the half-height, so multiply by 2
+        const float32_t fov = m_Camera->GetOrthoSize() * 2.0F;
+        m_GalaxyRenderer->Render(view, projection, fov);
     }
 
     // Update FPS counter
@@ -361,6 +435,31 @@ void Viewport::wheelEvent(QWheelEvent* event)
     m_Camera->Zoom(-delta); // Negative for intuitive zoom direction
 
     event->accept();
+}
+
+void Viewport::SetGalaxyDisplayFlag(uint32_t flag, bool enabled)
+{
+    if (enabled)
+    {
+        m_GalaxyDisplayFlags |= flag; // Set flag
+    }
+    else
+    {
+        m_GalaxyDisplayFlags &= ~flag; // Clear flag
+    }
+
+    if (m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->SetDisplayFlags(m_GalaxyDisplayFlags);
+    }
+
+    update(); // Trigger repaint
+}
+
+void Viewport::SetGalaxyAnimation(bool enabled)
+{
+    m_GalaxyAnimationEnabled = enabled;
+    Log::Debug("Galaxy animation: {}", enabled ? "enabled" : "disabled");
 }
 
 } // namespace Orogena::Render

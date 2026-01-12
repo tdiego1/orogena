@@ -101,9 +101,79 @@ if(OROGENA_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# Copy shader files to build directory
-file(GLOB SHADER_FILES "${CMAKE_SOURCE_DIR}/src/render/shaders/*")
-file(COPY ${SHADER_FILES} DESTINATION "${CMAKE_BINARY_DIR}/shaders")
+# Shader copying with precise dependency tracking
+file(GLOB_RECURSE SHADER_FILES "${CMAKE_SOURCE_DIR}/src/render/shaders/*")
+
+foreach(SHADER_FILE ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
+    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME}")
+
+    add_custom_command(
+        OUTPUT "${OUTPUT_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SHADER_FILE}"
+            "${OUTPUT_FILE}"
+        DEPENDS "${SHADER_FILE}"
+        COMMENT "Copying shader: ${SHADER_NAME}"
+        VERBATIM
+    )
+
+    list(APPEND SHADER_OUTPUTS "${OUTPUT_FILE}")
+endforeach()
+
+add_custom_target(copy_shaders ALL DEPENDS ${SHADER_OUTPUTS})
+
+# Copy texture files to build directory
+file(GLOB_RECURSE TEXTURE_FILES "${CMAKE_SOURCE_DIR}/resources/textures/*")
+
+foreach(TEXTURE_FILE ${TEXTURE_FILES})
+    file(RELATIVE_PATH TEXTURE_REL_PATH "${CMAKE_SOURCE_DIR}/resources/textures" "${TEXTURE_FILE}")
+    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/resources/textures/${TEXTURE_REL_PATH}")
+
+    get_filename_component(OUTPUT_DIR "${OUTPUT_FILE}" DIRECTORY)
+
+    add_custom_command(
+        OUTPUT "${OUTPUT_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${TEXTURE_FILE}"
+            "${OUTPUT_FILE}"
+        DEPENDS "${TEXTURE_FILE}"
+        COMMENT "Copying texture: ${TEXTURE_REL_PATH}"
+        VERBATIM
+    )
+
+    list(APPEND TEXTURE_OUTPUTS "${OUTPUT_FILE}")
+endforeach()
+
+add_custom_target(copy_textures ALL DEPENDS ${TEXTURE_OUTPUTS})
+
+# Copy asset files to build directory
+file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
+
+foreach(ASSET_FILE ${ASSET_FILES})
+    file(RELATIVE_PATH ASSET_REL_PATH "${CMAKE_SOURCE_DIR}/assets" "${ASSET_FILE}")
+    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/assets/${ASSET_REL_PATH}")
+
+    get_filename_component(OUTPUT_DIR "${OUTPUT_FILE}" DIRECTORY)
+
+    add_custom_command(
+        OUTPUT "${OUTPUT_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${ASSET_FILE}"
+            "${OUTPUT_FILE}"
+        DEPENDS "${ASSET_FILE}"
+        COMMENT "Copying asset: ${ASSET_REL_PATH}"
+        VERBATIM
+    )
+
+    list(APPEND ASSET_OUTPUTS "${OUTPUT_FILE}")
+endforeach()
+
+add_custom_target(copy_assets ALL DEPENDS ${ASSET_OUTPUTS})
+
+add_dependencies(orogena copy_shaders copy_textures copy_assets)
 
 # Installation rules (for future)
 # install(TARGETS orogena DESTINATION bin)
