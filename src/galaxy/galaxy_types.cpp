@@ -36,7 +36,7 @@ namespace Orogena::Galaxy
 //=================================================================================================
 
 /**************************************************************************************************/
-void StarData::CalculatePosition(int32_t perturbationN, float64_t perturbationAmp)
+void StarData::CalculatePosition(uint32_t perturbationN, float64_t perturbationAmp)
 {
     const float64_t alpha = theta * Math::c_DegToRad;
     const float64_t cosAlpha = std::cos(alpha);

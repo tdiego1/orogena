@@ -67,7 +67,7 @@ struct StarData
      * @param perturbationN Number of spiral arms (0 for no perturbation)
      * @param perturbationAmp Amplitude of perturbation
      */
-    void CalculatePosition(int32_t perturbationN, float64_t perturbationAmp);
+    void CalculatePosition(uint32_t perturbationN, float64_t perturbationAmp);
 };
 
 //=================================================================================================
@@ -79,19 +79,19 @@ struct StarData
  */
 struct GalaxyConfig
 {
-    float64_t radius{15000.0};        ///< Galaxy radius (parsecs)
-    float64_t coreRadius{6000.0};     ///< Core radius (parsecs)
-    float64_t angularOffset{0.019};   ///< Angular offset per parsec
-    float64_t excentricityInner{0.8}; ///< Inner orbit excentricity
-    float64_t excentricityOuter{1.0}; ///< Outer orbit excentricity
-    float64_t sigma{0.45};            ///< Star distribution parameter
-    float64_t velocityInner{200.0};   ///< Velocity at core edge (km/s)
-    float64_t velocityOuter{300.0};   ///< Velocity at disk edge (km/s)
+    float64_t radius{13000.0};         ///< Galaxy radius (parsecs)
+    float64_t coreRadius{4000.0};      ///< Core radius (parsecs)
+    float64_t angularOffset{0.0004};   ///< Angular offset per parsec
+    float64_t excentricityInner{0.85}; ///< Inner orbit excentricity
+    float64_t excentricityOuter{0.95}; ///< Outer orbit excentricity
+    float64_t sigma{0.5};              ///< Star distribution parameter
+    float64_t velocityInner{200.0};    ///< Velocity at core edge (km/s)
+    float64_t velocityOuter{300.0};    ///< Velocity at disk edge (km/s)
 
-    int32_t   numStars{20000};      ///< Total number of stars
-    int32_t   perturbationN{0};     ///< Number of spiral arms
-    float64_t perturbationAmp{0.0}; ///< Spiral perturbation amplitude
-    float64_t dustRenderSize{70.0}; ///< Visual size of dust particles
+    uint32_t  numStars{30000};       ///< Total number of stars
+    uint32_t  perturbationN{2};      ///< Number of spiral arms
+    float64_t perturbationAmp{40.0}; ///< Spiral perturbation amplitude
+    float64_t dustRenderSize{100.0}; ///< Visual size of dust particles
 
     bool hasDarkMatter{true}; ///< Include dark matter in physics
 };

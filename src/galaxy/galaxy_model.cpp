@@ -88,7 +88,7 @@ void Model::ToggleDarkMatter()
 }
 
 /**************************************************************************************************/
-const glm::dvec2& Model::GetStarPosition(int32_t index) const
+const glm::dvec2& Model::GetStarPosition(uint32_t index) const
 {
     if (index < 0 || index >= GetNumStars())
     {
@@ -249,9 +249,9 @@ void Model::SetExcentricityOuter(float64_t ex)
 }
 
 /**************************************************************************************************/
-void Model::SetPerturbationN(int32_t n)
+void Model::SetPerturbationN(uint32_t n)
 {
-    m_Config.perturbationN = std::max(0, n);
+    m_Config.perturbationN = std::max(0U, n);
 }
 
 /**************************************************************************************************/
@@ -273,9 +273,9 @@ void Model::SetDustRenderSize(float64_t size)
 /**************************************************************************************************/
 void Model::InitializeStars()
 {
-    const int32_t numStars = m_Config.numStars;
-    const int32_t numDust = numStars / 2;
-    const int32_t numH2 = 300;
+    const uint32_t numStars = m_Config.numStars;
+    const uint32_t numDust = numStars / 2;
+    const uint32_t numH2 = 300;
 
     m_Stars.clear();
     m_Stars.reserve(numStars);
@@ -351,7 +351,7 @@ void Model::InitializeRegularStars()
 
     const float64_t binWidth = m_FarFieldRadius / 100.0;
 
-    for (int32_t i = 3; i < m_Config.numStars; ++i)
+    for (uint32_t i = 3; i < m_Config.numStars; ++i)
     {
         const float64_t radius = cdf.ValFromProb(dist(gen));
 
@@ -363,10 +363,11 @@ void Model::InitializeRegularStars()
         star.velTheta = GetOrbitalVelocity(radius);
         star.center = {0.0, 0.0};
         star.temperature = 6000.0 + (4000.0 * dist(gen)) - 2000.0;
-        star.magnitude = 0.3 + 0.2 * dist(gen);
+        // Original values from Galaxy-Renderer - now using real particle.bmp
+        star.magnitude = 0.3 + 0.2 * dist(gen); // Range: 0.3-0.5
 
         // Update histogram
-        const int32_t bin = static_cast<int32_t>(
+        const uint32_t bin = static_cast<uint32_t>(
             std::min((star.semiMajorAxis + star.semiMinorAxis) / (2.0 * binWidth), 99.0));
         m_RadialHistogram[bin]++;
 
@@ -411,9 +412,10 @@ void Model::InitializeDust()
         dust.velTheta = GetOrbitalVelocity((dust.semiMajorAxis + dust.semiMinorAxis) / 2.0);
         dust.center = {0.0, 0.0};
         dust.temperature = 5000.0 + radius / 4.5; // Temperature gradient
-        dust.magnitude = 0.015 + 0.01 * dist(gen);
+        // Original values from Galaxy-Renderer - now using real particle.bmp
+        dust.magnitude = 0.015 + 0.01 * dist(gen); // Range: 0.015-0.025
 
-        const int32_t bin = static_cast<int32_t>(
+        const uint32_t bin = static_cast<uint32_t>(
             std::min((dust.semiMajorAxis + dust.semiMinorAxis) / (2.0 * binWidth), 99.0));
         m_RadialHistogram[bin]++;
 
@@ -447,14 +449,15 @@ void Model::InitializeH2Regions()
         h2_1.velTheta = GetOrbitalVelocity((h2_1.semiMajorAxis + h2_1.semiMinorAxis) / 2.0);
         h2_1.center = {0.0, 0.0};
         h2_1.temperature = 6000.0 + (6000.0 * dist(gen)) - 3000.0;
-        h2_1.magnitude = 0.1 + 0.05 * dist(gen);
+        // Original values from Galaxy-Renderer - now using real particle.bmp
+        h2_1.magnitude = 0.1 + 0.05 * dist(gen); // Range: 0.1-0.15
 
         // Second point 1000 pc away
         StarData h2_2 = h2_1;
         h2_2.semiMajorAxis = radius + c_PairDistance;
         h2_2.semiMinorAxis = radius * GetExcentricity(radius);
 
-        const int32_t bin = static_cast<int32_t>(
+        const uint32_t bin = static_cast<uint32_t>(
             std::min((h2_1.semiMajorAxis + h2_1.semiMinorAxis) / (2.0 * binWidth), 99.0));
         m_RadialHistogram[bin] += 2;
 

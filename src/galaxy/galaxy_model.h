@@ -154,7 +154,7 @@ class Model
      * @return Star position in parsecs
      * @throws std::out_of_range if index >= GetNumStars()
      */
-    const glm::dvec2& GetStarPosition(int32_t index) const;
+    const glm::dvec2& GetStarPosition(uint32_t index) const;
 
     //=============================================================================================
     // Properties
@@ -201,19 +201,19 @@ class Model
         return m_Time;
     }
 
-    int32_t GetNumStars() const
+    uint32_t GetNumStars() const
     {
-        return static_cast<int32_t>(m_Stars.size());
+        return static_cast<uint32_t>(m_Stars.size());
     }
-    int32_t GetNumDust() const
+    uint32_t GetNumDust() const
     {
-        return static_cast<int32_t>(m_Dust.size());
+        return static_cast<uint32_t>(m_Dust.size());
     }
-    int32_t GetNumH2() const
+    uint32_t GetNumH2() const
     {
-        return static_cast<int32_t>(m_H2Regions.size()) / 2;
+        return static_cast<uint32_t>(m_H2Regions.size() / 2U);
     }
-    int32_t GetPerturbationN() const
+    uint32_t GetPerturbationN() const
     {
         return m_Config.perturbationN;
     }
@@ -267,7 +267,7 @@ class Model
     void SetAngularOffset(float64_t offset);
     void SetExcentricityInner(float64_t ex);
     void SetExcentricityOuter(float64_t ex);
-    void SetPerturbationN(int32_t n);
+    void SetPerturbationN(uint32_t n);
     void SetPerturbationAmp(float64_t amp);
     void SetDustRenderSize(float64_t size);
 
