@@ -124,9 +124,9 @@ void Viewport::SetWireframeMode(bool enable)
 /**************************************************************************************************/
 void Viewport::InitializeGalaxy()
 {
-    // Create galaxy with default configuration
+    // Create galaxy with default configuration matching original Galaxy-Renderer
     Galaxy::GalaxyConfig config;
-    config.radius = 15000.0;         // 15,000 parsecs
+    config.radius = 13000.0;         // 13,000 parsecs (matches original)
     config.coreRadius = 4000.0;      // 4,000 parsecs
     config.angularOffset = 0.0004;   // Spiral tightness
     config.excentricityInner = 0.85; // Inner orbit shape
@@ -136,22 +136,28 @@ void Viewport::InitializeGalaxy()
     config.hasDarkMatter = true;
     config.perturbationN = 2; // 2 spiral arms
     config.perturbationAmp = 40.0;
-    config.dustRenderSize = 80.0;
+    config.dustRenderSize = 100.0; // Matches original (70 base * 28174/fov)
 
     m_GalaxyModel = std::make_unique<Galaxy::Model>(config);
+
+    // Set default display flags (show all)
+    m_GalaxyDisplayFlags = GALAXY_SHOW_ALL;
+    if (m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->SetDisplayFlags(m_GalaxyDisplayFlags);
+    }
 
     // Upload to GPU
     UpdateGalaxyRendering();
 
-    // Adjust camera to view galaxy
+    // Configure camera for galaxy view (orthographic, top-down)
     if (m_Camera)
     {
-        m_Camera->Reset();
-        // Position camera to see the whole galaxy (30,000 parsecs diameter)
-        m_Camera->Zoom(-20.0F); // Zoom out to see full extent
+        m_Camera->SetOrthographic(13000.0F); // Half-width to show 26000 parsec galaxy
+        m_Camera->Reset();                    // Reset to top-down view
     }
 
-    Log::Info("Viewport: Galaxy initialized with {} stars", config.numStars);
+    Log::Info("Viewport: Galaxy initialized with {} stars (camera: orthographic)", config.numStars);
 }
 
 /**************************************************************************************************/
@@ -279,7 +285,7 @@ void Viewport::paintGL()
     const glm::mat4 projection = m_Camera->GetProjectionMatrix();
 
     // Animate galaxy (optional - advance simulation each frame)
-    if (m_GalaxyModel)
+    if (m_GalaxyModel && m_GalaxyAnimationEnabled)
     {
         m_GalaxyModel->SingleTimeStep(100000.0); // 100,000 years per frame
         UpdateGalaxyRendering();
@@ -288,7 +294,8 @@ void Viewport::paintGL()
     // Render galaxy (if initialized)
     if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
     {
-        m_GalaxyRenderer->Render(view, projection);
+        const float32_t fov = m_Camera->GetOrthoSize();
+        m_GalaxyRenderer->Render(view, projection, fov);
     }
 
     // Update FPS counter
@@ -425,6 +432,31 @@ void Viewport::wheelEvent(QWheelEvent* event)
     m_Camera->Zoom(-delta); // Negative for intuitive zoom direction
 
     event->accept();
+}
+
+void Viewport::SetGalaxyDisplayFlag(uint32_t flag, bool enabled)
+{
+    if (enabled)
+    {
+        m_GalaxyDisplayFlags |= flag; // Set flag
+    }
+    else
+    {
+        m_GalaxyDisplayFlags &= ~flag; // Clear flag
+    }
+
+    if (m_GalaxyRenderer)
+    {
+        m_GalaxyRenderer->SetDisplayFlags(m_GalaxyDisplayFlags);
+    }
+
+    update(); // Trigger repaint
+}
+
+void Viewport::SetGalaxyAnimation(bool enabled)
+{
+    m_GalaxyAnimationEnabled = enabled;
+    Log::Debug("Galaxy animation: {}", enabled ? "enabled" : "disabled");
 }
 
 } // namespace Orogena::Render
