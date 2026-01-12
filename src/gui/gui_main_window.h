@@ -43,6 +43,8 @@
 // Forward declarations
 class QDockWidget;
 class QAction;
+class QPushButton;
+class QCheckBox;
 
 namespace Orogena::GUI
 {
@@ -128,6 +130,30 @@ class MainWindow : public QMainWindow
      */
     void OnGalaxyClicked();
 
+    /**
+     * @brief Toggle star rendering.
+     * @param checked True to show stars, false to hide
+     */
+    void OnToggleStars(bool checked);
+
+    /**
+     * @brief Toggle dust cloud rendering.
+     * @param checked True to show dust, false to hide
+     */
+    void OnToggleDust(bool checked);
+
+    /**
+     * @brief Toggle H2 region rendering.
+     * @param checked True to show H2 regions, false to hide
+     */
+    void OnToggleH2(bool checked);
+
+    /**
+     * @brief Toggle galaxy animation.
+     * @param checked True to animate, false to pause
+     */
+    void OnToggleAnimation(bool checked);
+
   private:
     //=============================================================================================
     // Private Types
@@ -197,8 +223,9 @@ class MainWindow : public QMainWindow
     // Private Member Variables
     //=============================================================================================
 
-    QDockWidget* m_ParametersDock; ///< Left sidebar for simulation parameters.
-    QDockWidget* m_PropertiesDock; ///< Right sidebar for properties/info.
+    QDockWidget* m_ParametersDock;    ///< Left sidebar for simulation parameters.
+    QDockWidget* m_GalaxyControlsDock; ///< Right sidebar for galaxy controls.
+    QDockWidget* m_PropertiesDock;     ///< Right sidebar for properties/info.
 
     QLabel* m_StatusLabel; ///< Status bar label for FPS display.
 
@@ -215,6 +242,28 @@ class MainWindow : public QMainWindow
 
     // View menu actions
     QAction* m_ActionWireframe{nullptr}; ///< Wireframe toggle action.
+
+    // View buttons in left panel
+    QPushButton* m_GalaxyButton{nullptr};          ///< Galaxy view button.
+    QPushButton* m_StellarSystemButton{nullptr};   ///< Stellar system view button.
+    QPushButton* m_StarButton{nullptr};            ///< Star view button.
+    QPushButton* m_PlanetButton{nullptr};          ///< Planet view button.
+    QPushButton* m_MoonsButton{nullptr};           ///< Moons view button.
+    QPushButton* m_TectonicsButton{nullptr};       ///< Plate tectonics view button.
+    QPushButton* m_TopographyButton{nullptr};      ///< Topography view button.
+    QPushButton* m_OceanCurrentsButton{nullptr};   ///< Ocean currents view button.
+    QPushButton* m_AtmosphereButton{nullptr};      ///< Atmosphere view button.
+    QPushButton* m_ClimateButton{nullptr};         ///< Climate view button.
+    QPushButton* m_HydrologyButton{nullptr};       ///< Hydrology view button.
+    QPushButton* m_WeatherButton{nullptr};         ///< Weather view button.
+    QPushButton* m_GeologyButton{nullptr};         ///< Geology view button.
+    QPushButton* m_ResourcesButton{nullptr};       ///< Resources view button.
+
+    // Galaxy control UI elements
+    QCheckBox* m_ShowStarsCheckBox{nullptr};   ///< Toggle stars rendering.
+    QCheckBox* m_ShowDustCheckBox{nullptr};    ///< Toggle dust rendering.
+    QCheckBox* m_ShowH2CheckBox{nullptr};      ///< Toggle H2 regions rendering.
+    QCheckBox* m_AnimateCheckBox{nullptr};     ///< Toggle galaxy animation.
 };
 
 } // namespace Orogena::GUI
