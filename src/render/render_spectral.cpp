@@ -125,10 +125,10 @@ Utils::ColorRGBF SpectralRenderer::TemperatureToColor(float32_t temperatureK)
             temperatureK <= c_ColorTable[i + 1].temperatureK)
         {
             // Calculate interpolation parameter
-            const float32_t t =
+            const float32_t t = static_cast<float32_t>(
                 Math::InverseLerp(static_cast<float64_t>(temperatureK),
                                   static_cast<float64_t>(c_ColorTable[i].temperatureK),
-                                  static_cast<float64_t>(c_ColorTable[i + 1].temperatureK));
+                                  static_cast<float64_t>(c_ColorTable[i + 1].temperatureK)));
 
             // Interpolate RGB components using Math::Lerp
             Utils::ColorRGBF color;
@@ -201,7 +201,7 @@ void SpectralRenderer::GeneratePointSpriteTexture()
         const int32_t width = particleImage.width();
         const int32_t height = particleImage.height();
 
-        std::vector<uint8_t> pixels(width * height * 4); // RGBA
+        std::vector<uint8_t> pixels(static_cast<size_t>(width * height * 4)); // RGBA
 
         particleImage = particleImage.convertToFormat(QImage::Format_RGB888);
 
@@ -212,7 +212,7 @@ void SpectralRenderer::GeneratePointSpriteTexture()
                 QRgb    pixel = particleImage.pixel(x, y);
                 int32_t brightness = qGray(pixel); // Convert to grayscale value
 
-                const int32_t idx = (y * width + x) * 4;
+                const uint32_t idx = static_cast<uint32_t>(y * width + x) * 4U;
                 pixels[idx + 0] = 255;                              // R - white
                 pixels[idx + 1] = 255;                              // G - white
                 pixels[idx + 2] = 255;                              // B - white
