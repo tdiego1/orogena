@@ -223,7 +223,7 @@ class MainWindow : public QMainWindow
     // Private Member Variables
     //=============================================================================================
 
-    QDockWidget* m_ParametersDock;    ///< Left sidebar for simulation parameters.
+    QDockWidget* m_ParametersDock;     ///< Left sidebar for simulation parameters.
     QDockWidget* m_GalaxyControlsDock; ///< Right sidebar for galaxy controls.
     QDockWidget* m_PropertiesDock;     ///< Right sidebar for properties/info.
 
@@ -244,26 +244,26 @@ class MainWindow : public QMainWindow
     QAction* m_ActionWireframe{nullptr}; ///< Wireframe toggle action.
 
     // View buttons in left panel
-    QPushButton* m_GalaxyButton{nullptr};          ///< Galaxy view button.
-    QPushButton* m_StellarSystemButton{nullptr};   ///< Stellar system view button.
-    QPushButton* m_StarButton{nullptr};            ///< Star view button.
-    QPushButton* m_PlanetButton{nullptr};          ///< Planet view button.
-    QPushButton* m_MoonsButton{nullptr};           ///< Moons view button.
-    QPushButton* m_TectonicsButton{nullptr};       ///< Plate tectonics view button.
-    QPushButton* m_TopographyButton{nullptr};      ///< Topography view button.
-    QPushButton* m_OceanCurrentsButton{nullptr};   ///< Ocean currents view button.
-    QPushButton* m_AtmosphereButton{nullptr};      ///< Atmosphere view button.
-    QPushButton* m_ClimateButton{nullptr};         ///< Climate view button.
-    QPushButton* m_HydrologyButton{nullptr};       ///< Hydrology view button.
-    QPushButton* m_WeatherButton{nullptr};         ///< Weather view button.
-    QPushButton* m_GeologyButton{nullptr};         ///< Geology view button.
-    QPushButton* m_ResourcesButton{nullptr};       ///< Resources view button.
+    QPushButton* m_GalaxyButton{nullptr};        ///< Galaxy view button.
+    QPushButton* m_StellarSystemButton{nullptr}; ///< Stellar system view button.
+    QPushButton* m_StarButton{nullptr};          ///< Star view button.
+    QPushButton* m_PlanetButton{nullptr};        ///< Planet view button.
+    QPushButton* m_MoonsButton{nullptr};         ///< Moons view button.
+    QPushButton* m_TectonicsButton{nullptr};     ///< Plate tectonics view button.
+    QPushButton* m_TopographyButton{nullptr};    ///< Topography view button.
+    QPushButton* m_OceanCurrentsButton{nullptr}; ///< Ocean currents view button.
+    QPushButton* m_AtmosphereButton{nullptr};    ///< Atmosphere view button.
+    QPushButton* m_ClimateButton{nullptr};       ///< Climate view button.
+    QPushButton* m_HydrologyButton{nullptr};     ///< Hydrology view button.
+    QPushButton* m_WeatherButton{nullptr};       ///< Weather view button.
+    QPushButton* m_GeologyButton{nullptr};       ///< Geology view button.
+    QPushButton* m_ResourcesButton{nullptr};     ///< Resources view button.
 
     // Galaxy control UI elements
-    QCheckBox* m_ShowStarsCheckBox{nullptr};   ///< Toggle stars rendering.
-    QCheckBox* m_ShowDustCheckBox{nullptr};    ///< Toggle dust rendering.
-    QCheckBox* m_ShowH2CheckBox{nullptr};      ///< Toggle H2 regions rendering.
-    QCheckBox* m_AnimateCheckBox{nullptr};     ///< Toggle galaxy animation.
+    QCheckBox* m_ShowStarsCheckBox{nullptr}; ///< Toggle stars rendering.
+    QCheckBox* m_ShowDustCheckBox{nullptr};  ///< Toggle dust rendering.
+    QCheckBox* m_ShowH2CheckBox{nullptr};    ///< Toggle H2 regions rendering.
+    QCheckBox* m_AnimateCheckBox{nullptr};   ///< Toggle galaxy animation.
 };
 
 } // namespace Orogena::GUI

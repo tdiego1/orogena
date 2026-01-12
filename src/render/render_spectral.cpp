@@ -53,32 +53,23 @@ static constexpr struct ColorEntry
     Utils::ColorRGBF color;
 } c_ColorTable[] = {
     // SMPTE normalized RGB values from specrend.cpp bb_spectrum output
-    {1000.0F, {1.000F, 0.007F, 0.000F}},  // Deep red
-    {1500.0F, {1.000F, 0.126F, 0.000F}},
-    {2000.0F, {1.000F, 0.234F, 0.010F}},
-    {2500.0F, {1.000F, 0.349F, 0.067F}},
-    {3000.0F, {1.000F, 0.454F, 0.151F}},
-    {3500.0F, {1.000F, 0.549F, 0.254F}},
-    {4000.0F, {1.000F, 0.635F, 0.370F}},
-    {4500.0F, {1.000F, 0.710F, 0.493F}},
-    {5000.0F, {1.000F, 0.778F, 0.620F}},
-    {5500.0F, {1.000F, 0.837F, 0.746F}},
-    {6000.0F, {1.000F, 0.890F, 0.869F}},  // Near white
-    {6500.0F, {1.000F, 0.937F, 0.988F}},
-    {7000.0F, {0.907F, 0.888F, 1.000F}},  // Transition to blue
-    {7500.0F, {0.827F, 0.839F, 1.000F}},
-    {8000.0F, {0.762F, 0.800F, 1.000F}},
-    {8500.0F, {0.711F, 0.766F, 1.000F}},
-    {9000.0F, {0.668F, 0.738F, 1.000F}},
-    {9500.0F, {0.632F, 0.714F, 1.000F}},
-    {10000.0F, {0.602F, 0.693F, 1.000F}}, // Blue
+    {1000.0F, {1.000F, 0.007F, 0.000F}}, // Deep red
+    {1500.0F, {1.000F, 0.126F, 0.000F}}, {2000.0F, {1.000F, 0.234F, 0.010F}},
+    {2500.0F, {1.000F, 0.349F, 0.067F}}, {3000.0F, {1.000F, 0.454F, 0.151F}},
+    {3500.0F, {1.000F, 0.549F, 0.254F}}, {4000.0F, {1.000F, 0.635F, 0.370F}},
+    {4500.0F, {1.000F, 0.710F, 0.493F}}, {5000.0F, {1.000F, 0.778F, 0.620F}},
+    {5500.0F, {1.000F, 0.837F, 0.746F}}, {6000.0F, {1.000F, 0.890F, 0.869F}}, // Near white
+    {6500.0F, {1.000F, 0.937F, 0.988F}}, {7000.0F, {0.907F, 0.888F, 1.000F}}, // Transition to blue
+    {7500.0F, {0.827F, 0.839F, 1.000F}}, {8000.0F, {0.762F, 0.800F, 1.000F}},
+    {8500.0F, {0.711F, 0.766F, 1.000F}}, {9000.0F, {0.668F, 0.738F, 1.000F}},
+    {9500.0F, {0.632F, 0.714F, 1.000F}}, {10000.0F, {0.602F, 0.693F, 1.000F}}, // Blue
 };
 
 static constexpr int32_t   c_ColorTableSize = sizeof(c_ColorTable) / sizeof(c_ColorTable[0]);
 static constexpr float32_t c_MinTemperature = 1000.0F;
 static constexpr float32_t c_MaxTemperature = 10000.0F; // Matches original Galaxy-Renderer
-static constexpr int32_t   c_ColorRampSize = 256;  // 1D texture width
-static constexpr int32_t   c_PointSpriteSize = 64; // 2D texture dimensions
+static constexpr int32_t   c_ColorRampSize = 256;       // 1D texture width
+static constexpr int32_t   c_PointSpriteSize = 64;      // 2D texture dimensions
 
 //=================================================================================================
 // Constructors/Destructor

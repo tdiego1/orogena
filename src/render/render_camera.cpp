@@ -156,7 +156,7 @@ void Camera::Reset()
         // For orthographic galaxy view: top-down view
         m_Distance = 2.0F;
         m_Azimuth = 0.0F;
-        m_Polar = 0.0F; // Look straight down (top view)
+        m_Polar = 0.0F;         // Look straight down (top view)
         m_OrthoSize = 15000.0F; // Start zoomed to show ~30000 parsec galaxy
     }
     else

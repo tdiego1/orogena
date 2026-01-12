@@ -197,8 +197,8 @@ class Camera
     float32_t m_FarPlane{1000.0F};         ///< Far clipping plane
 
     // Orthographic projection parameters
-    bool      m_UseOrthographic{false};   ///< Use orthographic instead of perspective
-    float32_t m_OrthoSize{15000.0F};      ///< Half-size of orthographic view (parsecs for galaxy)
+    bool      m_UseOrthographic{false}; ///< Use orthographic instead of perspective
+    float32_t m_OrthoSize{15000.0F};    ///< Half-size of orthographic view (parsecs for galaxy)
 
     // Control sensitivity
     static constexpr float32_t c_PanSpeed = 5.0F;
@@ -206,10 +206,11 @@ class Camera
     static constexpr float32_t c_RotateSpeed = 0.005F;
     static constexpr float32_t c_MinDistance = 1.0F;
     static constexpr float32_t c_MaxDistance = 100.0F;
-    static constexpr float32_t c_MinPolar = 0.0F;  // Allow top-down view (gimbal lock handled in GetViewMatrix)
-    static constexpr float32_t c_MaxPolar = 3.14159265F; // 180 degrees (allow bottom-up view too)
-    static constexpr float32_t c_MinOrthoSize = 1000.0F;   // Minimum zoom for galaxy
-    static constexpr float32_t c_MaxOrthoSize = 50000.0F;  // Maximum zoom for galaxy
+    static constexpr float32_t c_MinPolar =
+        0.0F; // Allow top-down view (gimbal lock handled in GetViewMatrix)
+    static constexpr float32_t c_MaxPolar = 3.14159265F;  // 180 degrees (allow bottom-up view too)
+    static constexpr float32_t c_MinOrthoSize = 1000.0F;  // Minimum zoom for galaxy
+    static constexpr float32_t c_MaxOrthoSize = 50000.0F; // Maximum zoom for galaxy
 };
 
 } // namespace Orogena::Render
