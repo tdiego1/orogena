@@ -29,12 +29,14 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QDockWidget>
+#include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStackedWidget>
 #include <QStatusBar>
 #include <QStyle>
 #include <QToolBar>
@@ -197,7 +199,7 @@ void MainWindow::SetupMenuBar()
     view_menu->addAction(tr("Show &Parameters Panel"), [this]()
                          { m_ParametersDock->setVisible(!m_ParametersDock->isVisible()); });
     view_menu->addAction(tr("Show &Galaxy Controls Panel"), [this]()
-                         { m_GalaxyControlsDock->setVisible(!m_GalaxyControlsDock->isVisible()); });
+                         { m_ControlsDock->setVisible(!m_ControlsDock->isVisible()); });
     view_menu->addAction(tr("Show &Properties Panel"), [this]()
                          { m_PropertiesDock->setVisible(!m_PropertiesDock->isVisible()); });
 
@@ -281,7 +283,8 @@ void MainWindow::SetupDockPanels()
 
     m_StarButton = new QPushButton(tr("Star"));
     m_StarButton->setToolTip(tr("View and edit star parameters"));
-    m_StarButton->setEnabled(false); // Disabled for now
+    m_StarButton->setCheckable(true);
+    connect(m_StarButton, &QPushButton::clicked, this, &MainWindow::OnStarClicked);
     params_layout->addWidget(m_StarButton);
 
     m_PlanetButton = new QPushButton(tr("Planet"));
@@ -345,54 +348,93 @@ void MainWindow::SetupDockPanels()
     addDockWidget(Qt::LeftDockWidgetArea, m_ParametersDock);
 
     //-------------------------------------------------------------------------
-    // Right sidebar - Galaxy Controls Panel
+    // Right sidebar - Controls Panel (stacked widget for different views)
     //-------------------------------------------------------------------------
 
-    m_GalaxyControlsDock = new QDockWidget(tr("Galaxy Controls"), this);
-    m_GalaxyControlsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_ControlsDock = new QDockWidget(tr("Parameters"), this);
+    m_ControlsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
-    // Create content for galaxy controls
-    auto* controls_widget = new QWidget();
-    auto* controls_layout = new QVBoxLayout(controls_widget);
+    // Create stacked widget to hold different control panels
+    m_ControlsStack = new QStackedWidget();
 
-    // Add section label
-    controls_layout->addWidget(new QLabel(tr("<b>Display Options</b>")));
+    // ===== Panel 0: Galaxy Controls =====
+    auto* galaxy_controls = new QWidget();
+    auto* galaxy_layout = new QVBoxLayout(galaxy_controls);
 
-    // Stars checkbox
+    galaxy_layout->addWidget(new QLabel(tr("<b>Display Options</b>")));
+
     m_ShowStarsCheckBox = new QCheckBox(tr("Show Stars"));
     m_ShowStarsCheckBox->setChecked(true);
     m_ShowStarsCheckBox->setToolTip(tr("Toggle star rendering"));
     connect(m_ShowStarsCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleStars);
-    controls_layout->addWidget(m_ShowStarsCheckBox);
+    galaxy_layout->addWidget(m_ShowStarsCheckBox);
 
-    // Dust checkbox
     m_ShowDustCheckBox = new QCheckBox(tr("Show Dust"));
     m_ShowDustCheckBox->setChecked(true);
     m_ShowDustCheckBox->setToolTip(tr("Toggle dust cloud rendering"));
     connect(m_ShowDustCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleDust);
-    controls_layout->addWidget(m_ShowDustCheckBox);
+    galaxy_layout->addWidget(m_ShowDustCheckBox);
 
-    // H2 regions checkbox
     m_ShowH2CheckBox = new QCheckBox(tr("Show H2 Regions"));
     m_ShowH2CheckBox->setChecked(true);
     m_ShowH2CheckBox->setToolTip(tr("Toggle H2 region rendering"));
     connect(m_ShowH2CheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleH2);
-    controls_layout->addWidget(m_ShowH2CheckBox);
+    galaxy_layout->addWidget(m_ShowH2CheckBox);
 
-    controls_layout->addSpacing(10);
-    controls_layout->addWidget(new QLabel(tr("<b>Animation</b>")));
+    galaxy_layout->addSpacing(10);
+    galaxy_layout->addWidget(new QLabel(tr("<b>Animation</b>")));
 
-    // Animation checkbox
     m_AnimateCheckBox = new QCheckBox(tr("Animate Galaxy"));
     m_AnimateCheckBox->setChecked(true);
     m_AnimateCheckBox->setToolTip(tr("Toggle galaxy rotation animation"));
     connect(m_AnimateCheckBox, &QCheckBox::toggled, this, &MainWindow::OnToggleAnimation);
-    controls_layout->addWidget(m_AnimateCheckBox);
+    galaxy_layout->addWidget(m_AnimateCheckBox);
 
-    controls_layout->addStretch();
+    galaxy_layout->addStretch();
 
-    m_GalaxyControlsDock->setWidget(controls_widget);
-    addDockWidget(Qt::RightDockWidgetArea, m_GalaxyControlsDock);
+    m_ControlsStack->addWidget(galaxy_controls); // Index 0
+
+    // ===== Panel 1: Star Parameters =====
+    auto* star_params = new QWidget();
+    auto* star_layout = new QVBoxLayout(star_params);
+
+    star_layout->addWidget(new QLabel(tr("<b>Input Parameters</b>")));
+
+    // Mass parameter
+    star_layout->addWidget(new QLabel(tr("Mass (M☉):")));
+    m_StarMassSpinBox = new QDoubleSpinBox();
+    m_StarMassSpinBox->setRange(0.075, 100.0); // Valid stellar mass range
+    m_StarMassSpinBox->setValue(1.0);          // Default: 1 solar mass
+    m_StarMassSpinBox->setDecimals(3);
+    m_StarMassSpinBox->setSingleStep(0.1);
+    m_StarMassSpinBox->setToolTip(tr("Star mass in solar masses (0.075 - 100 M☉)"));
+    connect(m_StarMassSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
+            &MainWindow::OnStarMassChanged);
+    star_layout->addWidget(m_StarMassSpinBox);
+
+    star_layout->addSpacing(10);
+
+    // Age parameter
+    star_layout->addWidget(new QLabel(tr("Age (Gyr):")));
+    m_StarAgeSpinBox = new QDoubleSpinBox();
+    m_StarAgeSpinBox->setRange(0.0, 13.8); // Age of universe
+    m_StarAgeSpinBox->setValue(4.5);       // Default: 4.5 Gyr (like the Sun)
+    m_StarAgeSpinBox->setDecimals(2);
+    m_StarAgeSpinBox->setSingleStep(0.1);
+    m_StarAgeSpinBox->setToolTip(tr("Star age in billions of years (0 - 13.8 Gyr)"));
+    connect(m_StarAgeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
+            &MainWindow::OnStarAgeChanged);
+    star_layout->addWidget(m_StarAgeSpinBox);
+
+    star_layout->addStretch();
+
+    m_ControlsStack->addWidget(star_params); // Index 1
+
+    // Set initial panel (Galaxy)
+    m_ControlsStack->setCurrentIndex(0);
+
+    m_ControlsDock->setWidget(m_ControlsStack);
+    addDockWidget(Qt::RightDockWidgetArea, m_ControlsDock);
 
     //-------------------------------------------------------------------------
     // Right sidebar - Properties Panel
@@ -411,10 +453,10 @@ void MainWindow::SetupDockPanels()
     m_PropertiesDock->setWidget(props_widget);
     addDockWidget(Qt::RightDockWidgetArea, m_PropertiesDock);
 
-    // Stack Properties dock below Galaxy Controls dock
-    splitDockWidget(m_GalaxyControlsDock, m_PropertiesDock, Qt::Vertical);
+    // Stack Properties dock below Controls dock
+    splitDockWidget(m_ControlsDock, m_PropertiesDock, Qt::Vertical);
 
-    Log::Debug("Dockable panels initialized: Parameters (left), Galaxy Controls (top right), "
+    Log::Debug("Dockable panels initialized: Parameters (left), Controls (top right), "
                "Properties (bottom right)");
 }
 
@@ -761,8 +803,19 @@ void MainWindow::OnToggleWireframe(bool checked)
 void MainWindow::OnGalaxyClicked()
 {
     Log::Debug("Galaxy button clicked - displaying galaxy view");
-    // Galaxy view is already displayed in the viewport by default
-    // This handler is kept for future functionality (e.g., switching views)
+
+    // Uncheck other view buttons
+    m_GalaxyButton->setChecked(true);
+    m_StarButton->setChecked(false);
+
+    // Switch viewport to galaxy view
+    if (m_Viewport)
+    {
+        m_Viewport->SetViewMode(Render::Viewport::ViewMode::Galaxy);
+    }
+
+    // Switch to galaxy controls panel (index 0)
+    SwitchControlPanel(0);
 }
 
 void MainWindow::OnToggleStars(bool checked)
@@ -798,6 +851,84 @@ void MainWindow::OnToggleAnimation(bool checked)
     {
         m_Viewport->SetGalaxyAnimation(checked);
         Log::Debug("Galaxy animation: {}", checked ? "enabled" : "disabled");
+    }
+}
+
+void MainWindow::OnStarClicked()
+{
+    Log::Debug("Star button clicked - displaying star view");
+
+    // Uncheck other view buttons
+    m_GalaxyButton->setChecked(false);
+    m_StarButton->setChecked(true);
+
+    // Switch viewport to star view (this will initialize star if needed)
+    if (m_Viewport)
+    {
+        m_Viewport->SetViewMode(Render::Viewport::ViewMode::Star);
+    }
+
+    // Switch to star parameters panel (index 1)
+    SwitchControlPanel(1);
+
+    // Update spinboxes with current star values
+    if (auto* star = m_Viewport->GetStar())
+    {
+        m_StarMassSpinBox->blockSignals(true);
+        m_StarAgeSpinBox->blockSignals(true);
+
+        m_StarMassSpinBox->setValue(static_cast<double>(star->GetMass()));
+        m_StarAgeSpinBox->setValue(static_cast<double>(star->GetCurrentAge()));
+
+        m_StarMassSpinBox->blockSignals(false);
+        m_StarAgeSpinBox->blockSignals(false);
+    }
+}
+
+void MainWindow::OnStarMassChanged(double value)
+{
+    if (auto* star = m_Viewport->GetStar())
+    {
+        star->SetMass(static_cast<float>(value));
+        star->RecalculateProperties();
+        m_Viewport->UpdateStarRendering();
+        Log::Debug("Star mass changed to {} Msol", value);
+    }
+}
+
+void MainWindow::OnStarAgeChanged(double value)
+{
+    if (auto* star = m_Viewport->GetStar())
+    {
+        star->SetCurrentAge(static_cast<float>(value));
+        star->RecalculateProperties();
+        m_Viewport->UpdateStarRendering();
+        Log::Debug("Star age changed to {} Gyr", value);
+    }
+}
+
+void MainWindow::SwitchControlPanel(int index)
+{
+    if (m_ControlsStack)
+    {
+        m_ControlsStack->setCurrentIndex(index);
+
+        // Update dock title based on panel
+        if (m_ControlsDock)
+        {
+            switch (index)
+            {
+                case 0:
+                    m_ControlsDock->setWindowTitle(tr("Galaxy Controls"));
+                    break;
+                case 1:
+                    m_ControlsDock->setWindowTitle(tr("Star Parameters"));
+                    break;
+                default:
+                    m_ControlsDock->setWindowTitle(tr("Parameters"));
+                    break;
+            }
+        }
     }
 }
 

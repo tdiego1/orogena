@@ -45,6 +45,8 @@ class QDockWidget;
 class QAction;
 class QPushButton;
 class QCheckBox;
+class QStackedWidget;
+class QDoubleSpinBox;
 
 namespace Orogena::GUI
 {
@@ -131,6 +133,11 @@ class MainWindow : public QMainWindow
     void OnGalaxyClicked();
 
     /**
+     * @brief Display Star view.
+     */
+    void OnStarClicked();
+
+    /**
      * @brief Toggle star rendering.
      * @param checked True to show stars, false to hide
      */
@@ -153,6 +160,18 @@ class MainWindow : public QMainWindow
      * @param checked True to animate, false to pause
      */
     void OnToggleAnimation(bool checked);
+
+    /**
+     * @brief Handle star mass parameter change.
+     * @param value New mass value in solar masses
+     */
+    void OnStarMassChanged(double value);
+
+    /**
+     * @brief Handle star age parameter change.
+     * @param value New age value in Gyr
+     */
+    void OnStarAgeChanged(double value);
 
   private:
     //=============================================================================================
@@ -219,13 +238,19 @@ class MainWindow : public QMainWindow
      */
     bool CheckUnsavedChanges();
 
+    /**
+     * @brief Switch to a specific control panel in the controls dock.
+     * @param index Panel index (0 = Galaxy, 1 = Star, etc.)
+     */
+    void SwitchControlPanel(int index);
+
     //=============================================================================================
     // Private Member Variables
     //=============================================================================================
 
-    QDockWidget* m_ParametersDock;     ///< Left sidebar for simulation parameters.
-    QDockWidget* m_GalaxyControlsDock; ///< Right sidebar for galaxy controls.
-    QDockWidget* m_PropertiesDock;     ///< Right sidebar for properties/info.
+    QDockWidget* m_ParametersDock; ///< Left sidebar for view selection.
+    QDockWidget* m_ControlsDock;   ///< Right sidebar for view-specific controls/parameters.
+    QDockWidget* m_PropertiesDock; ///< Right sidebar for properties/info.
 
     QLabel* m_StatusLabel; ///< Status bar label for FPS display.
 
@@ -259,11 +284,18 @@ class MainWindow : public QMainWindow
     QPushButton* m_GeologyButton{nullptr};       ///< Geology view button.
     QPushButton* m_ResourcesButton{nullptr};     ///< Resources view button.
 
-    // Galaxy control UI elements
+    // Controls dock - stacked widget for view-specific controls
+    QStackedWidget* m_ControlsStack{nullptr}; ///< Stacked widget for different view controls.
+
+    // Galaxy control UI elements (in stacked widget index 0)
     QCheckBox* m_ShowStarsCheckBox{nullptr}; ///< Toggle stars rendering.
     QCheckBox* m_ShowDustCheckBox{nullptr};  ///< Toggle dust rendering.
     QCheckBox* m_ShowH2CheckBox{nullptr};    ///< Toggle H2 regions rendering.
     QCheckBox* m_AnimateCheckBox{nullptr};   ///< Toggle galaxy animation.
+
+    // Star parameter UI elements (in stacked widget index 1)
+    QDoubleSpinBox* m_StarMassSpinBox{nullptr}; ///< Star mass parameter (Msol).
+    QDoubleSpinBox* m_StarAgeSpinBox{nullptr};  ///< Star age parameter (Gyr).
 };
 
 } // namespace Orogena::GUI

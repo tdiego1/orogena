@@ -133,6 +133,7 @@ add_library(orogena_render
     render/render_spectral.cpp
     render/render_shader.cpp
     render/render_sphere.cpp
+    render/render_star.cpp
     render/render_viewport.cpp
 )
 
@@ -143,6 +144,7 @@ target_link_libraries(orogena_render
         OpenGL::GL
         orogena_local
         orogena_galaxy
+        orogena_stellar
 )
 
 #===================================================================================================
