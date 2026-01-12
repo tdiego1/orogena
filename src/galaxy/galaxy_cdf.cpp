@@ -131,7 +131,7 @@ float64_t CumulativeDistributionFunction::ValFromProb(float64_t probability) con
     }
 
     // Get index
-    const size_t idx = std::distance(m_Y.begin(), it);
+    const size_t idx = static_cast<size_t>(std::distance(m_Y.begin(), it));
 
     if (idx == 0)
     {
