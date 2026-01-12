@@ -154,7 +154,7 @@ void Viewport::InitializeGalaxy()
     if (m_Camera)
     {
         m_Camera->SetOrthographic(13000.0F); // Half-width to show 26000 parsec galaxy
-        m_Camera->Reset();                    // Reset to top-down view
+        m_Camera->Reset();                   // Reset to top-down view
     }
 
     Log::Info("Viewport: Galaxy initialized with {} stars (camera: orthographic)", config.numStars);
@@ -287,14 +287,17 @@ void Viewport::paintGL()
     // Animate galaxy (optional - advance simulation each frame)
     if (m_GalaxyModel && m_GalaxyAnimationEnabled)
     {
-        m_GalaxyModel->SingleTimeStep(100000.0); // 100,000 years per frame
+        m_GalaxyModel->SingleTimeStep(10000.0); // 100,000 years per frame
         UpdateGalaxyRendering();
     }
 
     // Render galaxy (if initialized)
     if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
     {
-        const float32_t fov = m_Camera->GetOrthoSize();
+        // FOV = full visible height (2x ortho size) to match original Galaxy-Renderer
+        // Original uses: glOrtho(-fov/2, fov/2, ...) where fov is the FULL visible area
+        // Our orthoSize is already the half-height, so multiply by 2
+        const float32_t fov = m_Camera->GetOrthoSize() * 2.0F;
         m_GalaxyRenderer->Render(view, projection, fov);
     }
 
