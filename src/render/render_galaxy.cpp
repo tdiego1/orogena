@@ -30,7 +30,11 @@
 
 #include "utils/utils_logger.h"
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 namespace Orogena::Render
 {

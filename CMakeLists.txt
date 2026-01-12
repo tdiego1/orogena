@@ -107,7 +107,7 @@ file(GLOB_RECURSE SHADER_FILES "${CMAKE_SOURCE_DIR}/src/render/shaders/*")
 foreach(SHADER_FILE ${SHADER_FILES})
     get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
     set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME}")
-    
+
     add_custom_command(
         OUTPUT "${OUTPUT_FILE}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -117,7 +117,7 @@ foreach(SHADER_FILE ${SHADER_FILES})
         COMMENT "Copying shader: ${SHADER_NAME}"
         VERBATIM
     )
-    
+
     list(APPEND SHADER_OUTPUTS "${OUTPUT_FILE}")
 endforeach()
 
@@ -154,9 +154,9 @@ file(GLOB_RECURSE ASSET_FILES "${CMAKE_SOURCE_DIR}/assets/*")
 foreach(ASSET_FILE ${ASSET_FILES})
     file(RELATIVE_PATH ASSET_REL_PATH "${CMAKE_SOURCE_DIR}/assets" "${ASSET_FILE}")
     set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/assets/${ASSET_REL_PATH}")
-    
+
     get_filename_component(OUTPUT_DIR "${OUTPUT_FILE}" DIRECTORY)
-    
+
     add_custom_command(
         OUTPUT "${OUTPUT_FILE}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}"
@@ -167,7 +167,7 @@ foreach(ASSET_FILE ${ASSET_FILES})
         COMMENT "Copying asset: ${ASSET_REL_PATH}"
         VERBATIM
     )
-    
+
     list(APPEND ASSET_OUTPUTS "${OUTPUT_FILE}")
 endforeach()
 
