@@ -41,6 +41,8 @@
 #include "render_galaxy.h"
 #include "render_grid.h"
 #include "render_sphere.h"
+#include "render_star.h"
+#include "stellar/stellar_star.h"
 #include "utils/utils_types.h"
 
 #include <chrono>
@@ -63,6 +65,16 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     //=============================================================================================
     // Public Types
     //=============================================================================================
+
+    /**
+     * @brief Active view mode
+     */
+    enum class ViewMode
+    {
+        Galaxy, ///< Galaxy simulation view
+        Star,   ///< Single star view
+        Planet  ///< Planet view (future)
+    };
 
     //=============================================================================================
     // Constructors/Destructor
@@ -149,6 +161,45 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
      * @param enabled True to enable animation, false to pause
      */
     void SetGalaxyAnimation(bool enabled);
+
+    /**
+     * @brief Initialize star view with default parameters
+     */
+    void InitializeStar();
+
+    /**
+     * @brief Get star object for external manipulation
+     *
+     * @return Stellar::Star* Non-owning pointer to star (nullptr if not initialized)
+     */
+    Stellar::Star* GetStar()
+    {
+        return m_Star.get();
+    }
+
+    /**
+     * @brief Update star rendering from current star state
+     *
+     * @details Call this after modifying star parameters
+     */
+    void UpdateStarRendering();
+
+    /**
+     * @brief Set the active view mode
+     *
+     * @param mode View mode to activate
+     */
+    void SetViewMode(ViewMode mode);
+
+    /**
+     * @brief Get the current view mode
+     *
+     * @return ViewMode Current active view mode
+     */
+    [[nodiscard]] ViewMode GetViewMode() const
+    {
+        return m_ViewMode;
+    }
 
   signals:
     /**
@@ -273,6 +324,14 @@ class Viewport : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     std::unique_ptr<Orogena::Galaxy::Model> m_GalaxyModel;           ///< Galaxy simulation model.
     uint32_t                                m_GalaxyDisplayFlags{0}; ///< Galaxy display flags.
     bool m_GalaxyAnimationEnabled{true};                             ///< Galaxy animation state.
+
+    // Star rendering
+    std::unique_ptr<StarRenderer>    m_StarRenderer; ///< Star renderer.
+    std::unique_ptr<Stellar::Star>   m_Star;         ///< Star object.
+    std::chrono::steady_clock::time_point m_LastFrameTime; ///< Last frame time for delta calculation.
+
+    // View mode
+    ViewMode m_ViewMode{ViewMode::Galaxy}; ///< Current active view mode.
 
     // Mouse interaction state
     bool   m_LeftMousePressed{false};  ///< Left mouse button state.

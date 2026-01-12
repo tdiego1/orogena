@@ -169,6 +169,80 @@ void Viewport::UpdateGalaxyRendering()
     }
 }
 
+/**************************************************************************************************/
+void Viewport::InitializeStar()
+{
+    // Create a Sun-like star with default properties
+    m_Star = std::make_unique<Stellar::Star>();
+    m_Star->SetMass(1.0F);      // 1 solar mass
+    m_Star->SetCurrentAge(4.5F); // 4.5 Gyr (like the Sun)
+    m_Star->RecalculateProperties();
+
+    // Upload to renderer
+    UpdateStarRendering();
+
+    // Configure camera for star view (orthographic, centered on star)
+    if (m_Camera)
+    {
+        m_Camera->SetOrthographic(5.0F); // Zoom to show star nicely
+        m_Camera->Reset();               // Reset to centered view
+    }
+
+    // Initialize last frame time for delta calculations
+    m_LastFrameTime = std::chrono::steady_clock::now();
+
+    Log::Info("Viewport: Star initialized - Spectral Type: {}, Temperature: {}K, Radius: {} Rsol",
+              m_Star->GetSpectralTypeString(), m_Star->GetTemperature(), m_Star->GetRadius());
+}
+
+/**************************************************************************************************/
+void Viewport::UpdateStarRendering()
+{
+    if (m_Star && m_StarRenderer)
+    {
+        m_StarRenderer->SetStar(*m_Star);
+    }
+}
+
+/**************************************************************************************************/
+void Viewport::SetViewMode(Viewport::ViewMode mode)
+{
+    m_ViewMode = mode;
+
+    // Adjust camera based on view mode
+    switch (mode)
+    {
+        case Viewport::ViewMode::Galaxy:
+            if (m_Camera)
+            {
+                m_Camera->SetOrthographic(13000.0F); // Galaxy scale
+                m_Camera->Reset();
+            }
+            Log::Info("Viewport: Switched to Galaxy view");
+            break;
+
+        case Viewport::ViewMode::Star:
+            // Initialize star if not already done
+            if (!m_Star)
+            {
+                InitializeStar();
+            }
+            if (m_Camera)
+            {
+                m_Camera->SetOrthographic(5.0F); // Star scale (closer zoom)
+                m_Camera->Reset();
+            }
+            Log::Info("Viewport: Switched to Star view");
+            break;
+
+        case Viewport::ViewMode::Planet:
+            Log::Info("Viewport: Planet view not yet implemented");
+            break;
+    }
+
+    update(); // Trigger repaint
+}
+
 //=================================================================================================
 // Protected Functions
 //=================================================================================================
@@ -261,8 +335,20 @@ void Viewport::initializeGL()
         return;
     }
 
+    // Initialize star renderer
+    m_StarRenderer =
+        std::make_unique<StarRenderer>(static_cast<QOpenGLFunctions_4_5_Core*>(this));
+    if (!m_StarRenderer->Initialize())
+    {
+        emit OpenGLError("Failed to initialize star renderer");
+        return;
+    }
+
     // Create default galaxy
     InitializeGalaxy();
+
+    // Optionally initialize star (commented out for now - galaxy is default view)
+    // InitializeStar();
 
     // Emit success signal
     emit OpenGLInitialized(vendor_str, renderer_str,
@@ -284,21 +370,53 @@ void Viewport::paintGL()
     const glm::mat4 view = m_Camera->GetViewMatrix();
     const glm::mat4 projection = m_Camera->GetProjectionMatrix();
 
-    // Animate galaxy (optional - advance simulation each frame)
-    if (m_GalaxyModel && m_GalaxyAnimationEnabled)
+    // Render based on active view mode
+    switch (m_ViewMode)
     {
-        m_GalaxyModel->SingleTimeStep(10000.0); // 100,000 years per frame
-        UpdateGalaxyRendering();
-    }
+        case ViewMode::Galaxy:
+        {
+            // Animate galaxy (optional - advance simulation each frame)
+            if (m_GalaxyModel && m_GalaxyAnimationEnabled)
+            {
+                m_GalaxyModel->SingleTimeStep(7500.0); // 100,000 years per frame
+                UpdateGalaxyRendering();
+            }
 
-    // Render galaxy (if initialized)
-    if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
-    {
-        // FOV = full visible height (2x ortho size) to match original Galaxy-Renderer
-        // Original uses: glOrtho(-fov/2, fov/2, ...) where fov is the FULL visible area
-        // Our orthoSize is already the half-height, so multiply by 2
-        const float32_t fov = m_Camera->GetOrthoSize() * 2.0F;
-        m_GalaxyRenderer->Render(view, projection, fov);
+            // Render galaxy (if initialized)
+            if (m_GalaxyRenderer && m_GalaxyRenderer->IsInitialized())
+            {
+                // FOV = full visible height (2x ortho size) to match original Galaxy-Renderer
+                // Original uses: glOrtho(-fov/2, fov/2, ...) where fov is the FULL visible area
+                // Our orthoSize is already the half-height, so multiply by 2
+                const float32_t fov = m_Camera->GetOrthoSize() * 2.0F;
+                m_GalaxyRenderer->Render(view, projection, fov);
+            }
+            break;
+        }
+
+        case ViewMode::Star:
+        {
+            // Render star (if initialized)
+            if (m_Star && m_StarRenderer && m_StarRenderer->IsInitialized())
+            {
+                // Calculate delta time for animations
+                auto currentTime = std::chrono::steady_clock::now();
+                float32_t deltaTime =
+                    std::chrono::duration<float32_t>(currentTime - m_LastFrameTime).count();
+                m_LastFrameTime = currentTime;
+
+                // Update animations
+                m_StarRenderer->Update(deltaTime);
+
+                // Render star
+                m_StarRenderer->Render(view, projection);
+            }
+            break;
+        }
+
+        case ViewMode::Planet:
+            // Future: Planet rendering
+            break;
     }
 
     // Update FPS counter
