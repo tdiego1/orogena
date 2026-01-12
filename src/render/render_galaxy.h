@@ -149,8 +149,9 @@ class GalaxyRenderer
      *
      * @param viewMatrix Camera view matrix.
      * @param projectionMatrix Camera projection matrix.
+     * @param fov Field of view (orthographic size) for scaling dust particles.
      */
-    void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void Render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float32_t fov);
 
     /**
      * @brief Set display flags to show/hide particle types
@@ -199,22 +200,25 @@ class GalaxyRenderer
     /**
      * @brief Render stars with small point sprites
      */
-    void RenderStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void RenderStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float32_t fov);
 
     /**
      * @brief Render bright stars with larger point sprites
      */
-    void RenderBrightStars(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void RenderBrightStars(const glm::mat4& viewMatrix,
+                           const glm::mat4& projectionMatrix,
+                           float32_t        fov);
 
     /**
      * @brief Render dust clouds with large soft sprites
      */
-    void RenderDust(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void RenderDust(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float32_t fov);
 
     /**
      * @brief Render H2 regions with variable-size sprites
      */
-    void RenderH2Regions(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void
+    RenderH2Regions(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float32_t fov);
 
     /**
      * @brief Setup OpenGL state for point sprite rendering
@@ -240,26 +244,36 @@ class GalaxyRenderer
     // OpenGL resources - Stars
     std::unique_ptr<QOpenGLVertexArrayObject> m_StarVAO;
     std::unique_ptr<QOpenGLBuffer>            m_StarVBO;
-    int32_t                                   m_NumStars{0};
+    size_t                                    m_NumStars{0};
 
     // OpenGL resources - Dust
     std::unique_ptr<QOpenGLVertexArrayObject> m_DustVAO;
     std::unique_ptr<QOpenGLBuffer>            m_DustVBO;
-    int32_t                                   m_NumDust{0};
+    size_t                                    m_NumDust{0};
 
     // OpenGL resources - H2 Regions
     std::unique_ptr<QOpenGLVertexArrayObject> m_H2VAO;
     std::unique_ptr<QOpenGLBuffer>            m_H2VBO;
-    int32_t                                   m_NumH2{0};
+    size_t                                    m_NumH2{0};
+
+    // H2 pair data for distance-based sizing (matches original algorithm)
+    struct H2PairData
+    {
+        glm::vec2 position1; ///< First particle position
+        glm::vec2 position2; ///< Second particle position
+        float32_t size;      ///< Calculated size from distance
+    };
+    std::vector<H2PairData> m_H2PairData; ///< Cached pair data for rendering
 
     // Display settings
     uint32_t m_DisplayFlags{GALAXY_SHOW_ALL};
 
-    // Point size parameters (adjusted by FOV)
-    static constexpr float32_t c_StarPointScale = 3.0F;       ///< Normal stars
-    static constexpr float32_t c_BrightStarPointScale = 6.0F; ///< Bright stars
-    static constexpr float32_t c_DustPointScale = 70.0F;      ///< Dust clouds
-    static constexpr float32_t c_H2PointScale = 50.0F;        ///< H2 regions
+    // Point size parameters matching original Galaxy-Renderer
+    static constexpr float32_t c_StarPointScale = 3.0F;       ///< Normal stars (matches original)
+    static constexpr float32_t c_BrightStarPointScale = 6.0F; ///< Bright stars (matches original)
+    static constexpr float32_t c_DustPointScale =
+        100.0F;                                        ///< Dust clouds (base size, scaled by FOV)
+    static constexpr float32_t c_H2PointScale = 60.0F; ///< H2 regions
 };
 
 } // namespace Orogena::Render
