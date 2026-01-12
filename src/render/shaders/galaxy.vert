@@ -46,7 +46,7 @@ out float vMagnitude;   ///< Magnitude passed to fragment shader
 const float MIN_POINT_SIZE = 1.0;
 const float MAX_POINT_SIZE = 128.0;
 const float MIN_TEMPERATURE = 1000.0;  // Kelvin
-const float MAX_TEMPERATURE = 40000.0; // Kelvin
+const float MAX_TEMPERATURE = 10000.0; // Kelvin - matches original Galaxy-Renderer
 
 //=================================================================================================
 // Main Function
@@ -57,21 +57,13 @@ void main()
     // Transform 2D galaxy position to 3D world space (galaxy lies in XY plane, Z=0)
     vec4 worldPos = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
 
-    // Transform to camera space
-    vec4 viewPos = uView * worldPos;
-
-    // Calculate distance from camera for perspective scaling
-    float distance = length(viewPos.xyz);
-
-    // Perspective-correct point size: larger FoV or closer distance = larger points
-    // This mimics how stars appear larger when zoomed in
-    gl_PointSize = uPointScale * (uFoV / max(distance, 1.0));
-
-    // Clamp to reasonable range
-    gl_PointSize = clamp(gl_PointSize, MIN_POINT_SIZE, MAX_POINT_SIZE);
-
     // Transform to clip space
-    gl_Position = uProjection * viewPos;
+    gl_Position = uProjection * uView * worldPos;
+
+    // Simple point size matching original Galaxy-Renderer
+    // For stars: uPointScale is 3 or 6 (fixed size)
+    // For dust: uPointScale is 70 * (28174 / uFoV) to scale with zoom
+    gl_PointSize = clamp(uPointScale, MIN_POINT_SIZE, MAX_POINT_SIZE);
 
     // Pass interpolated data to fragment shader
     vTemperature = aTemperature;
